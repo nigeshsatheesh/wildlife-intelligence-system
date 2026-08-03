@@ -10,6 +10,7 @@ ml-service/.env
 
 # Data (too large / shouldn't live in git)
 data/raw-images/
+data/occurrence-samples/
 data/*.zip
 
 # Build output
