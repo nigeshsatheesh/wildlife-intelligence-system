@@ -1,4 +1,3 @@
-# fetch_gbif.py
 import requests
 import json
 import os
@@ -38,4 +37,4 @@ for species in SPECIES_LIST:
     record_count = data.get("count", 0)
     print(f"{species}: {record_count} total records available, saved 50")
 
-    time.sleep(1)  # be polite to the API, avoid hammering it
+    time.sleep(1)
