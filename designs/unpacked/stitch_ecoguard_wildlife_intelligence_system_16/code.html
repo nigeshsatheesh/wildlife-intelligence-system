@@ -1,0 +1,248 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-error":"#ffffff","primary":"#012d1d","on-tertiary-fixed":"#151d1a","error-container":"#ffdad6","primary-fixed-dim":"#a5d0b9","on-secondary":"#ffffff","on-tertiary":"#ffffff","background":"#f7faf8","on-secondary-container":"#1b724f","on-error-container":"#93000a","tertiary-fixed":"#dbe5df","on-primary-container":"#86af99","surface-container-lowest":"#ffffff","secondary-fixed-dim":"#86d7ad","surface-container-low":"#f1f4f2","surface-container-high":"#e6e9e7","outline":"#717973","on-primary-fixed":"#002114","outline-variant":"#c1c8c2","on-tertiary-fixed-variant":"#3f4945","on-secondary-fixed-variant":"#005236","surface-dim":"#d8dbd9","inverse-surface":"#2d3130","inverse-on-surface":"#eef1ef","primary-fixed":"#c1ecd4","tertiary-container":"#353e3a","on-surface-variant":"#414844","surface-tint":"#3f6653","on-background":"#181c1b","on-tertiary-container":"#9fa9a3","surface-container":"#eceeed","on-primary-fixed-variant":"#274e3d","error":"#ba1a1a","secondary-container":"#a1f4c8","on-secondary-fixed":"#002113","tertiary-fixed-dim":"#bfc9c3","tertiary":"#1f2825","inverse-primary":"#a5d0b9","on-surface":"#181c1b","surface-variant":"#e0e3e1","primary-container":"#1b4332","surface-bright":"#f7faf8","on-primary":"#ffffff","surface-container-highest":"#e0e3e1","secondary-fixed":"#a1f4c8","surface":"#f7faf8","secondary":"#116c4a"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"xxl":"48px","xl":"32px","gutter":"24px","margin-desktop":"40px","base":"4px","md":"16px","xs":"4px","lg":"24px","margin-mobile":"16px","sm":"8px"},"fontFamily":{"label-md":["Inter"],"headline-lg":["Inter"],"display-lg":["Inter"],"body-md":["Inter"],"headline-lg-mobile":["Inter"],"headline-md":["Inter"],"body-sm":["Inter"],"body-lg":["Inter"],"headline-sm":["Inter"]},"fontSize":{"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-lg-mobile":["28px",{"lineHeight":"36px","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","fontWeight":"600"}],"body-sm":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"600"}]}}}}</script><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-50 flex flex-col shadow-[1px_0_8px_rgba(0,0,0,0.02)]"><div class="p-lg mb-xl flex items-center gap-sm"><span class="material-symbols-outlined text-primary text-[32px]">eco</span><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-primary tracking-tight">EcoIntelligence</span><span class="font-label-md text-label-md text-on-surface-variant uppercase">Population System</span></div></div><nav class="flex-1 px-md space-y-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a aria-current="page" class="flex items-center px-lg py-md rounded-xl transition-all transition-colors group bg-primary-container text-on-primary-container font-semibold" data-path="dashboard" href="#"><span class="material-symbols-outlined mr-md">dashboard</span><span class="font-body-md">Dashboard</span></a><a class="flex items-center px-lg py-md rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="species-analysis" href="#"><span class="material-symbols-outlined mr-md">visibility</span><span class="font-body-md text-body-md">Species Analysis</span></a><a class="flex items-center px-lg py-md rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="bioacoustic-engine" href="#"><span class="material-symbols-outlined mr-md">graphic_eq</span><span class="font-body-md text-body-md">Bioacoustic Engine</span></a><a class="flex items-center px-lg py-md rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="population-intelligence" href="#"><span class="material-symbols-outlined mr-md">query_stats</span><span class="font-body-md text-body-md">Population Intel</span></a><a class="flex items-center px-lg py-md rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="habitat-health" href="#"><span class="material-symbols-outlined mr-md">travel_explore</span><span class="font-body-md text-body-md">Habitat & Health</span></a><a class="flex items-center px-lg py-md rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="conservation-hub" href="#"><span class="material-symbols-outlined mr-md">hub</span><span class="font-body-md text-body-md">Conservation Hub</span></a><a class="flex items-center px-lg py-md rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all group" data-path="reports-archive" href="#"><span class="material-symbols-outlined mr-md">inventory_2</span><span class="font-body-md text-body-md">Reports & Archive</span></a></nav><div class="px-md py-lg border-t border-surface-container-high"><div class="p-md flex items-center gap-md bg-surface-container-low rounded-xl"><div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[20px]">person</span></div><div class="overflow-hidden"><p class="font-label-md text-on-surface truncate">W. Researcher</p><p class="text-[11px] text-on-surface-variant truncate">Field Operations</p></div><span class="material-symbols-outlined text-on-surface-variant ml-auto text-[18px]">settings</span></div></div></aside><div class="pl-72 w-full"><header class="fixed top-0 left-72 right-0 h-20 bg-surface/80 backdrop-blur-xl z-40 px-xl flex items-center justify-between"><div class="relative w-96 group"><span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span><input class="w-full bg-surface-container-low rounded-full py-sm pl-[44px] pr-md text-body-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all" placeholder="Search species, clusters, or GIS coordinates..." type="text"/></div><div class="flex items-center gap-lg"><button class="relative p-sm text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span></button><button class="flex items-center gap-xs px-md py-sm bg-primary text-on-primary rounded-lg font-label-md hover:bg-primary-container transition-colors"><span class="material-symbols-outlined text-[18px]">add</span><span>New Survey</span></button></div></header><main class="relative pt-20 w-full min-h-screen"><div class="flex flex-col w-full p-xl gap-xl">
+<!-- Header / Quick Stats -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md w-full">
+<div class="bg-surface-container rounded-xl p-lg flex flex-col gap-sm relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-fixed/20 rounded-full blur-2xl group-hover:bg-primary-fixed/40 transition-colors duration-500"></div>
+<div class="flex justify-between items-center z-10">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Total Detected Today</span>
+<span class="material-symbols-outlined text-primary">visibility</span>
+</div>
+<div class="flex items-end gap-xs z-10 mt-md">
+<span class="font-display-lg text-on-surface">3,402</span>
+<span class="font-body-sm text-secondary-container bg-secondary px-sm py-xs rounded-full flex items-center mb-sm"><span class="material-symbols-outlined text-[14px] mr-[2px]">trending_up</span>12%</span>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-lg flex flex-col gap-sm relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-fixed/20 rounded-full blur-2xl group-hover:bg-primary-fixed/40 transition-colors duration-500"></div>
+<div class="flex justify-between items-center z-10">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Stability Index</span>
+<span class="material-symbols-outlined text-primary">analytics</span>
+</div>
+<div class="flex items-end gap-xs z-10 mt-md">
+<span class="font-display-lg text-on-surface">88<span class="text-headline-md text-on-surface-variant">%</span></span>
+<div class="w-full bg-surface-variant h-2 rounded-full mb-lg ml-md overflow-hidden flex-1">
+<div class="bg-primary h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-lg flex flex-col gap-sm relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary-fixed/20 rounded-full blur-2xl group-hover:bg-secondary-fixed/40 transition-colors duration-500"></div>
+<div class="flex justify-between items-center z-10">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Habitat Quality</span>
+<span class="material-symbols-outlined text-secondary">park</span>
+</div>
+<div class="flex items-end gap-xs z-10 mt-md">
+<span class="font-headline-lg text-secondary">Excellent</span>
+<span class="font-body-sm text-on-surface-variant mb-sm ml-sm">Top 5%</span>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-lg flex flex-col gap-sm relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-outline/10 rounded-full blur-2xl group-hover:bg-outline/20 transition-colors duration-500"></div>
+<div class="flex justify-between items-center z-10">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wider">Active Sensors</span>
+<span class="material-symbols-outlined text-outline">sensors</span>
+</div>
+<div class="flex items-end gap-xs z-10 mt-md">
+<span class="font-display-lg text-on-surface">142</span>
+<span class="font-body-sm text-on-surface-variant mb-sm ml-sm">Online</span>
+</div>
+</div>
+</section>
+<!-- Main Content Area -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-xl w-full">
+<!-- Left Column (Live Feed & Alerts) -->
+<div class="xl:col-span-1 flex flex-col gap-xl">
+<!-- Live Feed -->
+<section class="bg-surface-container rounded-xl flex flex-col">
+<div class="p-lg flex justify-between items-center bg-surface-container border-b border-surface-variant/50 sticky top-0 z-10 rounded-t-xl">
+<h2 class="font-headline-sm text-on-surface flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                Live Trap Feed
+            </h2>
+<button class="font-label-md text-primary hover:text-secondary transition-colors">View All</button>
+</div>
+<div class="flex flex-col gap-xs p-md h-[400px] overflow-y-auto" id="live-feed">
+<!-- Feed Item 1 -->
+<div class="flex gap-md bg-surface p-sm rounded-lg group hover:bg-surface-container-high transition-colors">
+<div class="w-16 h-16 rounded-md overflow-hidden bg-surface-variant shrink-0 relative">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A grainy black and white night vision camera trap photo of a Sumatran tiger walking through dense jungle underbrush. Green data overlay text in corner." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFmb7hPiBzfkyDdkzRURHDEk8m3bLbR1LVHCV5gZlwdZLUDiboGoAfyabAQgUcKD6oDs-HtQICGSVmu6V6QLy-pQVnxsjPhByADD2rzjtIU6011_T_Na-PvSCAD2euvP-AWTQNy5VjZtJgbpfQWzfqcgVU0Bon5cdNfCBoYIZRj6eJUddaC9nQn0ve7-gXH0Vjktuce9lc4M2xmoRbrEC6IGHGWhjnNe_KGJWu9v76XfCpltENu5Hm"/>
+<div class="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+</div>
+<div class="flex flex-col justify-center min-w-0">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-on-surface truncate pr-md">Sumatran Tiger</span>
+<span class="font-label-md text-on-surface-variant bg-surface-variant px-xs py-0.5 rounded text-[10px]">98%</span>
+</div>
+<span class="font-body-sm text-on-surface-variant truncate">Sector 4A - Dense Canopy</span>
+<span class="font-label-md text-on-surface-variant/70 mt-xs text-[10px]">Just now</span>
+</div>
+</div>
+<!-- Feed Item 2 -->
+<div class="flex gap-md bg-surface p-sm rounded-lg group hover:bg-surface-container-high transition-colors">
+<div class="w-16 h-16 rounded-md overflow-hidden bg-surface-variant shrink-0 relative">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A clear daylight camera trap photo of a family of Asian elephants moving through tall grass. Warm sunlight. Minimalist green data overlay." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZkUvxEzPg8gHxozLHrVUpIm6Lo_dCdaDFve2Fxa9r1lBn9H6RMMC_ll66i4g0oVw5GG0BYbyweaEFHbjEBMyJVup6tiprG5HThJceCOTGVdMcnFHjxfKxu2V7YIa--YCTOa_WX7tPu2Q7mij5Q12DPt_06FAyYFf6Wu8wPW2tsLvLwwdumrMM5M8QiNSc4DaZZqyLQU3QUk99akI1pts5xE6dWcCSTlCnFbFIYGiZomCJsuwfXVOp"/>
+<div class="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+</div>
+<div class="flex flex-col justify-center min-w-0">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-on-surface truncate pr-md">Asian Elephant</span>
+<span class="font-label-md text-on-surface-variant bg-surface-variant px-xs py-0.5 rounded text-[10px]">94%</span>
+</div>
+<span class="font-body-sm text-on-surface-variant truncate">River Basin Node 2</span>
+<span class="font-label-md text-on-surface-variant/70 mt-xs text-[10px]">2m ago</span>
+</div>
+</div>
+<!-- Feed Item 3 -->
+<div class="flex gap-md bg-surface p-sm rounded-lg group hover:bg-surface-container-high transition-colors">
+<div class="w-16 h-16 rounded-md overflow-hidden bg-surface-variant shrink-0 relative">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A thermal camera trap image showing the heat signature of a small primate in tree branches against a cool blue background. Technical, high-contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPuuuQyPjSHs4_3AMvnhrLfyDFKLVYHASjrRcJZyeW7ulhFTeyA-k9kuTzKUGWAvqDYDmi9TCzZ_ucHcjAIQI_usoBfdTv47xKLXLpd_a1YDSMx3O6Wqox01R5RGDKEDZHugc846PWydWgRguHtX4AINIlfQFnMRkKhvk5hkRNnWTW8SZpG3wIbesYBUbTlYOa9zGMBWKcXeAJq_yAYqnj4UqcKMjRhSpO_ZQ0FPpba4Z57tHmf0Bw"/>
+<div class="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+</div>
+<div class="flex flex-col justify-center min-w-0">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-on-surface truncate pr-md">Macaque (Thermal)</span>
+<span class="font-label-md text-on-surface-variant bg-surface-variant px-xs py-0.5 rounded text-[10px]">82%</span>
+</div>
+<span class="font-body-sm text-on-surface-variant truncate">Canopy Sensor C1</span>
+<span class="font-label-md text-on-surface-variant/70 mt-xs text-[10px]">15m ago</span>
+</div>
+</div>
+<!-- Feed Item 4 -->
+<div class="flex gap-md bg-surface p-sm rounded-lg group hover:bg-surface-container-high transition-colors">
+<div class="w-16 h-16 rounded-md overflow-hidden bg-surface-variant shrink-0 relative">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="A blurry action shot from a camera trap of an unidentified bird taking flight, motion blur. Neutral colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeaqvRNsavRHtkzzS1o0R-oOMK16KyXgm4DRbDs5_yn1P2MZPtj4aizWvB6ChxEfrGju7RJXgVs1WAgdvwHTjzvvUfK2nDYPwpDrJoBWTgvATVN6ZB-QShRqrzY8tw0JOkzIIbRtGR1PO_eXWKS9sWepVO0h8qMxrlMe0TeLm9GCdrcwHgVECwz2-TecnmHzyJVoARSbK8U998CG34p7SaVyjIa2maG5nEpF0xcUOpZ-3stxWfSRTO"/>
+<div class="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+</div>
+<div class="flex flex-col justify-center min-w-0">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-on-surface truncate pr-md">Unidentified Avian</span>
+<span class="font-label-md text-error bg-error-container px-xs py-0.5 rounded text-[10px]">45%</span>
+</div>
+<span class="font-body-sm text-on-surface-variant truncate">Ridge Line 7</span>
+<span class="font-label-md text-on-surface-variant/70 mt-xs text-[10px]">42m ago</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Conservation Alerts -->
+<section class="bg-error-container/30 rounded-xl p-lg flex flex-col gap-md">
+<h2 class="font-headline-sm text-on-surface flex items-center gap-sm">
+<span class="material-symbols-outlined text-error">warning</span>
+            Conservation Alerts
+        </h2>
+<div class="bg-surface rounded-lg p-md shadow-sm border-l-4 border-error flex flex-col gap-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<h3 class="font-body-md font-semibold text-on-surface">Endangered Species Alert</h3>
+<span class="font-label-md text-error bg-error-container px-sm py-xs rounded-full">High</span>
+</div>
+<p class="font-body-sm text-on-surface-variant line-clamp-2">A verified sighting of a Pangolin has been recorded in an unprotected zone near Sector 9. Immediate ranger dispatch recommended.</p>
+<button class="self-start mt-xs px-md py-sm bg-surface-container text-on-surface font-label-md rounded hover:bg-surface-container-high transition-colors">View Details</button>
+</div>
+<div class="bg-surface rounded-lg p-md shadow-sm border-l-4 border-outline-variant flex flex-col gap-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<h3 class="font-body-md font-semibold text-on-surface">Significant Decline</h3>
+<span class="font-label-md text-on-surface-variant bg-surface-variant px-sm py-xs rounded-full">Review</span>
+</div>
+<p class="font-body-sm text-on-surface-variant line-clamp-2">Local Amphibian population in Marsh Area B shows a 15% drop over the last 30 days. Investigate water quality metrics.</p>
+<button class="self-start mt-xs px-md py-sm bg-surface-container text-on-surface font-label-md rounded hover:bg-surface-container-high transition-colors">Analyze Data</button>
+</div>
+</section>
+</div>
+<!-- Right Column (Analytics & Map) -->
+<div class="xl:col-span-2 flex flex-col gap-xl">
+<!-- Biodiversity Analytics -->
+<section class="bg-surface-container rounded-xl p-xl flex flex-col gap-lg h-[400px]">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-md text-on-surface">Biodiversity Trend (6Mo)</h2>
+<div class="flex gap-sm">
+<button class="px-sm py-xs bg-primary text-on-primary font-label-md rounded">Species Richness</button>
+<button class="px-sm py-xs bg-surface-container-high text-on-surface font-label-md rounded hover:bg-surface-variant transition-colors">Abundance</button>
+</div>
+</div>
+<!-- Minimalist Chart Area -->
+<div class="flex-1 relative w-full h-full">
+<!-- Y-Axis Labels -->
+<div class="absolute left-0 top-0 bottom-8 w-8 flex flex-col justify-between text-[10px] text-on-surface-variant font-label-md font-normal">
+<span>100</span>
+<span>75</span>
+<span>50</span>
+<span>25</span>
+<span>0</span>
+</div>
+<!-- Grid Lines -->
+<div class="absolute left-8 right-0 top-0 bottom-8 flex flex-col justify-between z-0">
+<div class="w-full h-[1px] bg-outline-variant/30"></div>
+<div class="w-full h-[1px] bg-outline-variant/30"></div>
+<div class="w-full h-[1px] bg-outline-variant/30"></div>
+<div class="w-full h-[1px] bg-outline-variant/30"></div>
+<div class="w-full h-[1px] bg-outline-variant/30"></div>
+</div>
+<!-- Chart SVG -->
+<div class="absolute left-8 right-0 top-0 bottom-8 z-10">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 1000 300">
+<path class="text-primary" d="M 0,250 C 100,200 200,280 300,150 C 400,20 500,180 600,100 C 700,20 800,90 900,40 C 950,20 1000,10 1000,10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"></path>
+<path class="opacity-20" d="M 0,250 C 100,200 200,280 300,150 C 400,20 500,180 600,100 C 700,20 800,90 900,40 C 950,20 1000,10 1000,10 L 1000,300 L 0,300 Z" fill="url(#gradient)"></path>
+<defs>
+<lineargradient id="gradient" x1="0" x2="0" y1="0" y2="1">
+<stop class="text-primary" offset="0%" stop-color="currentColor" stop-opacity="1"></stop>
+<stop class="text-primary" offset="100%" stop-color="currentColor" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Data Points -->
+<circle class="text-primary hover:r-[8] transition-all cursor-pointer shadow-md" cx="300" cy="150" fill="currentColor" r="6"></circle>
+<circle class="text-primary hover:r-[8] transition-all cursor-pointer" cx="600" cy="100" fill="currentColor" r="6"></circle>
+<circle class="text-primary hover:r-[8] transition-all cursor-pointer" cx="900" cy="40" fill="currentColor" r="6"></circle>
+</svg>
+</div>
+<!-- X-Axis Labels -->
+<div class="absolute left-8 right-0 bottom-0 h-8 flex justify-between text-[10px] text-on-surface-variant font-label-md font-normal items-end pb-1">
+<span>Jan</span>
+<span>Feb</span>
+<span>Mar</span>
+<span>Apr</span>
+<span>May</span>
+<span>Jun</span>
+</div>
+</div>
+</section>
+<!-- Regional Map -->
+<section class="bg-surface-container rounded-xl flex flex-col h-[500px] overflow-hidden relative group">
+<div class="absolute top-lg left-lg z-20 bg-surface/90 backdrop-blur-md p-md rounded-lg shadow-lg flex flex-col gap-xs max-w-xs">
+<h3 class="font-headline-sm text-on-surface">Sector 7 Alpha</h3>
+<p class="font-body-sm text-on-surface-variant">Active monitoring zone. 24 GPS collars, 12 camera traps online.</p>
+<div class="flex gap-sm mt-sm">
+<span class="font-label-md text-primary bg-primary-container px-sm py-xs rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>Stable</span>
+</div>
+</div>
+<!-- Map Background -->
+<div class="w-full h-full bg-cover bg-center" data-location="Borneo Rainforest" style="background-image: url('https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg')"></div>
+<!-- Simulated Map UI Elements overlaying the static map -->
+<div class="absolute inset-0 z-10 pointer-events-none">
+<!-- Ping 1 -->
+<div class="absolute top-[30%] left-[40%] flex items-center justify-center pointer-events-auto cursor-pointer group/ping">
+<div class="w-3 h-3 bg-primary rounded-full z-10 shadow-[0_0_10px_rgba(1,45,29,0.8)]"></div>
+<div class="absolute w-8 h-8 bg-primary/30 rounded-full animate-ping"></div>
+<div class="absolute left-full ml-sm bg-surface text-on-surface px-sm py-xs rounded text-xs font-label-md whitespace-nowrap opacity-0 group-hover/ping:opacity-100 transition-opacity shadow-md">Trap C-44</div>
+</div>
+<!-- Ping 2 -->
+<div class="absolute top-[60%] left-[70%] flex items-center justify-center pointer-events-auto cursor-pointer group/ping">
+<div class="w-3 h-3 bg-error rounded-full z-10 shadow-[0_0_10px_rgba(186,26,26,0.8)]"></div>
+<div class="absolute w-8 h-8 bg-error/30 rounded-full animate-ping"></div>
+<div class="absolute left-full ml-sm bg-surface text-on-surface px-sm py-xs rounded text-xs font-label-md whitespace-nowrap opacity-0 group-hover/ping:opacity-100 transition-opacity shadow-md">Collar ID-99 (Low Battery)</div>
+</div>
+<!-- Ping 3 -->
+<div class="absolute top-[20%] left-[80%] flex items-center justify-center pointer-events-auto cursor-pointer group/ping">
+<div class="w-3 h-3 bg-primary rounded-full z-10 shadow-[0_0_10px_rgba(1,45,29,0.8)]"></div>
+<div class="absolute left-full ml-sm bg-surface text-on-surface px-sm py-xs rounded text-xs font-label-md whitespace-nowrap opacity-0 group-hover/ping:opacity-100 transition-opacity shadow-md">Drone Node Alpha</div>
+</div>
+</div>
+<div class="absolute bottom-lg right-lg z-20 flex gap-sm">
+<button class="w-10 h-10 bg-surface text-on-surface rounded-full shadow-md flex items-center justify-center hover:bg-surface-variant transition-colors"><span class="material-symbols-outlined">add</span></button>
+<button class="w-10 h-10 bg-surface text-on-surface rounded-full shadow-md flex items-center justify-center hover:bg-surface-variant transition-colors"><span class="material-symbols-outlined">remove</span></button>
+</div>
+</section>
+</div>
+</div>
+</div></main></div></body></html>
