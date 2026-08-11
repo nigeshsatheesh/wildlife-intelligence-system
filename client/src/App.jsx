@@ -12,8 +12,6 @@ import SiteFormModal from './components/SiteFormModal';
 import SightingsListPage from './components/SightingsListPage';
 import SightingLogForm from './components/SightingLogForm';
 import SightingDetailPage from './components/SightingDetailPage';
-import BioacousticMonitoring from './components/BioacousticMonitoring';
-import HabitatIntelligence from './components/HabitatIntelligence';
 import { Search, Bell, Plus, UserCheck, Shield } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';

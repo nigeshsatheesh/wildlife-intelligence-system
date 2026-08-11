@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
-  LayoutDashboard, 
-  PawPrint, 
+  LayoutDashboard,
   Users, 
   Award, 
   Map, 
@@ -22,17 +21,13 @@ import {
 export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
   const monitoringItems = [
     { id: 'surveys', label: 'Surveys' },
-    { id: 'camera-traps', label: 'Camera Traps' },
-    { id: 'audio-sensors', label: 'Audio Sensors' }
+    { id: 'camera-traps', label: 'Camera Traps' }
   ];
 
   const analysisItems = [
     { id: 'image-analysis', label: 'Image Analysis' },
-    { id: 'audio-analysis', label: 'Audio Analysis' },
-    { id: 'species', label: 'Species', icon: PawPrint },
     { id: 'population', label: 'Population', icon: Users },
     { id: 'biodiversity', label: 'Biodiversity', icon: Award },
-    { id: 'habitat', label: 'Habitat & GIS', icon: Map },
     { id: 'conservation', label: 'Conservation', icon: Share2 },
     { id: 'health', label: 'Ecosystem Health', icon: HeartPulse },
     { id: 'alerts', label: 'Alerts', icon: Bell },

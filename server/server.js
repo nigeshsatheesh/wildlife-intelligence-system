@@ -107,30 +107,6 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/species', require('./routes/speciesRoutes'));
 app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/sightings', require('./routes/sightingRoutes'));
-app.use('/api/audio', require('./routes/audioRoutes'));
-
-// AI Image Detection & Bounding Box Simulator API
-app.post('/api/classify', (req, res) => {
-  const sampleSpecies = [
-    { label: 'Panthera tigris', commonName: 'Bengal Tiger', confidence: 0.974, category: 'Mammal', risk: 'Critical' },
-    { label: 'Loxodonta africana', commonName: 'African Elephant', confidence: 0.989, category: 'Mammal', risk: 'Vulnerable' },
-    { label: 'Aquila chrysaetos', commonName: 'Golden Eagle', confidence: 0.942, category: 'Bird', risk: 'Healthy' },
-    { label: 'Canis lupus', commonName: 'Eurasian Wolf', confidence: 0.915, category: 'Mammal', risk: 'Moderate Concern' },
-    { label: 'Vulpes vulpes', commonName: 'Red Fox', confidence: 0.958, category: 'Mammal', risk: 'Healthy' }
-  ];
-  
-  const match = sampleSpecies[Math.floor(Math.random() * sampleSpecies.length)];
-  res.json({
-    prediction: match.label,
-    commonName: match.commonName,
-    confidence: match.confidence,
-    category: match.category,
-    conservationStatus: match.risk,
-    detectedCount: Math.floor(Math.random() * 3) + 1,
-    boundingBox: { x: 25, y: 20, width: 50, height: 60 }
-  });
-});
-
 // Biodiversity Analytics API
 app.get('/api/analytics', async (req, res) => {
   const SpeciesModel = require('./models/Species');
