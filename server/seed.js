@@ -33,8 +33,7 @@ const seed = async () => {
   await MonitoringSite.deleteMany({});
 
   // registeredBy is required on MonitoringSite — need a user ID first.
-  // Replace this with a real _id from your users collection (check MongoDB Atlas > users).
-  const REPLACE_WITH_YOUR_USER_ID = 'nigeshsatheesh';
+  const REPLACE_WITH_YOUR_USER_ID = '6a7b593c9741d2bc913f7a39';
 
   const insertedSpecies = await Species.insertMany(speciesData);
   const insertedSites = await MonitoringSite.insertMany(

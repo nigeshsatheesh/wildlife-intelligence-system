@@ -44,7 +44,12 @@ exports.createSighting = async (req, res) => {
       classifierPrediction,
       classifierConfidence: classifierConfidence || 0.95,
       observedBy: req.user ? req.user._id : undefined,
-      eventDate: req.body.eventDate || new Date()
+      eventDate: req.body.eventDate || new Date(),
+
+      location: {
+        latitude: Number(req.body.latitude),
+        longitude: Number(req.body.longitude)
+      }
     };
 
     if (req.isMongoConnected) {

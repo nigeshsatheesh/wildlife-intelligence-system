@@ -62,7 +62,7 @@ export default function SightingModal({ isOpen, onClose, species, sites, onSaveS
       }
 
       await onSaveSighting(newSightingData);
-      alert('✅ Wildlife sighting record & image successfully uploaded to EcoGuard database!');
+      alert('Wildlife sighting record & image successfully uploaded to EcoGuard database!');
       onClose();
     } catch (err) {
       alert('Failed to log sighting: ' + err.message);

@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
+const Sighting = require('./models/Sighting');
 
 dotenv.config();
 
@@ -102,6 +103,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+    console.log('REQUEST:', req.method, req.url);
+    console.log('BODY:', req.body);
+    next();
+});
+
 // Route Modules
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/species', require('./routes/speciesRoutes'));
@@ -121,28 +128,36 @@ app.get('/api/analytics', async (req, res) => {
   const totalIndividuals = sightingsList.reduce((acc, s) => acc + (s.individualCount || 1), 0);
   const activeSpeciesCount = speciesList.length;
 
+  // Real month-over-month comparison, not fabricated percentages
+  const now = new Date();
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
   const conservationAlerts = speciesList.map(s => {
-    const speciesSightings = sightingsList.filter(sg => 
-      (sg.species._id || sg.species || '').toString() === (s._id || '').toString() || 
-      (sg.species && sg.species.scientificName === s.scientificName)
+    const speciesSightings = sightingsList.filter(sg =>
+      (sg.species?._id || sg.species || '').toString() === (s._id || '').toString()
     );
     const count = speciesSightings.length;
-    let statusFlag = s.conservationStatus || 'Healthy';
-    let trend = 'Stable';
-    let percentChange = 0;
 
-    if (count < 2) {
-      statusFlag = 'Critical';
-      trend = 'Decline (-24%)';
-      percentChange = -24;
-    } else if (count < 5) {
-      statusFlag = 'Vulnerable';
-      trend = 'Decline (-12%)';
-      percentChange = -12;
+    const thisMonthCount = speciesSightings.filter(sg => new Date(sg.eventDate) >= startOfThisMonth).length;
+    const lastMonthCount = speciesSightings.filter(sg =>
+      new Date(sg.eventDate) >= startOfLastMonth && new Date(sg.eventDate) < startOfThisMonth
+    ).length;
+
+    let trend;
+    if (lastMonthCount === 0 && thisMonthCount === 0) {
+      trend = 'No data yet';
+    } else if (lastMonthCount === 0) {
+      trend = 'New activity this month';
     } else {
-      trend = 'Increasing (+18%)';
-      percentChange = 18;
+      const percentChange = Math.round(((thisMonthCount - lastMonthCount) / lastMonthCount) * 100);
+      trend = `${percentChange >= 0 ? '+' : ''}${percentChange}% vs last month`;
     }
+
+    // Rule-based status: low overall sighting volume flags for attention.
+    // This is intentionally simple (count-based), not a predictive model.
+    let statusFlag = s.conservationStatus || 'Healthy';
+    if (count === 0) statusFlag = 'No sightings recorded';
 
     return {
       speciesId: s._id,
@@ -150,10 +165,24 @@ app.get('/api/analytics', async (req, res) => {
       scientificName: s.scientificName,
       sightingCount: count,
       statusFlag,
-      trend,
-      percentChange
+      trend
     };
   });
+
+  // Real monthly aggregation from actual Sighting documents
+  const sightingTrends = isMongoConnected
+    ? await SightingModel.aggregate([
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m', date: '$eventDate' } },
+            sightings: { $sum: 1 },
+            verified: { $sum: { $cond: ['$verified', 1, 0] } }
+          }
+        },
+        { $sort: { _id: 1 } },
+        { $project: { _id: 0, month: '$_id', sightings: 1, verified: 1 } }
+      ])
+    : [];
 
   res.json({
     totalSightings,
@@ -161,16 +190,7 @@ app.get('/api/analytics', async (req, res) => {
     activeSpeciesCount,
     activeSitesCount: sitesCount,
     conservationAlerts,
-    sightingTrends: [
-      { month: 'Jan', sightings: 45, verified: 40 },
-      { month: 'Feb', sightings: 58, verified: 52 },
-      { month: 'Mar', sightings: 72, verified: 68 },
-      { month: 'Apr', sightings: 64, verified: 60 },
-      { month: 'May', sightings: 89, verified: 81 },
-      { month: 'Jun', sightings: 105, verified: 98 },
-      { month: 'Jul', sightings: 120, verified: 114 },
-      { month: 'Aug', sightings: 142, verified: 135 }
-    ]
+    sightingTrends
   });
 });
 
@@ -180,16 +200,17 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Wildlife Intelligence API running on port ${PORT}`);
+  console.log(`Wildlife Intelligence API running on port ${PORT}`);
 });
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.log(`⚠️ Port ${PORT} occupied, starting on port 5001...`);
-    app.listen(5001, () => {
-      console.log(`🚀 Wildlife Intelligence API running on port 5001`);
-    });
-  } else {
+      console.log(`Port ${PORT} occupied, starting on port 5001...`);
+      app.listen(5001, () => {
+          console.log(`Wildlife Intelligence API running on port 5001`);
+      });
+  }
+  else {
     console.error('Server error:', err.message);
   }
 });
