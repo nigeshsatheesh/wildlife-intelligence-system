@@ -28,8 +28,6 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
     { id: 'image-analysis', label: 'Image Analysis' },
     { id: 'population', label: 'Population', icon: Users },
     { id: 'biodiversity', label: 'Biodiversity', icon: Award },
-    { id: 'conservation', label: 'Conservation', icon: Share2 },
-    { id: 'health', label: 'Ecosystem Health', icon: HeartPulse },
     { id: 'alerts', label: 'Alerts', icon: Bell },
     { id: 'reports', label: 'Reports', icon: FileText },
     { id: 'settings', label: 'Settings', icon: Settings }

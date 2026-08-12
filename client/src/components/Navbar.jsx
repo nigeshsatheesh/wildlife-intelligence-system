@@ -24,9 +24,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenAuth, onOpenSigh
 
   const navItems = [
     { id: 'dashboard', label: 'Research Dashboard', icon: Activity },
-    { id: 'habitat', label: 'Habitat Intelligence', icon: Map },
     { id: 'species', label: 'Species Classifier', icon: Scan },
-    { id: 'bioacoustics', label: 'Bioacoustic Monitor', icon: Volume2 },
   ];
 
   return (

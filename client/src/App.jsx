@@ -87,7 +87,7 @@ export default function App() {
   const [authMode, setAuthMode] = useState('authenticated'); // 'login' | 'register' | 'authenticated'
   const [user, setUser] = useState({ name: 'Dr. Sarah Chen', role: 'Researcher' });
 
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'species' | 'sites' | 'sightings' | 'bioacoustics' | 'habitat' | 'reports'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'species' | 'sites' | 'sightings' | 'reports'
   
   // Selected detail views
   const [selectedSpeciesDetail, setSelectedSpeciesDetail] = useState(null);
@@ -334,16 +334,6 @@ export default function App() {
                   onSaveSighting={handleSaveSighting} 
                   onClose={() => setActiveTab('surveys')} 
                 />
-              )}
-
-              {/* Bioacoustic Engine / Audio Sensors / Audio Analysis (Page 14) */}
-              {(activeTab === 'bioacoustics' || activeTab === 'audio-sensors' || activeTab === 'audio-analysis') && (
-                <BioacousticMonitoring />
-              )}
-
-              {/* Habitat & Health / Conservation (Page 13) */}
-              {(activeTab === 'habitat' || activeTab === 'health' || activeTab === 'conservation') && (
-                <HabitatIntelligence />
               )}
 
               {/* Reports & Archive */}
