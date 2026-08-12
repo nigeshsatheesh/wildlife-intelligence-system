@@ -253,6 +253,41 @@ code, .font-mono {
   padding: 1.25rem 1.5rem;
 }
 
+/* Buttons */
+.btn-new-survey,
+.btn-primary,
+button[type='submit'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--forest-green);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-new-survey:hover,
+.btn-primary:hover,
+button[type='submit']:hover {
+  background: #0a2617;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(17, 56, 41, 0.16);
+}
+
+.btn-new-survey:disabled,
+button[type='submit']:disabled {
+  background: #94a89e;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* Badges */
 .badge-pill {
   padding: 0.2rem 0.6rem;

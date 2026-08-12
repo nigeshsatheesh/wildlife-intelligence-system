@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Plus, Filter, ArrowRight } from 'lucide-react';
+import { getSpeciesImageUrl } from '../utils/speciesImages';
 
 export default function SpeciesListPage({ species, user, onSelectSpecies, onOpenAddSpecies }) {
   const [search, setSearch] = useState('');
@@ -88,7 +89,7 @@ export default function SpeciesListPage({ species, user, onSelectSpecies, onOpen
                 {/* Species Representative Photo */}
                 <div style={{ height: '160px', borderRadius: '10px', overflow: 'hidden', marginBottom: '0.85rem', background: '#0a1612' }}>
                   <img 
-                    src={sp.imageUrl || 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=500&q=80'} 
+                    src={getSpeciesImageUrl(sp)} 
                     alt={sp.commonName} 
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                   />

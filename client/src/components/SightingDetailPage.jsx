@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle, MapPin, Calendar, User, Eye, Edit3 } from 'lucide-react';
+import { getSpeciesImageUrl } from '../utils/speciesImages';
 
 export default function SightingDetailPage({ sighting, speciesList, onVerify, onCorrectSpecies, onBack }) {
   if (!sighting) return null;
@@ -49,9 +50,7 @@ export default function SightingDetailPage({ sighting, speciesList, onVerify, on
         <div className="eco-card" style={{ padding: '1rem' }}>
           <div style={{ height: '360px', borderRadius: '12px', overflow: 'hidden', background: '#0a1612', position: 'relative' }}>
             <img 
-              src={sighting.imageUrl || 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=1000&q=80'} 
-              alt="Sighting Specimen" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                src={sighting.imageUrl || getSpeciesImageUrl(sighting.species)} 
             />
           </div>
 

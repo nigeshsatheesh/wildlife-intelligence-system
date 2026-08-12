@@ -58,3 +58,37 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.me = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Not authenticated' });
+  }
+
+  res.json({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    role: req.user.role
+  });
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    if (req.isMongoConnected) {
+      const users = await User.find().select('-password').sort({ createdAt: -1 });
+      return res.json(users);
+    }
+
+    const users = req.memoryDb.users.map((u) => ({
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      createdAt: u.createdAt || new Date().toISOString()
+    }));
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

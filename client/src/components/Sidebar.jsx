@@ -20,12 +20,12 @@ import {
 
 export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
   const monitoringItems = [
-    { id: 'surveys', label: 'Surveys' },
-    { id: 'camera-traps', label: 'Camera Traps' }
+    { id: 'surveys', label: 'Surveys', icon: Map },
+    { id: 'camera-traps', label: 'Camera Traps', icon: Camera }
   ];
 
   const analysisItems = [
-    { id: 'image-analysis', label: 'Image Analysis' },
+    { id: 'image-analysis', label: 'Image Analysis', icon: Image },
     { id: 'population', label: 'Population', icon: Users },
     { id: 'biodiversity', label: 'Biodiversity', icon: Award },
     { id: 'alerts', label: 'Alerts', icon: Bell },
@@ -61,15 +61,20 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
           {/* MONITORING Section */}
           <div className="sidebar-section-title">MONITORING</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '1.25rem' }}>
-            {monitoringItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`nav-sub-item ${activeTab === item.id ? 'active-sub' : ''}`}
-              >
-                {item.label}
-              </button>
-            ))}
+            {monitoringItems.map(item => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`nav-sub-item ${isActive ? 'active-sub' : ''}`}
+                >
+                  {Icon && <Icon size={14} />}
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* AI ANALYSIS Section */}
@@ -78,25 +83,14 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
             {analysisItems.map(item => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
-              if (!Icon) {
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`nav-sub-item ${isActive ? 'active-sub' : ''}`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              }
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`nav-item ${isActive ? 'active' : ''}`}
+                  className={Icon ? `nav-item ${isActive ? 'active' : ''}` : `nav-sub-item ${isActive ? 'active-sub' : ''}`}
                   style={{ padding: '0.45rem 0.75rem', fontSize: '0.82rem' }}
                 >
-                  <Icon size={16} />
+                  {Icon && <Icon size={16} />}
                   <span>{item.label}</span>
                 </button>
               );

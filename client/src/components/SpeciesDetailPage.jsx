@@ -61,7 +61,7 @@ export default function SpeciesDetailPage({ speciesItem, sightings, onBack }) {
         {/* Large Representative Photo */}
         <div style={{ height: '220px', borderRadius: '12px', overflow: 'hidden', background: '#0a1612' }}>
           <img 
-            src={speciesItem.imageUrl || 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=600&q=80'} 
+            src={getSpeciesImageUrl(speciesItem)} 
             alt={speciesItem.commonName} 
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
           />

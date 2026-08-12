@@ -4,6 +4,8 @@ import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import ResearchDashboard from './components/ResearchDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import AlertsPage from './components/AlertsPage';
+import ReportsPage from './components/ReportsPage';
 import SpeciesListPage from './components/SpeciesListPage';
 import SpeciesDetailPage from './components/SpeciesDetailPage';
 import SpeciesFormModal from './components/SpeciesFormModal';
@@ -84,8 +86,10 @@ const defaultSightings = [
 ];
 
 export default function App() {
-  const [authMode, setAuthMode] = useState('authenticated'); // 'login' | 'register' | 'authenticated'
-  const [user, setUser] = useState({ name: 'Dr. Sarah Chen', role: 'Researcher' });
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'authenticated'
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'species' | 'sites' | 'sightings' | 'reports'
   
@@ -106,6 +110,7 @@ export default function App() {
   const [sites, setSites] = useState(defaultSites);
   const [sightings, setSightings] = useState(defaultSightings);
   const [analytics, setAnalytics] = useState(null);
+  const [users, setUsers] = useState([]);
 
   // Fetch API data on mount
   useEffect(() => {
@@ -135,6 +140,63 @@ export default function App() {
     fetchData();
   }, []);
 
+  const fetchUsers = async (authToken) => {
+    try {
+      const res = await fetch(`${API_BASE}/users`, {
+        headers: {
+          Authorization: authToken ? `Bearer ${authToken}` : ''
+        }
+      });
+
+      if (!res.ok) return;
+      const userData = await res.json();
+      setUsers(userData);
+    } catch (err) {
+      console.error('Unable to load users', err);
+    }
+  };
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const savedToken = localStorage.getItem('token');
+      if (!savedToken) {
+        setAuthLoading(false);
+        setAuthMode('login');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${savedToken}`
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error('Authentication failed');
+        }
+
+        const userData = await res.json();
+        setUser(userData);
+        setToken(savedToken);
+        setAuthMode('authenticated');
+
+        if (userData.role === 'Admin') {
+          await fetchUsers(savedToken);
+        }
+      } catch (err) {
+        localStorage.removeItem('token');
+        setUser(null);
+        setToken('');
+        setAuthMode('login');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
   const handleSaveSpecies = (newSpeciesObj) => {
     if (newSpeciesObj._id) {
       setSpecies(prev => prev.map(s => s._id === newSpeciesObj._id ? newSpeciesObj : s));
@@ -151,19 +213,68 @@ export default function App() {
     }
   };
 
-  const handleSaveSighting = (newSightingData) => {
-    const matchedSpecies = species.find(s => s._id === newSightingData.species) || species[0];
-    const matchedSite = sites.find(st => st._id === newSightingData.monitoringSite) || sites[0];
+  const handleLogin = async ({ email, password }) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
 
-    const localCreated = {
-      _id: 'sg_' + Date.now(),
-      ...newSightingData,
-      species: matchedSpecies,
-      monitoringSite: matchedSite,
-      observedBy: { name: user ? user.name : 'Dr. Sarah Chen' },
-      createdAt: new Date()
-    };
-    setSightings(prev => [localCreated, ...prev]);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Login failed');
+      }
+
+      const savedUser = await res.json();
+      localStorage.setItem('token', savedUser.token);
+      setToken(savedUser.token);
+      setUser(savedUser);
+      setActiveTab('dashboard');
+      setAuthMode('authenticated');
+
+      if (savedUser.role === 'Admin') {
+        await fetchUsers(savedUser.token);
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  };
+
+  const handleRegister = async ({ name, email, password, role }) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      const savedUser = await res.json();
+      localStorage.setItem('token', savedUser.token);
+      setToken(savedUser.token);
+      setUser(savedUser);
+      setActiveTab('dashboard');
+      setAuthMode('authenticated');
+
+      if (savedUser.role === 'Admin') {
+        await fetchUsers(savedUser.token);
+      }
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  };
+
+  const handleSaveSighting = (savedSighting) => {
+    setSightings(prev => [savedSighting, ...prev]);
   };
 
   const handleVerifySighting = (sightingId, verifiedState) => {
@@ -181,12 +292,20 @@ export default function App() {
   };
 
   // Auth pages view override
-  if (authMode === 'login') {
-    return <LoginPage onLogin={(u) => { setUser(u); setAuthMode('authenticated'); }} onNavigateRegister={() => setAuthMode('register')} />;
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dark)' }}>
+        Validating session...
+      </div>
+    );
   }
 
-  if (authMode === 'register') {
-    return <RegisterPage onRegister={(u) => { setUser(u); setAuthMode('authenticated'); }} onNavigateLogin={() => setAuthMode('login')} />;
+  if (!user) {
+    if (authMode === 'register') {
+      return <RegisterPage onRegister={handleRegister} onNavigateLogin={() => setAuthMode('login')} />;
+    }
+
+    return <LoginPage onLogin={handleLogin} onNavigateRegister={() => setAuthMode('register')} />;
   }
 
   return (
@@ -289,12 +408,20 @@ export default function App() {
           {!isLogSightingFormOpen && !selectedSightingDetail && !selectedSpeciesDetail && (
             <>
               {/* Dashboard View: Researcher (Page 3) or Admin (Page 4) */}
-              {(activeTab === 'dashboard' || activeTab === 'population' || activeTab === 'alerts') && (
+              {(activeTab === 'dashboard' || activeTab === 'population') && (
                 user?.role === 'Admin' ? (
-                  <AdminDashboard analytics={analytics} species={species} sites={sites} sightings={sightings} />
+                  <AdminDashboard analytics={analytics} species={species} sites={sites} sightings={sightings} users={users} />
                 ) : (
                   <ResearchDashboard analytics={analytics} sightings={sightings} species={species} />
                 )
+              )}
+
+              {activeTab === 'alerts' && (
+                <AlertsPage species={species} sightings={sightings} />
+              )}
+
+              {activeTab === 'reports' && (
+                <ReportsPage analytics={analytics} species={species} sightings={sightings} />
               )}
 
               {/* Sightings / Surveys Listing Page (Page 10) */}

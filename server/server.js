@@ -111,6 +111,7 @@ app.use((req, res, next) => {
 
 // Route Modules
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/species', require('./routes/speciesRoutes'));
 app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/sightings', require('./routes/sightingRoutes'));

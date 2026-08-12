@@ -7,18 +7,29 @@ export default function RegisterPage({ onRegister, onNavigateLogin }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('Researcher');
+  const [registering, setRegistering] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
-    onRegister({
+    setRegistering(true);
+    setError('');
+
+    const result = await onRegister({
       name: fullName || 'Dr. Jane Doe',
       email: email || 'jane.doe@conservation.org',
+      password,
       role
     });
+
+    if (!result.success) {
+      setError(result.message || 'Unable to register');
+    }
+    setRegistering(false);
   };
 
   return (

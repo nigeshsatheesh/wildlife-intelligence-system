@@ -6,18 +6,19 @@ export default function LoginPage({ onLogin, onNavigateRegister }) {
   const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setAuthenticating(true);
-    setTimeout(() => {
-      onLogin({
-        email,
-        name: email.includes('admin') ? 'Dr. Sarah Chen (Admin)' : 'Dr. Sarah Chen',
-        role: email.includes('admin') ? 'Admin' : 'Researcher'
-      });
-      setAuthenticating(false);
-    }, 800);
+    setError('');
+
+    const result = await onLogin({ email, password });
+    if (!result.success) {
+      setError(result.message || 'Unable to authenticate');
+    }
+
+    setAuthenticating(false);
   };
 
   return (
@@ -147,6 +148,11 @@ export default function LoginPage({ onLogin, onNavigateRegister }) {
             </div>
           </div>
 
+          {error && (
+            <div style={{ color: '#c0392b', fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.75rem', textAlign: 'center' }}>
+              {error}
+            </div>
+          )}
           <button
             type="submit"
             style={{

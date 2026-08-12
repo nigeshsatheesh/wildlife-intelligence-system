@@ -1,14 +1,8 @@
 import React from 'react';
 import { Users, Layers, MapPin, Eye, Shield, MoreHorizontal, UserCheck } from 'lucide-react';
 
-export default function AdminDashboard({ analytics, species, sites, sightings }) {
-  const registeredUsers = [
-    { id: 'u1', name: 'Dr. Sarah Chen', email: 'sarah.chen@ecoguard.org', role: 'Admin', joined: 'Jan 12, 2026' },
-    { id: 'u2', name: 'Alex Rivera', email: 'alex.rivera@ecoguard.org', role: 'Researcher', joined: 'Feb 04, 2026' },
-    { id: 'u3', name: 'Dr. Marcus Vance', email: 'm.vance@wildlife.org', role: 'Researcher', joined: 'Mar 18, 2026' },
-    { id: 'u4', name: 'Elena Rostova', email: 'e.rostova@biosphere.net', role: 'Admin', joined: 'Apr 02, 2026' },
-    { id: 'u5', name: 'James Wilson', email: 'j.wilson@fieldops.org', role: 'Researcher', joined: 'May 20, 2026' }
-  ];
+export default function AdminDashboard({ analytics, species, sites, sightings, users }) {
+  const registeredUsers = users || [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -117,7 +111,7 @@ export default function AdminDashboard({ analytics, species, sites, sightings })
                     </span>
                   </td>
                   <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                    {user.joined}
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                   </td>
                   <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
                     <button style={{

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter, CheckCircle, AlertTriangle, MapPin, Eye } from 'lucide-react';
+import { getSpeciesImageUrl } from '../utils/speciesImages';
 
 export default function SightingsListPage({ sightings, speciesList, sitesList, onSelectSighting, onOpenLogSighting }) {
   const [selectedSpecies, setSelectedSpecies] = useState('All');
@@ -117,7 +118,7 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
                     <td style={{ padding: '0.75rem 1rem' }}>
                       <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', background: '#0a1612' }}>
                         <img 
-                          src={sighting.imageUrl || 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=200&q=80'} 
+                          src={sighting.imageUrl || getSpeciesImageUrl(sighting.species)} 
                           alt="Thumbnail" 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         />
