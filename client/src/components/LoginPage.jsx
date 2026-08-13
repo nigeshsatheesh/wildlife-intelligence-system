@@ -58,21 +58,10 @@ export default function LoginPage({ onLogin, onNavigateRegister }) {
         padding: '2.5rem 2rem',
         border: '1px solid #e0e3e1'
       }}>
-        {/* Brand Icon Header */}
+        {/* Brand Icon Header (uses project logo at /logo.png) */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '1.75rem', position: 'relative' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            background: '#1b4332',
-            color: '#86af99',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '1rem',
-            boxShadow: '0 4px 12px rgba(1, 45, 29, 0.15)'
-          }}>
-            <Radar size={32} color="#ffffff" />
+          <div style={{ marginBottom: '1rem' }}>
+            <img src="/logo.png" alt="Wildlife Intelligence" style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 8 }} />
           </div>
           <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: '#012d1d', letterSpacing: '-0.01em' }}>
             Wildlife Population Intelligence

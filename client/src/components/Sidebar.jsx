@@ -26,6 +26,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
 
   const analysisItems = [
     { id: 'image-analysis', label: 'Image Analysis', icon: Image },
+    { id: 'bioacoustics', label: 'Bioacoustics', icon: Volume2 },
     { id: 'population', label: 'Population', icon: Users },
     { id: 'biodiversity', label: 'Biodiversity', icon: Award },
     { id: 'alerts', label: 'Alerts', icon: Bell },
@@ -36,14 +37,14 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
   return (
     <aside className="sidebar">
       <div>
-        {/* Brand Logo Header */}
+        {/* Brand Logo Header (uses project logo at /logo.png) */}
         <div className="sidebar-logo">
-          <div className="logo-icon">
-            <Leaf size={18} color="#ffffff" />
-          </div>
-          <div>
-            <div className="logo-text-main">EcoIntelligence</div>
-            <div className="logo-text-sub">ECOLOGICAL INTELLIGENCE</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <img src="/logo.png" alt="Wildlife Intelligence" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 6 }} />
+            <div>
+              <div className="logo-text-main">EcoIntelligence</div>
+              <div className="logo-text-sub">ECOLOGICAL INTELLIGENCE</div>
+            </div>
           </div>
         </div>
 
@@ -119,4 +120,3 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
     </aside>
   );
 }
-
