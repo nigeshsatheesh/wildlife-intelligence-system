@@ -14,6 +14,8 @@ import SiteFormModal from './components/SiteFormModal';
 import SightingsListPage from './components/SightingsListPage';
 import SightingLogForm from './components/SightingLogForm';
 import SightingDetailPage from './components/SightingDetailPage';
+import RecordingLogForm from './components/RecordingLogForm';
+import RecordingsListPage from './components/RecordingsListPage';
 import { Search, Bell, Plus, UserCheck, Shield } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -97,6 +99,7 @@ export default function App() {
   const [selectedSpeciesDetail, setSelectedSpeciesDetail] = useState(null);
   const [selectedSightingDetail, setSelectedSightingDetail] = useState(null);
   const [isLogSightingFormOpen, setIsLogSightingFormOpen] = useState(false);
+  const [isLogRecordingFormOpen, setIsLogRecordingFormOpen] = useState(false);
 
   // Modals
   const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
@@ -109,6 +112,7 @@ export default function App() {
   const [species, setSpecies] = useState(defaultSpecies);
   const [sites, setSites] = useState(defaultSites);
   const [sightings, setSightings] = useState(defaultSightings);
+  const [recordings, setRecordings] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
 
@@ -116,11 +120,12 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [spRes, stRes, sgRes, anRes] = await Promise.all([
+        const [spRes, stRes, sgRes, anRes, recRes] = await Promise.all([
           fetch(`${API_BASE}/species`),
           fetch(`${API_BASE}/sites`),
           fetch(`${API_BASE}/sightings`),
-          fetch(`${API_BASE}/analytics`)
+          fetch(`${API_BASE}/analytics`),
+          fetch(`${API_BASE}/recordings`)
         ]);
 
         if (spRes.ok && stRes.ok && sgRes.ok && anRes.ok) {
@@ -133,6 +138,10 @@ export default function App() {
           if (stData.length) setSites(stData);
           if (sgData.length) setSightings(sgData);
           setAnalytics(anData);
+        }
+        if (recRes.ok) {
+          const recData = await recRes.json();
+          setRecordings(recData);
         }
       } catch (err) {}
     };
@@ -157,44 +166,10 @@ export default function App() {
   };
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      const savedToken = localStorage.getItem('token');
-      if (!savedToken) {
-        setAuthLoading(false);
-        setAuthMode('login');
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_BASE}/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${savedToken}`
-          }
-        });
-
-        if (!res.ok) {
-          throw new Error('Authentication failed');
-        }
-
-        const userData = await res.json();
-        setUser(userData);
-        setToken(savedToken);
-        setAuthMode('authenticated');
-
-        if (userData.role === 'Admin') {
-          await fetchUsers(savedToken);
-        }
-      } catch (err) {
-        localStorage.removeItem('token');
-        setUser(null);
-        setToken('');
-        setAuthMode('login');
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-
-    initializeAuth();
+    // Do not auto-authenticate on initial load. Always show the login page first.
+    // This keeps the login page visible when a user first opens the site.
+    setAuthLoading(false);
+    setAuthMode('login');
   }, []);
 
   const handleSaveSpecies = (newSpeciesObj) => {
@@ -275,6 +250,10 @@ export default function App() {
 
   const handleSaveSighting = (savedSighting) => {
     setSightings(prev => [savedSighting, ...prev]);
+  };
+
+  const handleSaveRecording = (savedRecording) => {
+    setRecordings(prev => [savedRecording, ...prev]);
   };
 
   const handleVerifySighting = (sightingId, verifiedState) => {
@@ -384,8 +363,17 @@ export default function App() {
             />
           )}
 
+          {/* Recording Log Form View (Bioacoustics) */}
+          {!isLogSightingFormOpen && isLogRecordingFormOpen && (
+            <RecordingLogForm 
+              sites={sites} 
+              onSaveRecording={handleSaveRecording} 
+              onClose={() => setIsLogRecordingFormOpen(false)} 
+            />
+          )}
+
           {/* Sighting Detail View (Page 12) */}
-          {!isLogSightingFormOpen && selectedSightingDetail && (
+          {!isLogSightingFormOpen && !isLogRecordingFormOpen && selectedSightingDetail && (
             <SightingDetailPage 
               sighting={selectedSightingDetail} 
               speciesList={species} 
@@ -396,7 +384,7 @@ export default function App() {
           )}
 
           {/* Species Detail View (Page 6) */}
-          {!isLogSightingFormOpen && !selectedSightingDetail && selectedSpeciesDetail && (
+          {!isLogSightingFormOpen && !isLogRecordingFormOpen && !selectedSightingDetail && selectedSpeciesDetail && (
             <SpeciesDetailPage 
               speciesItem={selectedSpeciesDetail} 
               sightings={sightings} 
@@ -405,7 +393,7 @@ export default function App() {
           )}
 
           {/* Main Views */}
-          {!isLogSightingFormOpen && !selectedSightingDetail && !selectedSpeciesDetail && (
+          {!isLogSightingFormOpen && !isLogRecordingFormOpen && !selectedSightingDetail && !selectedSpeciesDetail && (
             <>
               {/* Dashboard View: Researcher (Page 3) or Admin (Page 4) */}
               {(activeTab === 'dashboard' || activeTab === 'population') && (
@@ -432,6 +420,15 @@ export default function App() {
                   sitesList={sites} 
                   onSelectSighting={(sg) => setSelectedSightingDetail(sg)} 
                   onOpenLogSighting={() => setIsLogSightingFormOpen(true)} 
+                />
+              )}
+
+              {/* Bioacoustic Recordings Listing Page */}
+              {activeTab === 'bioacoustics' && (
+                <RecordingsListPage 
+                  recordings={recordings} 
+                  sitesList={sites} 
+                  onOpenLogRecording={() => setIsLogRecordingFormOpen(true)} 
                 />
               )}
 

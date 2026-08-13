@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff, ShieldCheck, Radar, LogIn } from 'lucide-react';
 
 export default function LoginPage({ onLogin, onNavigateRegister }) {
-  const [email, setEmail] = useState('dr.smith@conservation.org');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
   const [error, setError] = useState('');
@@ -61,7 +61,17 @@ export default function LoginPage({ onLogin, onNavigateRegister }) {
         {/* Brand Icon Header (uses project logo at /logo.png) */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '1.75rem', position: 'relative' }}>
           <div style={{ marginBottom: '1rem' }}>
-            <img src="/logo.png" alt="Wildlife Intelligence" style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 8 }} />
+            <img
+              src="/logo.png"
+              alt="Wildlife Intelligence"
+              style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 8 }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+                  <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="100%" height="100%" fill="#ffffff"/><circle cx="80" cy="55" r="30" fill="#174f3a"/><text x="50%" y="135" font-size="18" text-anchor="middle" fill="#174f3a" font-family="Arial">Wildlife</text></svg>
+                `);
+              }}
+            />
           </div>
           <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: '#012d1d', letterSpacing: '-0.01em' }}>
             Wildlife Intelligence System
@@ -79,12 +89,12 @@ export default function LoginPage({ onLogin, onNavigateRegister }) {
             </label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} color="#717973" style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
-              <input
+                  <input
                 type="email"
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="dr.smith@conservation.org"
+                placeholder=""
                 style={{
                   width: '100%',
                   background: '#f1f4f2',
@@ -115,7 +125,7 @@ export default function LoginPage({ onLogin, onNavigateRegister }) {
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder=""
                 style={{
                   width: '100%',
                   background: '#f1f4f2',

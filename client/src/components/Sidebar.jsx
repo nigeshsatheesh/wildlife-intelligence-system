@@ -40,7 +40,15 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
         {/* Brand Logo Header (uses project logo at /logo.png) */}
         <div className="sidebar-logo">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <img src="/logo.png" alt="Wildlife Intelligence" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 6 }} />
+            <img
+              src="/logo.png"
+              alt="Wildlife Intelligence"
+              style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 6 }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="100%" height="100%" fill="#ffffff"/><circle cx="24" cy="24" r="12" fill="#174f3a"/></svg>`);
+              }}
+            />
             <div>
               <div className="logo-text-main">Wildlife Intelligence System</div>
               <div className="logo-text-sub">ECOLOGICAL INTELLIGENCE</div>
