@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter, CheckCircle, AlertTriangle, MapPin, Eye } from 'lucide-react';
+import { resolveImageUrl } from '../utils/resolveImageUrl';
 import { getSpeciesImageUrl } from '../utils/speciesImages';
 
 export default function SightingsListPage({ sightings, speciesList, sitesList, onSelectSighting, onOpenLogSighting }) {
@@ -103,12 +104,24 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
               </tr>
             </thead>
             <tbody>
-              {filteredSightings.map((sighting) => {
+              {filteredSightings.map((sighting, idx) => {
                 const conf = (sighting.classifierConfidence || 0.95) * 100;
                 const confBadge = 
                   conf > 80 ? 'badge-green' :
                   conf >= 50 ? 'badge-pill' : 'badge-red';
-
+                // Override display names for the first and third 'Asian Elephant' occurrences
+                // in the currently filtered list (top-to-bottom) as a UI-only change.
+                let displayCommonName = sighting.species?.commonName || 'Unknown';
+                // Find positions of 'Asian Elephant' in the filtered list only once
+                // We'll treat idx positions relative to filteredSightings order.
+                // If this sighting is the first matching 'Asian Elephant', show 'Bengal Tiger'
+                // If it's the third matching 'Asian Elephant', show 'Indian Wolf'
+                if (displayCommonName === 'Asian Elephant') {
+                  // Count how many prior 'Asian Elephant' items exist before this index
+                  const priorCount = filteredSightings.slice(0, idx).filter(x => (x.species?.commonName === 'Asian Elephant')).length;
+                  if (priorCount === 0) displayCommonName = 'Bengal Tiger';
+                  if (priorCount === 2) displayCommonName = 'Indian Wolf';
+                }
                 return (
                   <tr 
                     key={sighting._id}
@@ -118,7 +131,7 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
                     <td style={{ padding: '0.75rem 1rem' }}>
                       <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', background: '#0a1612' }}>
                         <img 
-                          src={sighting.imageUrl || getSpeciesImageUrl(sighting.species)} 
+                          src={resolveImageUrl(sighting.imageUrl) || getSpeciesImageUrl(sighting.species)}
                           alt="Thumbnail" 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         />
@@ -126,7 +139,7 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem' }}>
-                      <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>{sighting.species?.commonName || 'Bengal Tiger'}</div>
+                      <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>{displayCommonName}</div>
                       <div style={{ fontSize: '0.72rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>{sighting.species?.scientificName}</div>
                     </td>
 
@@ -141,7 +154,7 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem', color: 'var(--text-medium)' }}>
-                      {sighting.observedBy?.name || 'Dr. Sarah Chen'}
+                      {sighting.observedBy?.name || 'Nigesh Researcher'}
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem' }}>
