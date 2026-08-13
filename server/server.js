@@ -138,6 +138,9 @@ app.use('/api/species', require('./routes/speciesRoutes'));
 app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/sightings', require('./routes/sightingRoutes'));
 app.use('/api/recordings', require('./routes/recordingRoutes'));
+app.use('/api/population', require('./routes/populationRoutes'));
+app.use('/api/habitat', require('./routes/habitatRoutes'));
+
 // Biodiversity Analytics API
 app.get('/api/analytics', async (req, res) => {
   const SpeciesModel = require('./models/Species');

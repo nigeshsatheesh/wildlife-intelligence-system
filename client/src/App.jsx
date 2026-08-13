@@ -16,6 +16,8 @@ import SightingLogForm from './components/SightingLogForm';
 import SightingDetailPage from './components/SightingDetailPage';
 import RecordingLogForm from './components/RecordingLogForm';
 import RecordingsListPage from './components/RecordingsListPage';
+import PopulationPage from './components/PopulationPage';
+import HabitatPage from './components/HabitatPage';
 import { Search, Bell, Plus, UserCheck, Shield } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -426,12 +428,16 @@ export default function App() {
           {!isLogSightingFormOpen && !isLogRecordingFormOpen && !selectedSightingDetail && !selectedSpeciesDetail && (
             <>
               {/* Dashboard View: Researcher (Page 3) or Admin (Page 4) */}
-              {(activeTab === 'dashboard' || activeTab === 'population') && (
+              {(activeTab === 'dashboard') && (
                 user?.role === 'Admin' ? (
                   <AdminDashboard analytics={analytics} species={species} sites={sites} sightings={sightings} users={users} />
                 ) : (
                   <ResearchDashboard analytics={analytics} sightings={sightings} species={species} />
                 )
+              )}
+
+              {activeTab === 'population' && (
+                <PopulationPage />
               )}
 
               {activeTab === 'alerts' && (
@@ -463,13 +469,17 @@ export default function App() {
               )}
 
               {/* Species Listing Page (Page 5) */}
-              {(activeTab === 'species' || activeTab === 'biodiversity') && (
+              {(activeTab === 'species') && (
                 <SpeciesListPage 
                   species={species} 
                   user={user} 
                   onSelectSpecies={(sp) => setSelectedSpeciesDetail(sp)} 
                   onOpenAddSpecies={() => { setEditingSpeciesData(null); setIsSpeciesModalOpen(true); }} 
                 />
+              )}
+
+              {activeTab === 'biodiversity' && (
+                <HabitatPage />
               )}
 
               {/* Monitoring Sites / Camera Traps Listing Page (Page 8) */}

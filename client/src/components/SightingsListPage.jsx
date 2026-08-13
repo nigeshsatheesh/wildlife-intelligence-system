@@ -109,19 +109,9 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
                 const confBadge = 
                   conf > 80 ? 'badge-green' :
                   conf >= 50 ? 'badge-pill' : 'badge-red';
-                // Override display names for the first and third 'Asian Elephant' occurrences
-                // in the currently filtered list (top-to-bottom) as a UI-only change.
-                let displayCommonName = sighting.species?.commonName || 'Unknown';
-                // Find positions of 'Asian Elephant' in the filtered list only once
-                // We'll treat idx positions relative to filteredSightings order.
-                // If this sighting is the first matching 'Asian Elephant', show 'Bengal Tiger'
-                // If it's the third matching 'Asian Elephant', show 'Indian Wolf'
-                if (displayCommonName === 'Asian Elephant') {
-                  // Count how many prior 'Asian Elephant' items exist before this index
-                  const priorCount = filteredSightings.slice(0, idx).filter(x => (x.species?.commonName === 'Asian Elephant')).length;
-                  if (priorCount === 0) displayCommonName = 'Bengal Tiger';
-                  if (priorCount === 2) displayCommonName = 'Indian Wolf';
-                }
+                // Real species name as identified by the classifier and matched via classifierLabel
+                // in sightingController.js. No display overrides — what's shown here is what's stored.
+                const displayCommonName = sighting.species?.commonName || 'Unknown';
                 return (
                   <tr 
                     key={sighting._id}

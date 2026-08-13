@@ -34,6 +34,16 @@ const recordingSchema = new mongoose.Schema({
     type: Number,
     max: 1
   },
+  // Populated only when the optional species-level classifier (train_audio.py)
+  // is loaded in the audio ML service. Distinct from topLabel/topConfidence,
+  // which come from generic YAMNet AudioSet categories.
+  speciesClassifierLabel: {
+    type: String
+  },
+  speciesClassifierConfidence: {
+    type: Number,
+    max: 1
+  },
   verified: {
     type: Boolean,
     default: false

@@ -18,6 +18,12 @@ const monitoringSiteSchema = new mongoose.Schema({
   protectedArea: {
     type: String 
   },
+  // Optional. Needed to compute real population DENSITY (individuals / km²).
+  // If left unset, density is reported as unavailable for that site rather
+  // than estimated or faked.
+  areaKm2: {
+    type: Number
+  },
   location: {
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true }

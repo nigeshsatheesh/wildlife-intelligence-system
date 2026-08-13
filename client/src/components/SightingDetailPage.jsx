@@ -74,10 +74,10 @@ export default function SightingDetailPage({ sighting, speciesList, onVerify, on
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
               <div>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-dark)' }}>
-                  {sighting.species?.commonName || 'Bengal Tiger'}
+                  {sighting.species?.commonName || 'Unidentified Species'}
                 </h1>
                 <p style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
-                  {sighting.species?.scientificName || 'Panthera tigris'}
+                  {sighting.species?.scientificName || '—'}
                 </p>
               </div>
 

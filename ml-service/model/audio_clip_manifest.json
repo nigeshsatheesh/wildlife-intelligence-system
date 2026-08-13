@@ -1,0 +1,51 @@
+{
+  "train": {
+    "eagle": [
+      "dragon-studio-eagle-sound-382725.mp3",
+      "freesound_community-eagle-cry-7095.mp3",
+      "u_tmwllo5zur-an-eagle-squawking-overhead-226774.mp3",
+      "dragon-studio-eagle-cry-339725.mp3"
+    ],
+    "elephant": [
+      "freesound_community-angry-elephant-40916.mp3",
+      "designerschoice-anmlwild-cu_elephant-trumpet_nicholas-judy_tdc-482702.mp3",
+      "u_tococonino969-elephant-225994.mp3",
+      "dragon-studio-elephant-trumpeting-494313.mp3"
+    ],
+    "lion": [
+      "freesound_community-lion-roar-6011.mp3",
+      "ribhavagrawal-lion-roaring-sfx-293295.mp3",
+      "dragon-studio-lion-roar-sound-effect-324751.mp3",
+      "virtualzero-lion-roar-ai-cinematic-371855.mp3"
+    ],
+    "owl": [
+      "freesound_community-owl_hooting_000102_0145s3-002-070-000-002-068-074-37397.mp3",
+      "lazychillzone-owl-hooting-223549.mp3",
+      "universfield-owl-hoot-144750.mp3",
+      "freesound_community-hoot-46198.mp3"
+    ],
+    "tiger": [
+      "sherimfal-tiger-light-roar-t-293716.mp3",
+      "dffdv-tiger-roar-loudly-193229.mp3",
+      "dffdv-tiger-attack-195840.mp3",
+      "dffdv-tiger-lion-werewolf-and-leopard-sounds-195878.mp3"
+    ]
+  },
+  "val": {
+    "eagle": [
+      "u_jfkxueyart-eagle-281163.mp3"
+    ],
+    "elephant": [
+      "u_7bikmggkv2-trumpet-sound-of-an-elephant-154720.mp3"
+    ],
+    "lion": [
+      "soundzee-lion-snarl-growl-354324.mp3"
+    ],
+    "owl": [
+      "freesound_community-owl-hoot-73006.mp3"
+    ],
+    "tiger": [
+      "wings_of_freedom-tiger-roar-399277.mp3"
+    ]
+  }
+}
