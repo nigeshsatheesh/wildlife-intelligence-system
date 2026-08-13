@@ -19,17 +19,27 @@ export default function RegisterPage({ onRegister, onNavigateLogin }) {
     setRegistering(true);
     setError('');
 
-    const result = await onRegister({
-      name: fullName || 'Dr. Jane Doe',
-      email: email || 'jane.doe@conservation.org',
-      password,
-      role
-    });
+    try {
+      const result = await onRegister({
+        name: fullName || 'Dr. Jane Doe',
+        email: email || 'jane.doe@conservation.org',
+        password,
+        role
+      });
 
-    if (!result.success) {
-      setError(result.message || 'Unable to register');
+      if (!result.success) {
+        setError(result.message || 'Unable to register');
+      }
+
+      // Successful registration
+      // App.jsx should handle setting the user and showing the dashboard
+
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Unable to register. Please try again.');
+    } finally {
+      setRegistering(false);
     }
-    setRegistering(false);
   };
 
   return (
@@ -226,9 +236,23 @@ export default function RegisterPage({ onRegister, onNavigateLogin }) {
               </div>
             </div>
           </div>
-
+          {error && (
+            <div
+              style={{
+                color: '#c0392b',
+                background: '#fef2f2',
+                padding: '0.7rem',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                textAlign: 'center'
+              }}
+            >
+              {error}
+            </div>
+          )}
           <button
             type="submit"
+            disabled={registering}
             style={{
               width: '100%',
               background: '#012d1d',
@@ -238,7 +262,8 @@ export default function RegisterPage({ onRegister, onNavigateLogin }) {
               padding: '0.75rem 1rem',
               fontWeight: '700',
               fontSize: '0.85rem',
-              cursor: 'pointer',
+              cursor: registering ? 'not-allowed' : 'pointer',
+              opacity: registering ? 0.7 : 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -247,8 +272,11 @@ export default function RegisterPage({ onRegister, onNavigateLogin }) {
               boxShadow: '0 2px 6px rgba(1, 45, 29, 0.2)'
             }}
           >
-            <span>Create Account</span>
-            <ArrowRight size={18} />
+            <span>
+              {registering ? 'Creating Account...' : 'Create Account'}
+            </span>
+
+            {!registering && <ArrowRight size={18} />}
           </button>
         </form>
 

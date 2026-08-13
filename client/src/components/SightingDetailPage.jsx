@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle, MapPin, Calendar, User, Eye, Edit3 } from 'lucide-react';
 import { getSpeciesImageUrl } from '../utils/speciesImages';
+import { resolveImageUrl } from '../utils/resolveImageUrl';
 
 export default function SightingDetailPage({ sighting, speciesList, onVerify, onCorrectSpecies, onBack }) {
   if (!sighting) return null;
@@ -50,7 +51,7 @@ export default function SightingDetailPage({ sighting, speciesList, onVerify, on
         <div className="eco-card" style={{ padding: '1rem' }}>
           <div style={{ height: '360px', borderRadius: '12px', overflow: 'hidden', background: '#0a1612', position: 'relative' }}>
             <img 
-                src={sighting.imageUrl || getSpeciesImageUrl(sighting.species)} 
+                src={resolveImageUrl(sighting.imageUrl) || getSpeciesImageUrl(sighting.species)}
             />
           </div>
 
@@ -104,7 +105,7 @@ export default function SightingDetailPage({ sighting, speciesList, onVerify, on
 
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Observed By:</span>
-                <strong style={{ color: 'var(--text-dark)' }}>{sighting.observedBy?.name || 'Dr. Sarah Chen'}</strong>
+                <strong style={{ color: 'var(--text-dark)' }}>{sighting.observedBy?.name || 'Nigesh Researcher'}</strong>
               </div>
 
               <div style={{ marginTop: '0.5rem' }}>

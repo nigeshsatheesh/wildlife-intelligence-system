@@ -218,6 +218,70 @@ app.get('/api/analytics', async (req, res) => {
   });
 });
 
+app.get('/api/analytics/biodiversity', async (req, res) => {
+  try {
+    const SightingModel = require('./models/Sighting');
+    const MonitoringSiteModel = require('./models/MonitoringSite');
+
+    const sightingsList = isMongoConnected ? await SightingModel.find().populate('species monitoringSite') : memoryDb.sightings;
+    const sitesList = isMongoConnected ? await MonitoringSiteModel.find() : memoryDb.sites;
+
+    // Shannon Diversity Index: H' = -Σ(pi * ln(pi))
+    // pi = proportion of sightings belonging to species i, within the group being measured
+    function shannonIndex(sightingsGroup) {
+      const speciesCounts = {};
+      let total = 0;
+
+      sightingsGroup.forEach(s => {
+        const key = s.species?._id?.toString() || s.species?.toString();
+        if (!key) return;
+        speciesCounts[key] = (speciesCounts[key] || 0) + 1;
+        total += 1;
+      });
+
+      const speciesRichness = Object.keys(speciesCounts).length;
+      if (total === 0 || speciesRichness === 0) {
+        return { index: 0, speciesRichness: 0, evenness: 0 };
+      }
+
+      let H = 0;
+      Object.values(speciesCounts).forEach(count => {
+        const pi = count / total;
+        H -= pi * Math.log(pi);
+      });
+
+      // Evenness: how close to maximum possible diversity (0 to 1)
+      const maxH = Math.log(speciesRichness);
+      const evenness = maxH > 0 ? H / maxH : 0;
+
+      return {
+        index: parseFloat(H.toFixed(3)),
+        speciesRichness,
+        evenness: parseFloat(evenness.toFixed(3))
+      };
+    }
+
+    const overall = shannonIndex(sightingsList);
+
+    const perSite = sitesList.map(site => {
+      const siteSightings = sightingsList.filter(s => {
+        const siteId = s.monitoringSite?._id?.toString() || s.monitoringSite?.toString();
+        return siteId === site._id.toString();
+      });
+      return {
+        siteId: site._id,
+        siteName: site.siteName,
+        totalSightings: siteSightings.length,
+        ...shannonIndex(siteSightings)
+      };
+    });
+
+    res.json({ overall, perSite });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.get('/', (req, res) => {
   res.send('Wildlife Intelligence System API is running');
 });
