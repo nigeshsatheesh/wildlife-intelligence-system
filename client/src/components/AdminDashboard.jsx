@@ -98,7 +98,7 @@ export default function AdminDashboard({ analytics, species, sites, sightings, u
             </thead>
             <tbody>
               {registeredUsers.map((user) => (
-                <tr key={user.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <tr key={user._id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                   <td style={{ padding: '0.85rem 1rem', fontWeight: '700', color: 'var(--text-dark)' }}>
                     {user.name}
                   </td>

@@ -11,6 +11,7 @@ exports.createSighting = async (req, res) => {
 
     let classifierPrediction = req.body.classifierPrediction;
     let classifierConfidence = req.body.classifierConfidence ? Number(req.body.classifierConfidence) : undefined;
+    let matchedSpeciesDoc = null; // will hold the real species matched to the AI prediction
 
     // Call ML Microservice at http://localhost:5001/predict if ML service is running and file uploaded
     if (req.file) {
@@ -27,6 +28,13 @@ exports.createSighting = async (req, res) => {
         if (mlRes.data && mlRes.data.label) {
           classifierPrediction = mlRes.data.label;
           classifierConfidence = mlRes.data.confidence;
+
+          // Look up the actual Species document whose classifierLabel matches the AI's predicted label
+          if (req.isMongoConnected) {
+            matchedSpeciesDoc = await Species.findOne({ classifierLabel: classifierPrediction });
+          } else {
+            matchedSpeciesDoc = req.memoryDb.species.find(s => s.classifierLabel === classifierPrediction);
+          }
         }
       } catch (mlErr) {
         // Fallback classifier simulation if ML service not running
@@ -40,6 +48,8 @@ exports.createSighting = async (req, res) => {
 
     const sightingData = {
       ...req.body,
+      // Use the AI-matched species if we found one; otherwise fall back to whatever was submitted
+      species: matchedSpeciesDoc ? (matchedSpeciesDoc._id || matchedSpeciesDoc.id) : req.body.species,
       imageUrl,
       classifierPrediction,
       classifierConfidence: classifierConfidence || 0.95,
@@ -51,7 +61,6 @@ exports.createSighting = async (req, res) => {
         longitude: Number(req.body.longitude)
       }
     };
-
     if (req.isMongoConnected) {
       const sighting = await Sighting.create(sightingData);
       const populated = await Sighting.findById(sighting._id)
@@ -60,7 +69,7 @@ exports.createSighting = async (req, res) => {
         .populate('observedBy', 'name email');
       res.status(201).json(populated);
     } else {
-      const matchedSpecies = req.memoryDb.species.find(s => s._id === req.body.species) || req.memoryDb.species[0];
+      const matchedSpecies = matchedSpeciesDoc || req.memoryDb.species.find(s => s._id === req.body.species) || req.memoryDb.species[0];
       const matchedSite = req.memoryDb.sites.find(st => st._id === req.body.monitoringSite) || req.memoryDb.sites[0];
       
       const newSighting = {

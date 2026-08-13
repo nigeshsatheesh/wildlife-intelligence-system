@@ -109,9 +109,10 @@ export default function App() {
   const [editingSiteData, setEditingSiteData] = useState(null);
 
   // Data states
-  const [species, setSpecies] = useState(defaultSpecies);
-  const [sites, setSites] = useState(defaultSites);
-  const [sightings, setSightings] = useState(defaultSightings);
+  const [species, setSpecies] = useState([]);
+  const [sites, setSites] = useState([]);
+  const [sightings, setSightings] = useState([]);
+  const [dataLoadError, setDataLoadError] = useState(null);
   const [recordings, setRecordings] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
@@ -120,6 +121,7 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setDataLoadError(null);
         const [spRes, stRes, sgRes, anRes, recRes] = await Promise.all([
           fetch(`${API_BASE}/species`),
           fetch(`${API_BASE}/sites`),
@@ -143,7 +145,11 @@ export default function App() {
           const recData = await recRes.json();
           setRecordings(recData);
         }
-      } catch (err) {}
+      }
+      catch (err) {
+        setDataLoadError('Could not connect to backend. Data may be incomplete.');
+        console.error('Failed to fetch backend data:', err);
+      }
     };
 
     fetchData();
@@ -290,6 +296,7 @@ export default function App() {
   return (
     <div className="app-layout">
       
+      
       {/* Left Navigation Sidebar (Pages 3-12) */}
       <Sidebar 
         activeTab={activeTab} 
@@ -350,7 +357,19 @@ export default function App() {
             </button>
           </div>
         </header>
-
+          {/* Backend Connection Warning */}
+          {dataLoadError && (
+            <div
+              style={{
+                background: '#fef2f2',
+                color: '#c0392b',
+                padding: '0.75rem',
+                textAlign: 'center'
+              }}
+            >
+              {dataLoadError}
+            </div>
+          )}
         {/* Tab View Router across 12 Milestone Pages */}
         <main>
           {/* Sighting Log Form View (Page 11) */}
@@ -458,16 +477,6 @@ export default function App() {
                   onSaveSighting={handleSaveSighting} 
                   onClose={() => setActiveTab('surveys')} 
                 />
-              )}
-
-              {/* Reports & Archive */}
-              {(activeTab === 'reports' || activeTab === 'settings') && (
-                <div className="eco-card" style={{ padding: '2.5rem', textAlign: 'center' }}>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }}>Reports & System Settings</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                    System telemetry, user access clearance, and historical archives are securely managed via MongoDB & Express.
-                  </p>
-                </div>
               )}
             </>
           )}

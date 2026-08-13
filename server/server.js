@@ -24,13 +24,19 @@ const memoryDb = {
     { _id: 'u2', name: 'Alex Rivera', email: 'alex.rivera@ecoguard.org', role: 'Researcher' }
   ],
   species: [
-    { _id: 's1', commonName: 'Bengal Tiger', scientificName: 'Panthera tigris', category: 'Mammal', classifierLabel: 'tiger', conservationStatus: 'Critical' },
-    { _id: 's2', commonName: 'African Elephant', scientificName: 'Loxodonta africana', category: 'Mammal', classifierLabel: 'elephant', conservationStatus: 'Vulnerable' },
-    { _id: 's3', commonName: 'Golden Eagle', scientificName: 'Aquila chrysaetos', category: 'Bird', classifierLabel: 'eagle', conservationStatus: 'Healthy' },
-    { _id: 's4', commonName: 'Eurasian Wolf', scientificName: 'Canis lupus', category: 'Mammal', classifierLabel: 'wolf', conservationStatus: 'Moderate Concern' },
-    { _id: 's5', commonName: 'Eurasian Lynx', scientificName: 'Lynx lynx', category: 'Mammal', classifierLabel: 'lynx', conservationStatus: 'Vulnerable' },
-    { _id: 's6', commonName: 'Red Fox', scientificName: 'Vulpes vulpes', category: 'Mammal', classifierLabel: 'fox', conservationStatus: 'Healthy' }
-  ],
+      { _id: 's1', commonName: 'Bengal Tiger', scientificName: 'Panthera tigris', category: 'Mammal', classifierLabel: 'tiger', conservationStatus: 'Critical' },
+      { _id: 's2', commonName: 'African Elephant', scientificName: 'Loxodonta africana', category: 'Mammal', classifierLabel: 'elephant', conservationStatus: 'Vulnerable' },
+      { _id: 's3', commonName: 'Golden Eagle', scientificName: 'Aquila chrysaetos', category: 'Bird', classifierLabel: 'eagle', conservationStatus: 'Healthy' },
+      { _id: 's4', commonName: 'Eurasian Wolf', scientificName: 'Canis lupus', category: 'Mammal', classifierLabel: 'wolf', conservationStatus: 'Moderate Concern' },
+      { _id: 's5', commonName: 'Red Fox', scientificName: 'Vulpes vulpes', category: 'Mammal', classifierLabel: 'fox', conservationStatus: 'Healthy' },
+      { _id: 's6', commonName: 'Sloth Bear', scientificName: 'Melursus ursinus', category: 'Mammal', classifierLabel: 'bear', conservationStatus: 'Vulnerable' },
+      { _id: 's7', commonName: 'Sambar Deer', scientificName: 'Rusa unicolor', category: 'Mammal', classifierLabel: 'deer', conservationStatus: 'Healthy' },
+      { _id: 's8', commonName: 'Leopard', scientificName: 'Panthera pardus', category: 'Mammal', classifierLabel: 'leopard', conservationStatus: 'Vulnerable' },
+      { _id: 's9', commonName: 'Asiatic Lion', scientificName: 'Panthera leo persica', category: 'Mammal', classifierLabel: 'lion', conservationStatus: 'Critical' },
+      { _id: 's10', commonName: 'Eurasian Owl', scientificName: 'Bubo bubo', category: 'Bird', classifierLabel: 'owl', conservationStatus: 'Healthy' },
+      { _id: 's11', commonName: 'Indian Giant Squirrel', scientificName: 'Ratufa indica', category: 'Mammal', classifierLabel: 'squirrel', conservationStatus: 'Healthy' },
+      { _id: 's12', commonName: 'Plains Zebra', scientificName: 'Equus quagga', category: 'Mammal', classifierLabel: 'zebra', conservationStatus: 'Healthy' }
+    ],
   sites: [
     { _id: 'st1', siteName: 'Bandipur Tiger Reserve', siteCode: 'BTR-ALPHA-01', habitatType: 'Forest', protectedArea: 'Bandipur National Park', location: { latitude: 11.6664, longitude: 76.6292 }, monitoringDevice: 'Camera Trap', active: true },
     { _id: 'st2', siteName: 'Serengeti North Grid', siteCode: 'SER-GRID-04', habitatType: 'Grassland', protectedArea: 'Serengeti Ecosystem', location: { latitude: -2.3333, longitude: 34.8333 }, monitoringDevice: 'Camera Trap', active: true },
@@ -86,7 +92,8 @@ const memoryDb = {
       eventDate: new Date('2026-08-06T22:45:00Z'),
       notes: 'Night camera trap trigger. Pack movement recorded.'
     }
-  ]
+  ],
+  recordings: []
 };
 
 let isMongoConnected = false;
@@ -115,6 +122,7 @@ app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/species', require('./routes/speciesRoutes'));
 app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/sightings', require('./routes/sightingRoutes'));
+app.use('/api/recordings', require('./routes/recordingRoutes'));
 // Biodiversity Analytics API
 app.get('/api/analytics', async (req, res) => {
   const SpeciesModel = require('./models/Species');
