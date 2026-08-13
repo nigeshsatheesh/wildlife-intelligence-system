@@ -16,6 +16,21 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve static uploaded files (images, audio)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve raw dataset images so the client can reference them directly
+app.use('/raw-images', express.static(path.join(__dirname, '..', 'data', 'raw-images')));
+
+// Helper endpoint: return a representative thumbnail for a species label
+const fs = require('fs');
+app.get('/raw-images/thumbnail/:label', (req, res) => {
+  const label = req.params.label;
+  const dir = path.join(__dirname, '..', 'data', 'raw-images', label);
+  if (!fs.existsSync(dir)) return res.status(404).send('Not found');
+  const files = fs.readdirSync(dir).filter(f => /\.(jpe?g|png|webp)$/i.test(f));
+  if (!files || files.length === 0) return res.status(404).send('No images');
+  // send first image as representative thumbnail
+  const imgPath = path.join(dir, files[0]);
+  res.sendFile(imgPath);
+});
 
 // Standalone in-memory fallback store if MongoDB isn't reachable
 const memoryDb = {

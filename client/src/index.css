@@ -147,6 +147,9 @@ code, .font-mono {
 }
 
 .nav-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   padding: 0.4rem 0.75rem 0.4rem 1rem;
   border-radius: 8px;
   border: none;
