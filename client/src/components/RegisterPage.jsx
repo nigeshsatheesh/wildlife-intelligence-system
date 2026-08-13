@@ -69,21 +69,20 @@ export default function RegisterPage({ onRegister, onNavigateLogin }) {
         overflow: 'hidden',
         border: '1px solid #e0e3e1'
       }}>
-        {/* Header Section */}
+        {/* Header Section (use project logo at /logo.png) */}
         <div style={{ padding: '2rem 2rem 1.5rem 2rem', textAlign: 'center', borderBottom: '1px solid #e0e3e1' }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            background: '#1b4332',
-            color: '#86af99',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem auto',
-            boxShadow: '0 4px 12px rgba(1, 45, 29, 0.15)'
-          }}>
-            <Leaf size={32} color="#ffffff" />
+          <div style={{ margin: '0 auto 1rem auto' }}>
+            <img
+              src="/logo.png"
+              alt="Wildlife Intelligence"
+              style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 12 }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+                  <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="100%" height="100%" fill="#ffffff"/><circle cx="80" cy="50" r="32" fill="#174f3a"/><text x="50%" y="140" font-size="18" text-anchor="middle" fill="#174f3a" font-family="Arial">Wildlife</text></svg>
+                `);
+              }}
+            />
           </div>
           <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: '#012d1d', letterSpacing: '-0.01em' }}>
             Join the Network
