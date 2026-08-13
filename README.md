@@ -1,4 +1,4 @@
-# 🍃EcoGuard Wildlife Population Intelligence System
+# 🍃Wildlife Intelligence System
 
 An AI-powered wildlife monitoring platform for logging animal sightings, classifying species from camera trap photos via a real trained image classifier, detecting acoustic events from field audio recordings, and tracking population trends — built as a scoped-down, solo-feasible version of a larger original specification.
 
