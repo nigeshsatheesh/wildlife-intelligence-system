@@ -145,8 +145,7 @@ export default function App() {
           const recData = await recRes.json();
           setRecordings(recData);
         }
-      }
-      catch (err) {
+      } catch (err) {
         setDataLoadError('Could not connect to backend. Data may be incomplete.');
         console.error('Failed to fetch backend data:', err);
       }
@@ -169,6 +168,17 @@ export default function App() {
     } catch (err) {
       console.error('Unable to load users', err);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken('');
+    setUser(null);
+    setAuthMode('login');
+    setSelectedSpeciesDetail(null);
+    setSelectedSightingDetail(null);
+    setIsLogSightingFormOpen(false);
+    setActiveTab('dashboard');
   };
 
   useEffect(() => {
@@ -308,6 +318,7 @@ export default function App() {
         }} 
         user={user} 
         onOpenAuth={() => setAuthMode('login')} 
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -477,6 +488,14 @@ export default function App() {
                   onSaveSighting={handleSaveSighting} 
                   onClose={() => setActiveTab('surveys')} 
                 />
+              )}
+              {activeTab === 'settings' && (
+                <div className="eco-card" style={{ padding: '2.5rem', textAlign: 'center' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }}>Settings</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                    Account and system settings will be available in a future update.
+                  </p>
+                </div>
               )}
             </>
           )}

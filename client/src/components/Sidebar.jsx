@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard,
   Users, 
@@ -15,10 +15,22 @@ import {
   Image, 
   Volume2, 
   Compass, 
-  Share2 
+  Share2,
+  LogOut
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
+export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onLogout }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleDocClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    }
+    document.addEventListener('click', handleDocClick);
+    return () => document.removeEventListener('click', handleDocClick);
+  }, []);
+
   const monitoringItems = [
     { id: 'surveys', label: 'Surveys', icon: Map },
     { id: 'camera-traps', label: 'Camera Traps', icon: Camera }
@@ -108,8 +120,8 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
         </nav>
       </div>
 
-      {/* User Card */}
-      <div className="user-card" onClick={onOpenAuth} style={{ cursor: 'pointer', marginTop: '1rem' }}>
+      {/* User Card with Settings menu */}
+      <div className="user-card" style={{ cursor: 'default', marginTop: '1rem', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <div className="user-avatar">
             {user ? user.name.charAt(0) : 'R'}
@@ -123,7 +135,29 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
             </div>
           </div>
         </div>
-        <Settings size={15} color="var(--text-muted)" />
+        <button
+          aria-label="Open settings"
+          onClick={(e) => { e.stopPropagation(); setMenuOpen(prev => !prev); }}
+          style={{ background: 'transparent', border: 'none', padding: 6, marginLeft: 6, cursor: 'pointer' }}
+        >
+          <Settings size={15} color="var(--text-muted)" />
+        </button>
+
+        {menuOpen && (
+          <div ref={menuRef} style={{ position: 'absolute', left: 12, bottom: 72, width: 180, background: '#ffffff', border: '1px solid var(--border-light)', borderRadius: 8, boxShadow: '0 6px 20px rgba(0,0,0,0.08)', zIndex: 200 }}>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                if (typeof onLogout === 'function') onLogout();
+              }}
+              className="nav-sub-item"
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.9rem', background: 'transparent', border: 'none', cursor: 'pointer' }}
+            >
+              <LogOut size={16} />
+              <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>Log out</span>
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
