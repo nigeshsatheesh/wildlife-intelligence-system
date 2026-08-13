@@ -150,8 +150,8 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onL
                 setMenuOpen(false);
                 if (typeof onLogout === 'function') onLogout();
               }}
-              className="nav-sub-item"
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.9rem', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              className="nav-sub-item logout-item"
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.9rem', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--accent-red)' }}
             >
               <LogOut size={16} />
               <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>Log out</span>

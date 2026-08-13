@@ -322,6 +322,21 @@ button[type='submit']:disabled {
   color: #4b5563;
 }
 
+/* Logout menu item styles */
+.logout-item {
+  color: var(--accent-red);
+}
+.logout-item svg {
+  color: var(--accent-red);
+}
+.logout-item:hover {
+  background: #fff1f2;
+  color: var(--accent-red);
+}
+.logout-item:hover span {
+  color: var(--accent-red);
+}
+
 /* Alerts card item */
 .alert-row {
   display: flex;
