@@ -42,7 +42,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <img src="/logo.png" alt="Wildlife Intelligence" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 6 }} />
             <div>
-              <div className="logo-text-main">EcoIntelligence</div>
+              <div className="logo-text-main">Wildlife Intelligence System</div>
               <div className="logo-text-sub">ECOLOGICAL INTELLIGENCE</div>
             </div>
           </div>

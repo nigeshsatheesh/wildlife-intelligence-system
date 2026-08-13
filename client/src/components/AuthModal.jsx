@@ -14,7 +14,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault();
     const userData = {
       name: name || (isRegister ? 'Field Researcher' : 'Dr. Sarah Chen'),
-      email: email || 'sarah.chen@ecoguard.org',
+      email: email || 'sarah.chen@wildlife.org',
       role: role
     };
     onLoginSuccess(userData);
@@ -58,7 +58,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             <ShieldAlert size={28} color="#10b981" />
           </div>
           <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#f0fdf4' }}>
-            {isRegister ? 'Register EcoGuard Access' : 'Researcher Authentication'}
+            {isRegister ? 'Register Wildlife Intelligence System Access' : 'Researcher Authentication'}
           </h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
             JWT authentication & role-based security
@@ -92,7 +92,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Email Address:</label>
             <input
               type="email"
-              placeholder="sarah.chen@ecoguard.org"
+              placeholder="sarah.chen@wildlife.org"
               value={email}
               onChange={e => setEmail(e.target.value)}
               style={{

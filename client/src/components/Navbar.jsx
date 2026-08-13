@@ -48,7 +48,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenAuth, onOpenSigh
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <h1 style={{ fontSize: '1.2rem', fontWeight: '700', letterSpacing: '-0.02em', color: '#f0fdf4' }}>EcoGuard</h1>
+              <h1 style={{ fontSize: '1.2rem', fontWeight: '700', letterSpacing: '-0.02em', color: '#f0fdf4' }}>Wildlife Intelligence System</h1>
               <span className="badge badge-telemetry" style={{ fontSize: '0.65rem', padding: '0.15rem 0.4rem' }}>v2.4 AI</span>
             </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Wildlife Intelligence System</p>

@@ -62,7 +62,7 @@ export default function SightingModal({ isOpen, onClose, species, sites, onSaveS
       }
 
       await onSaveSighting(newSightingData);
-      alert('Wildlife sighting record & image successfully uploaded to EcoGuard database!');
+      alert('Wildlife sighting record & image successfully uploaded to Wildlife Intelligence System database!');
       onClose();
     } catch (err) {
       alert('Failed to log sighting: ' + err.message);
@@ -99,7 +99,7 @@ export default function SightingModal({ isOpen, onClose, species, sites, onSaveS
             <h2 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }}>Log Wildlife Sighting</h2>
           </div>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-medium)', marginTop: '0.2rem' }}>
-            Upload specimen photo & log telemetry record into EcoGuard MongoDB database.
+            Upload specimen photo & log telemetry record into Wildlife Intelligence System database.
           </p>
         </div>
 

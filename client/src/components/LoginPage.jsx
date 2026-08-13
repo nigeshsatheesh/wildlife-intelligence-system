@@ -64,7 +64,7 @@ export default function LoginPage({ onLogin, onNavigateRegister }) {
             <img src="/logo.png" alt="Wildlife Intelligence" style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 8 }} />
           </div>
           <h1 style={{ fontSize: '1.35rem', fontWeight: '700', color: '#012d1d', letterSpacing: '-0.01em' }}>
-            Wildlife Population Intelligence
+            Wildlife Intelligence System
           </h1>
           <p style={{ fontSize: '0.85rem', color: '#414844', marginTop: '0.25rem', maxWidth: '280px' }}>
             Secure access to real-time ecological monitoring and analytics.
