@@ -117,19 +117,32 @@ def predict_audio():
         'duration_seconds': round(duration_seconds, 2)
     }
 
-    # Optional species-level prediction. Pool this clip's frame embeddings into
-    # ONE vector, same as train_audio.py does per-clip at inference conceptually
-    # (train_audio.py trains on frames, so we score each frame and pick the
-    # majority-vote / mean-probability class across the clip's frames — more
-    # stable than trusting a single frame).
-    if species_model is not None and embeddings_np.shape[0] > 0:
-        frame_probs = species_model.predict_proba(embeddings_np)  # (num_frames, num_species)
-        mean_probs = frame_probs.mean(axis=0)
-        top_idx = int(np.argmax(mean_probs))
-        response['species_prediction'] = {
-            'label': species_model.classes_[top_idx],
-            'confidence': round(float(mean_probs[top_idx]), 4)
-        }
+    # Species-level prediction (only for species train_audio.py was actually trained on)
+    species_prediction = None
+    if species_model is not None:
+        embeddings_np = embeddings.numpy()  # shape: (num_frames, 1024)
+
+        # Predict per-frame, then average the PROBABILITY distributions across
+        # frames (not the raw embeddings first) — this lets short, distinctive
+        # bursts (like a bird call) contribute a strong vote even when
+        # surrounded by quieter/ambiguous frames, instead of getting diluted
+        # into a blended "average sound" that loses the distinguishing signal.
+        frame_probs = species_model.predict_proba(embeddings_np)  # (num_frames, num_classes)
+        avg_probs = frame_probs.mean(axis=0)
+
+        best_idx = int(np.argmax(avg_probs))
+        best_label = species_model.classes_[best_idx]
+        best_confidence = float(avg_probs[best_idx])
+
+        SPECIES_CONFIDENCE_FLOOR = 0.35
+        if best_confidence >= SPECIES_CONFIDENCE_FLOOR:
+            species_prediction = {
+                'label': str(best_label),
+                'confidence': round(best_confidence, 4)
+            }
+
+    if species_prediction is not None:
+        response['species_prediction'] = species_prediction
 
     return jsonify(response)
 

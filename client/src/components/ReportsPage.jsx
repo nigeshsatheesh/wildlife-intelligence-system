@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layers, CalendarDays, FileText, TrendingDown } from 'lucide-react';
 
-export default function ReportsPage({ analytics = {}, species = [], sightings = [] }) {
+export default function ReportsPage({ analytics = {}, species = [], sightings = [], ecosystemHealth = [] }) {
   const statusCounts = species.reduce((acc, sp) => {
     const key = sp.conservationStatus || 'Healthy';
     acc[key] = (acc[key] || 0) + 1;
@@ -12,12 +12,37 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
     .sort((a, b) => new Date(b.eventDate || b.createdAt) - new Date(a.eventDate || a.createdAt))
     .slice(0, 4);
 
+  const handleDownloadReport = async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch('http://localhost:5000/api/reports/download', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return alert('Failed to generate report');
+
+    const disposition = res.headers.get('Content-Disposition');
+    const match = disposition && disposition.match(/filename=(.+)/);
+    const filename = match ? match[1] : 'wildlife-monitoring-report.pdf';
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-          <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)' }}>Reports & Intelligence</h2>
-          <span className="badge-pill badge-green">Data-driven</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)' }}>Reports & Intelligence</h2>
+            <span className="badge-pill badge-green">Data-driven</span>
+          </div>
+          <button className="btn-new-survey" onClick={handleDownloadReport}>
+            Download Report
+          </button>
         </div>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
           Generated conservation reports using the latest sightings and biodiversity analytics.
@@ -67,6 +92,25 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
             <TrendingDown size={18} color="#2563eb" />
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Time series data available for report generation.</div>
+        </div>
+      </div>
+
+      <div className="eco-card" style={{ padding: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>Ecosystem Health Score</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {ecosystemHealth.map(e => (
+            <div key={e.siteId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0', borderBottom: '1px solid var(--border-subtle)' }}>
+              <div>
+                <div style={{ fontWeight: '700' }}>{e.siteName}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Diversity {e.diversityScore} · Activity {e.activityScore} · Stability {e.conservationStabilityScore}
+                </div>
+              </div>
+              <span className={`badge-pill ${e.statusLabel === 'Excellent' || e.statusLabel === 'Healthy' ? 'badge-green' : 'badge-red'}`}>
+                {e.overallScore} — {e.statusLabel}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 

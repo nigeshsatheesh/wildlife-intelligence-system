@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, MapPin, Trees, Radio, Compass, ShieldCheck } from 'lucide-react';
 
-export default function SitesListPage({ sites, onOpenAddSite }) {
+export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }) {
   const [search, setSearch] = useState('');
 
   const filteredSites = sites.filter(s => 
@@ -106,6 +106,7 @@ export default function SitesListPage({ sites, onOpenAddSite }) {
                 <th style={{ padding: '0.75rem 1rem' }}>Site Name</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Site Code</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Habitat Type</th>
+                <th style={{ padding: '0.75rem 1rem' }}>Habitat Activity</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Protected Area</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Monitoring Device</th>
                 <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Status</th>
@@ -126,6 +127,13 @@ export default function SitesListPage({ sites, onOpenAddSite }) {
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-medium)', fontWeight: '600' }}>
                       <Trees size={14} color="var(--forest-green)" /> {site.habitatType || 'Forest'}
                     </span>
+                  </td>
+                  <td style={{ padding: '0.85rem 1rem' }}>
+                    {habitatData.find(h => h.siteId === site._id) && (
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Activity Index: {habitatData.find(h => h.siteId === site._id).habitatActivityIndex}
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: '0.85rem 1rem', color: 'var(--text-medium)' }}>
                     {site.protectedArea || 'Protected Reserve'}

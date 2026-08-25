@@ -16,7 +16,7 @@ import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-export default function ResearchDashboard({ analytics, sightings, species }) {
+export default function ResearchDashboard({ analytics, sightings, species, population = [] }) {
   const [selectedTimeframe, setSelectedTimeframe] = useState('Last 30 Days');
 
   // Smooth wave graph matching Stitch mock
@@ -223,6 +223,21 @@ export default function ResearchDashboard({ analytics, sightings, species }) {
           </div>
         </div>
 
+      </div>
+
+      <div className="eco-card" style={{ padding: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>Population Trends</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {population.filter(p => p.sightingCount > 0).map(p => (
+            <div key={p.speciesId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border-subtle)' }}>
+              <span style={{ fontWeight: '700' }}>{p.commonName}</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.totalIndividualsObserved} individuals · {p.sitesPresent} site(s)</span>
+              <span className={`badge-pill ${p.trend === 'Declining' ? 'badge-red' : p.trend === 'Increasing' ? 'badge-green' : 'badge-pill'}`}>
+                {p.trend}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Row 3: 3 Metric Summary Cards */}

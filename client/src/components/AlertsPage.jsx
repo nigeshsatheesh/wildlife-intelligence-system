@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle, TrendingDown, ShieldAlert, Layers } from 'lucide-react';
 import { getSpeciesImageUrl } from '../utils/speciesImages';
 
-export default function AlertsPage({ species = [], sightings = [] }) {
+export default function AlertsPage({ species = [], sightings = [], recommendations = [] }) {
   const alertSpecies = species.filter(sp => ['Critical', 'Vulnerable'].includes(sp.conservationStatus));
   const speciesById = new Map(species.map(sp => [sp._id?.toString(), sp]));
 
@@ -74,6 +74,26 @@ export default function AlertsPage({ species = [], sightings = [] }) {
             <Layers size={18} color="#065f46" />
           </div>
           <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Species with the highest vulnerable sighting activity.</div>
+        </div>
+      </div>
+
+      <div className="eco-card" style={{ padding: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>Conservation Recommendations</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {recommendations.filter(r => r.recommendations.length > 0).map(r => (
+            <div key={r.speciesId}>
+              <div style={{ fontWeight: '700', marginBottom: '0.3rem' }}>{r.commonName}</div>
+              {r.recommendations.map((rec, i) => (
+                <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', padding: '0.5rem', background: '#f9fafb', borderRadius: '8px', marginBottom: '0.35rem' }}>
+                  <span className={`badge-pill ${rec.priority === 'High' ? 'badge-red' : 'badge-pill'}`} style={{ flexShrink: 0 }}>{rec.priority}</span>
+                  <div>
+                    <div style={{ fontSize: '0.85rem' }}>{rec.action}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{rec.reason}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 

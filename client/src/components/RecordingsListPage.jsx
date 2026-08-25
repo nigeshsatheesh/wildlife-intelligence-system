@@ -84,6 +84,7 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
               <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                 <th style={{ padding: '0.75rem 1rem' }}>Recording</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Top Detected Event</th>
+                <th style={{ padding: '0.75rem 1rem' }}>Species Prediction</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Category</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Site / Locality</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Event Date</th>
@@ -93,7 +94,7 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
             <tbody>
               {filteredRecordings.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No bioacoustic recordings logged yet.
                   </td>
                 </tr>
@@ -115,6 +116,28 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
 
                     <td style={{ padding: '0.75rem 1rem' }}>
                       <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>{rec.topLabel || 'Unclassified'}</div>
+                    </td>
+
+                    <td style={{ padding: '0.75rem 1rem' }}>
+                      {rec.speciesPrediction ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span style={{ fontWeight: '700', color: 'var(--forest-green)', textTransform: 'capitalize' }}>
+                            {rec.speciesPrediction}
+                          </span>
+                          <span style={{
+                            fontSize: '0.65rem', fontWeight: 700,
+                            color: (rec.speciesPredictionConfidence * 100) > 70 ? '#2f855a' : '#b7791f',
+                            background: (rec.speciesPredictionConfidence * 100) > 70 ? '#e8f3ee' : '#fef3d9',
+                            borderRadius: '999px', padding: '0.15rem 0.5rem'
+                          }}>
+                            {(rec.speciesPredictionConfidence * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.8rem' }}>
+                          No species match
+                        </span>
+                      )}
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem' }}>

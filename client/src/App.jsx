@@ -118,18 +118,26 @@ export default function App() {
   const [recordings, setRecordings] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [users, setUsers] = useState([]);
+  const [populationData, setPopulationData] = useState([]);
+  const [habitatData, setHabitatData] = useState([]);
+  const [conservationRecs, setConservationRecs] = useState([]);
+  const [ecosystemHealth, setEcosystemHealth] = useState([]);
 
   // Fetch API data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setDataLoadError(null);
-        const [spRes, stRes, sgRes, anRes, recRes] = await Promise.all([
+        const [spRes, stRes, sgRes, anRes, recRes, popRes, habRes, conRes, ecoRes] = await Promise.all([
           fetch(`${API_BASE}/species`),
           fetch(`${API_BASE}/sites`),
           fetch(`${API_BASE}/sightings`),
           fetch(`${API_BASE}/analytics`),
-          fetch(`${API_BASE}/recordings`)
+          fetch(`${API_BASE}/recordings`),
+          fetch(`${API_BASE}/analytics/population`),
+          fetch(`${API_BASE}/analytics/habitat`),
+          fetch(`${API_BASE}/analytics/conservation-recommendations`),
+          fetch(`${API_BASE}/analytics/ecosystem-health`)
         ]);
 
         if (spRes.ok && stRes.ok && sgRes.ok && anRes.ok) {
@@ -143,6 +151,10 @@ export default function App() {
           if (sgData.length) setSightings(sgData);
           setAnalytics(anData);
         }
+        if (popRes.ok) setPopulationData((await popRes.json()).population);
+        if (habRes.ok) setHabitatData((await habRes.json()).habitat);
+        if (conRes.ok) setConservationRecs((await conRes.json()).recommendations);
+        if (ecoRes.ok) setEcosystemHealth((await ecoRes.json()).ecosystemHealth);
         if (recRes.ok) {
           const recData = await recRes.json();
           setRecordings(recData);
@@ -432,7 +444,7 @@ export default function App() {
                 user?.role === 'Admin' ? (
                   <AdminDashboard analytics={analytics} species={species} sites={sites} sightings={sightings} users={users} />
                 ) : (
-                  <ResearchDashboard analytics={analytics} sightings={sightings} species={species} />
+                  <ResearchDashboard analytics={analytics} sightings={sightings} species={species} population={populationData} />
                 )
               )}
 
@@ -441,11 +453,11 @@ export default function App() {
               )}
 
               {activeTab === 'alerts' && (
-                <AlertsPage species={species} sightings={sightings} />
+                <AlertsPage species={species} sightings={sightings} recommendations={conservationRecs} />
               )}
 
               {activeTab === 'reports' && (
-                <ReportsPage analytics={analytics} species={species} sightings={sightings} />
+                <ReportsPage analytics={analytics} species={species} sightings={sightings} ecosystemHealth={ecosystemHealth} />
               )}
 
               {/* Sightings / Surveys Listing Page (Page 10) */}
@@ -487,6 +499,7 @@ export default function App() {
                 <SitesListPage 
                   sites={sites} 
                   onOpenAddSite={() => { setEditingSiteData(null); setIsSiteModalOpen(true); }} 
+                  habitatData={habitatData}
                 />
               )}
 

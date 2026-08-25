@@ -16,8 +16,73 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve static uploaded files (images, audio)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Serve raw dataset images so the client can reference them directly
 app.use('/raw-images', express.static(path.join(__dirname, '..', 'data', 'raw-images')));
+
+// Reports
+app.use('/api/reports', require('./routes/reportRoutes'));
+
+app.get('/api/analytics/population', async (req, res) => {
+  try {
+    const SpeciesModel = require('./models/Species');
+    const SightingModel = require('./models/Sighting');
+
+    const speciesList = isMongoConnected ? await SpeciesModel.find() : memoryDb.species;
+    const sightingsList = isMongoConnected ? await SightingModel.find() : memoryDb.sightings;
+
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const population = speciesList.map(sp => {
+      const speciesSightings = sightingsList.filter(sg => {
+        const sgSpeciesId = sg.species?._id?.toString() || sg.species?.toString();
+        return sgSpeciesId === sp._id.toString();
+      });
+
+      const totalIndividuals = speciesSightings.reduce((sum, sg) => sum + (sg.individualCount || 1), 0);
+      const sightingCount = speciesSightings.length;
+
+      const thisMonthIndividuals = speciesSightings
+        .filter(sg => new Date(sg.eventDate) >= startOfThisMonth)
+        .reduce((sum, sg) => sum + (sg.individualCount || 1), 0);
+      const lastMonthIndividuals = speciesSightings
+        .filter(sg => new Date(sg.eventDate) >= startOfLastMonth && new Date(sg.eventDate) < startOfThisMonth)
+        .reduce((sum, sg) => sum + (sg.individualCount || 1), 0);
+
+      let growthRate = null;
+      let trend = 'Insufficient data';
+      if (lastMonthIndividuals > 0) {
+        growthRate = parseFloat((((thisMonthIndividuals - lastMonthIndividuals) / lastMonthIndividuals) * 100).toFixed(1));
+        if (growthRate > 10) trend = 'Increasing';
+        else if (growthRate < -10) trend = 'Declining';
+        else trend = 'Stable';
+      } else if (thisMonthIndividuals > 0) {
+        trend = 'New activity this month';
+      }
+
+      const siteIds = new Set(
+        speciesSightings.map(sg => sg.monitoringSite?._id?.toString() || sg.monitoringSite?.toString()).filter(Boolean)
+      );
+
+      return {
+        speciesId: sp._id,
+        commonName: sp.commonName,
+        conservationStatus: sp.conservationStatus,
+        totalIndividualsObserved: totalIndividuals,
+        sightingCount,
+        sitesPresent: siteIds.size,
+        growthRate,
+        trend
+      };
+    });
+
+    res.json({ population });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // Helper endpoint: return a representative thumbnail for a species label
 const fs = require('fs');
@@ -220,7 +285,222 @@ app.get('/api/analytics', async (req, res) => {
     sightingTrends
   });
 });
+app.get('/api/analytics/habitat', async (req, res) => {
+  try {
+    const MonitoringSiteModel = require('./models/MonitoringSite');
+    const SightingModel = require('./models/Sighting');
 
+    const sitesList = isMongoConnected ? await MonitoringSiteModel.find() : memoryDb.sites;
+    const sightingsList = isMongoConnected ? await SightingModel.find().populate('species') : memoryDb.sightings;
+
+    const habitat = sitesList.map(site => {
+      const siteSightings = sightingsList.filter(sg => {
+        const siteId = sg.monitoringSite?._id?.toString() || sg.monitoringSite?.toString();
+        return siteId === site._id.toString();
+      });
+
+      // Species diversity actually observed at this site
+      const speciesAtSite = {};
+      siteSightings.forEach(sg => {
+        const spId = sg.species?._id?.toString();
+        if (!spId) return;
+        if (!speciesAtSite[spId]) {
+          speciesAtSite[spId] = { commonName: sg.species.commonName, conservationStatus: sg.species.conservationStatus, count: 0 };
+        }
+        speciesAtSite[spId].count += 1;
+      });
+
+      const speciesList = Object.values(speciesAtSite).sort((a, b) => b.count - a.count);
+      const speciesRichness = speciesList.length;
+      const criticalOrVulnerableCount = speciesList.filter(s => ['Critical', 'Vulnerable'].includes(s.conservationStatus)).length;
+
+      // Simple, honestly-labeled heuristic score — NOT a predictive/ML model.
+      // Combines how many different species use this site and how much
+      // recent monitoring activity it has. Real habitat quality would need
+      // vegetation/environmental sensor data this project doesn't have.
+      const activityScore = Math.min(siteSightings.length / 10, 1); // caps at 10 sightings = full score
+      const diversityScore = Math.min(speciesRichness / 8, 1); // caps at 8 species = full score
+      const habitatActivityIndex = parseFloat(((activityScore * 0.5 + diversityScore * 0.5) * 100).toFixed(1));
+
+      return {
+        siteId: site._id,
+        siteName: site.siteName,
+        habitatType: site.habitatType,
+        protectedArea: site.protectedArea,
+        totalSightings: siteSightings.length,
+        speciesRichness,
+        criticalOrVulnerableSpeciesCount: criticalOrVulnerableCount,
+        topSpecies: speciesList.slice(0, 3).map(s => s.commonName),
+        habitatActivityIndex
+      };
+    });
+
+    res.json({ habitat });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+app.get('/api/analytics/conservation-recommendations', async (req, res) => {
+  try {
+    const SpeciesModel = require('./models/Species');
+    const SightingModel = require('./models/Sighting');
+
+    const speciesList = isMongoConnected ? await SpeciesModel.find() : memoryDb.species;
+    const sightingsList = isMongoConnected ? await SightingModel.find() : memoryDb.sightings;
+
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const recommendations = speciesList.map(sp => {
+      const speciesSightings = sightingsList.filter(sg => {
+        const sgSpeciesId = sg.species?._id?.toString() || sg.species?.toString();
+        return sgSpeciesId === sp._id.toString();
+      });
+
+      const totalSightings = speciesSightings.length;
+      const thisMonthCount = speciesSightings.filter(sg => new Date(sg.eventDate) >= startOfThisMonth).length;
+      const lastMonthCount = speciesSightings.filter(sg =>
+        new Date(sg.eventDate) >= startOfLastMonth && new Date(sg.eventDate) < startOfThisMonth
+      ).length;
+
+      const isDeclining = lastMonthCount > 0 && thisMonthCount < lastMonthCount;
+      const isHighRiskStatus = ['Critical', 'Vulnerable'].includes(sp.conservationStatus);
+      const isRarelySighted = totalSightings <= 1;
+
+      const actions = [];
+
+      if (sp.conservationStatus === 'Critical') {
+        actions.push({
+          priority: 'High',
+          action: 'Increase camera trap density and patrol frequency at all sites where this species has been recorded.',
+          reason: `Species is classified as Critical conservation status.`
+        });
+      }
+
+      if (isHighRiskStatus && isDeclining) {
+        actions.push({
+          priority: 'High',
+          action: 'Investigate cause of recent sighting decline — check for habitat disturbance, poaching indicators, or seasonal migration.',
+          reason: `Sightings dropped from ${lastMonthCount} last month to ${thisMonthCount} this month for a ${sp.conservationStatus.toLowerCase()} species.`
+        });
+      }
+
+      if (isHighRiskStatus && isRarelySighted) {
+        actions.push({
+          priority: 'Medium',
+          action: 'Expand monitoring coverage — this species has very limited sighting data despite elevated conservation concern.',
+          reason: `Only ${totalSightings} sighting(s) recorded to date for a ${sp.conservationStatus.toLowerCase()} species.`
+        });
+      }
+
+      if (sp.conservationStatus === 'Healthy' && totalSightings === 0) {
+        actions.push({
+          priority: 'Low',
+          action: 'No monitoring data yet — no action needed unless status changes.',
+          reason: 'No recorded sightings, but species is not currently at elevated risk.'
+        });
+      }
+
+      return {
+        speciesId: sp._id,
+        commonName: sp.commonName,
+        conservationStatus: sp.conservationStatus,
+        totalSightings,
+        recommendations: actions
+      };
+    });
+
+    res.json({ recommendations });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+app.get('/api/analytics/ecosystem-health', async (req, res) => {
+  try {
+    const MonitoringSiteModel = require('./models/MonitoringSite');
+    const SightingModel = require('./models/Sighting');
+
+    const sitesList = isMongoConnected ? await MonitoringSiteModel.find() : memoryDb.sites;
+    const sightingsList = isMongoConnected ? await SightingModel.find().populate('species') : memoryDb.sightings;
+
+    function shannonIndex(sightingsGroup) {
+      const speciesCounts = {};
+      let total = 0;
+      sightingsGroup.forEach(s => {
+        const key = s.species?._id?.toString() || s.species?.toString();
+        if (!key) return;
+        speciesCounts[key] = (speciesCounts[key] || 0) + 1;
+        total += 1;
+      });
+      const speciesRichness = Object.keys(speciesCounts).length;
+      if (total === 0 || speciesRichness === 0) return { evenness: 0, speciesRichness: 0 };
+      let H = 0;
+      Object.values(speciesCounts).forEach(count => {
+        const pi = count / total;
+        H -= pi * Math.log(pi);
+      });
+      const maxH = Math.log(speciesRichness);
+      return { evenness: maxH > 0 ? H / maxH : 0, speciesRichness };
+    }
+
+    const ecosystemHealth = sitesList.map(site => {
+      const siteSightings = sightingsList.filter(sg => {
+        const siteId = sg.monitoringSite?._id?.toString() || sg.monitoringSite?.toString();
+        return siteId === site._id.toString();
+      });
+
+      const { evenness, speciesRichness } = shannonIndex(siteSightings);
+      const diversityScore = evenness * 100; // 0-100
+
+      const activityScore = Math.min(siteSightings.length / 10, 1) * 100; // 0-100
+
+      const speciesAtSite = new Set();
+      let highRiskSightings = 0;
+      siteSightings.forEach(sg => {
+        const spId = sg.species?._id?.toString();
+        if (spId) speciesAtSite.add(spId);
+        if (['Critical', 'Vulnerable'].includes(sg.species?.conservationStatus)) highRiskSightings += 1;
+      });
+      const conservationStabilityScore = siteSightings.length > 0
+        ? 100 - (highRiskSightings / siteSightings.length) * 100
+        : 100; // no data = neutral, not penalized
+
+      // Weights adapted from the original spec's model, reduced to
+      // components with real underlying data (no Environmental Conditions —
+      // that requires sensor data this project doesn't collect).
+      const overallScore = parseFloat((
+        diversityScore * 0.40 +
+        activityScore * 0.35 +
+        conservationStabilityScore * 0.25
+      ).toFixed(1));
+
+      let statusLabel = 'Insufficient data';
+      if (siteSightings.length > 0) {
+        if (overallScore >= 75) statusLabel = 'Excellent';
+        else if (overallScore >= 55) statusLabel = 'Healthy';
+        else if (overallScore >= 35) statusLabel = 'Moderate Concern';
+        else statusLabel = 'Vulnerable';
+      }
+
+      return {
+        siteId: site._id,
+        siteName: site.siteName,
+        diversityScore: parseFloat(diversityScore.toFixed(1)),
+        activityScore: parseFloat(activityScore.toFixed(1)),
+        conservationStabilityScore: parseFloat(conservationStabilityScore.toFixed(1)),
+        overallScore,
+        statusLabel,
+        speciesRichness,
+        totalSightings: siteSightings.length
+      };
+    });
+
+    res.json({ ecosystemHealth });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 app.get('/api/analytics/biodiversity', async (req, res) => {
   try {
     const SightingModel = require('./models/Sighting');
