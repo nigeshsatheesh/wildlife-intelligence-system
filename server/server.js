@@ -23,6 +23,9 @@ app.use('/raw-images', express.static(path.join(__dirname, '..', 'data', 'raw-im
 // Reports
 app.use('/api/reports', require('./routes/reportRoutes'));
 
+//Health Score
+app.use('/api/health-score', require('./routes/healthScoreRoutes'));
+
 app.get('/api/analytics/population', async (req, res) => {
   try {
     const SpeciesModel = require('./models/Species');
