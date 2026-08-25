@@ -14,14 +14,17 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
 
   const handleDownloadReport = async () => {
     const token = localStorage.getItem('token');
-    const res = await fetch('http://localhost:5000/api/reports/download', {
+    if (!token) return alert('Please log in to generate the report.');
+
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const res = await fetch(`${API_BASE}/api/reports/download`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!res.ok) return alert('Failed to generate report');
 
     const disposition = res.headers.get('Content-Disposition');
     const match = disposition && disposition.match(/filename=(.+)/);
-    const filename = match ? match[1] : 'wildlife-monitoring-report.pdf';
+    const filename = match ? match[1].replace(/['"]/g, '') : 'wildlife-monitoring-report.pdf';
 
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);

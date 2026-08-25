@@ -1,13 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Users, TrendingUp, TrendingDown, MapPin, Info } from 'lucide-react';
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 
 const API_BASE = 'http://localhost:5000/api';
+
+function speciesRadius(count, maxCount) {
+  if (!maxCount) return 8;
+  const min = 6, max = 26;
+  return min + (max - min) * (count / maxCount);
+}
+
+function DistributionMap({ species }) {
+  const points = species?.distributionPoints || [];
+
+  if (points.length === 0) {
+    return (
+      <div className="eco-card" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+        No geo-tagged sightings for {species?.commonName || 'this species'} in this period.
+      </div>
+    );
+  }
+
+  const maxCount = Math.max(...points.map(p => p.count));
+  const center = [points[0].latitude, points[0].longitude];
+
+  return (
+    <div className="eco-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <MapContainer center={center} zoom={6} style={{ height: '360px', width: '100%' }} scrollWheelZoom={false}>
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {points.map((p, idx) => (
+          <CircleMarker
+            key={idx}
+            center={[p.latitude, p.longitude]}
+            radius={speciesRadius(p.count, maxCount)}
+            pathOptions={{ color: '#1f4d3d', fillColor: '#2e7d32', fillOpacity: 0.55, weight: 2 }}
+          >
+            <Popup>
+              <strong>{p.siteName}</strong>
+              <br />
+              {p.count} individual{p.count === 1 ? '' : 's'} recorded
+            </Popup>
+          </CircleMarker>
+        ))}
+      </MapContainer>
+    </div>
+  );
+}
 
 export default function PopulationPage() {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [periodDays, setPeriodDays] = useState(90);
+  const [mapSpeciesId, setMapSpeciesId] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -26,6 +74,17 @@ export default function PopulationPage() {
     return () => { cancelled = true; };
   }, [periodDays]);
 
+  const activeSpecies = useMemo(
+    () => metrics ? metrics.speciesMetrics.filter(sp => sp.populationSize > 0) : [],
+    [metrics]
+  );
+
+  useEffect(() => {
+    if (activeSpecies.length > 0 && !activeSpecies.find(sp => sp.speciesId === mapSpeciesId)) {
+      setMapSpeciesId(activeSpecies[0].speciesId);
+    }
+  }, [activeSpecies, mapSpeciesId]);
+
   if (loading) {
     return <div className="eco-card" style={{ padding: '2rem', textAlign: 'center' }}>Loading population data...</div>;
   }
@@ -38,7 +97,7 @@ export default function PopulationPage() {
     );
   }
 
-  const activeSpecies = metrics.speciesMetrics.filter(sp => sp.populationSize > 0);
+  const selectedSpecies = activeSpecies.find(sp => sp.speciesId === mapSpeciesId);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -74,6 +133,24 @@ export default function PopulationPage() {
       {activeSpecies.length === 0 && (
         <div className="eco-card" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
           No sightings recorded in this period yet.
+        </div>
+      )}
+
+      {activeSpecies.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: '800' }}>Species Distribution Map</h3>
+            <select
+              value={mapSpeciesId}
+              onChange={e => setMapSpeciesId(e.target.value)}
+              style={{ padding: '0.5rem 0.8rem', borderRadius: '8px', border: '1px solid var(--border-light)' }}
+            >
+              {activeSpecies.map(sp => (
+                <option key={sp.speciesId} value={sp.speciesId}>{sp.commonName}</option>
+              ))}
+            </select>
+          </div>
+          <DistributionMap species={selectedSpecies} />
         </div>
       )}
 
