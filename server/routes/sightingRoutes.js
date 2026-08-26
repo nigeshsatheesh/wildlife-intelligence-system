@@ -7,6 +7,7 @@ const ctrl = require('../controllers/sightingController');
 router.get('/', ctrl.getAllSightings);
 router.get('/:id', ctrl.getSightingById);
 router.post('/', protect, upload.single('image'), ctrl.createSighting);
+router.post('/classify-preview', protect, upload.single('image'), ctrl.classifyPreview);
 router.put('/:id', protect, ctrl.updateSighting);
 router.delete('/:id', protect, ctrl.deleteSighting);
 

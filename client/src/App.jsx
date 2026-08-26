@@ -18,6 +18,8 @@ import RecordingLogForm from './components/RecordingLogForm';
 import RecordingsListPage from './components/RecordingsListPage';
 import PopulationPage from './components/PopulationPage';
 import HabitatPage from './components/HabitatPage';
+import BiodiversityPage from './components/BiodiversityPage';
+import HealthScorePage from './components/HealthScorePage';
 import { Search, Bell, Plus, UserCheck, Shield } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
@@ -121,14 +123,13 @@ export default function App() {
   const [populationData, setPopulationData] = useState([]);
   const [habitatData, setHabitatData] = useState([]);
   const [conservationRecs, setConservationRecs] = useState([]);
-  const [ecosystemHealth, setEcosystemHealth] = useState([]);
 
   // Fetch API data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setDataLoadError(null);
-        const [spRes, stRes, sgRes, anRes, recRes, popRes, habRes, conRes, ecoRes] = await Promise.all([
+        const [spRes, stRes, sgRes, anRes, recRes, popRes, habRes, conRes] = await Promise.all([
           fetch(`${API_BASE}/species`),
           fetch(`${API_BASE}/sites`),
           fetch(`${API_BASE}/sightings`),
@@ -136,8 +137,7 @@ export default function App() {
           fetch(`${API_BASE}/recordings`),
           fetch(`${API_BASE}/analytics/population`),
           fetch(`${API_BASE}/analytics/habitat`),
-          fetch(`${API_BASE}/analytics/conservation-recommendations`),
-          fetch(`${API_BASE}/analytics/ecosystem-health`)
+          fetch(`${API_BASE}/analytics/conservation-recommendations`)
         ]);
 
         if (spRes.ok && stRes.ok && sgRes.ok && anRes.ok) {
@@ -154,7 +154,6 @@ export default function App() {
         if (popRes.ok) setPopulationData((await popRes.json()).population);
         if (habRes.ok) setHabitatData((await habRes.json()).habitat);
         if (conRes.ok) setConservationRecs((await conRes.json()).recommendations);
-        if (ecoRes.ok) setEcosystemHealth((await ecoRes.json()).ecosystemHealth);
         if (recRes.ok) {
           const recData = await recRes.json();
           setRecordings(recData);
@@ -457,7 +456,7 @@ export default function App() {
               )}
 
               {activeTab === 'reports' && (
-                <ReportsPage analytics={analytics} species={species} sightings={sightings} ecosystemHealth={ecosystemHealth} />
+                <ReportsPage analytics={analytics} species={species} sightings={sightings} />
               )}
 
               {/* Sightings / Surveys Listing Page (Page 10) */}
@@ -490,8 +489,16 @@ export default function App() {
                 />
               )}
 
-              {activeTab === 'biodiversity' && (
+              {activeTab === 'habitat' && (
                 <HabitatPage />
+              )}
+
+              {activeTab === 'biodiversity' && (
+                <BiodiversityPage />
+              )}
+
+              {activeTab === 'health-score' && (
+                <HealthScorePage />
               )}
 
               {/* Monitoring Sites / Camera Traps Listing Page (Page 8) */}

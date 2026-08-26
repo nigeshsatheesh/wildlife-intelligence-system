@@ -40,7 +40,9 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onL
     { id: 'image-analysis', label: 'Image Analysis', icon: Image },
     { id: 'bioacoustics', label: 'Bioacoustics', icon: Volume2 },
     { id: 'population', label: 'Population', icon: Users },
+    { id: 'habitat', label: 'Habitat', icon: Leaf },
     { id: 'biodiversity', label: 'Biodiversity', icon: Award },
+    { id: 'health-score', label: 'Ecosystem Health', icon: HeartPulse },
     { id: 'alerts', label: 'Alerts', icon: Bell },
     { id: 'reports', label: 'Reports', icon: FileText },
     { id: 'settings', label: 'Settings', icon: Settings }

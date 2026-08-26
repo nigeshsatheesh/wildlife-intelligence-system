@@ -20,11 +20,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Serve raw dataset images so the client can reference them directly
 app.use('/raw-images', express.static(path.join(__dirname, '..', 'data', 'raw-images')));
 
-// Reports
-app.use('/api/reports', require('./routes/reportRoutes'));
-
-//Health Score
-app.use('/api/health-score', require('./routes/healthScoreRoutes'));
 
 app.get('/api/analytics/population', async (req, res) => {
   try {
@@ -197,8 +192,14 @@ app.use((req, res, next) => {
     console.log('REQUEST:', req.method, req.url);
     console.log('BODY:', req.body);
     next();
-});
+  });
+  
+// Reports
+app.use('/api/reports', require('./routes/reportRoutes'));
 
+//Health Score
+app.use('/api/health-score', require('./routes/healthScoreRoutes'));
+  
 // Route Modules
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
@@ -415,91 +416,6 @@ app.get('/api/analytics/conservation-recommendations', async (req, res) => {
     });
 
     res.json({ recommendations });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-app.get('/api/analytics/ecosystem-health', async (req, res) => {
-  try {
-    const MonitoringSiteModel = require('./models/MonitoringSite');
-    const SightingModel = require('./models/Sighting');
-
-    const sitesList = isMongoConnected ? await MonitoringSiteModel.find() : memoryDb.sites;
-    const sightingsList = isMongoConnected ? await SightingModel.find().populate('species') : memoryDb.sightings;
-
-    function shannonIndex(sightingsGroup) {
-      const speciesCounts = {};
-      let total = 0;
-      sightingsGroup.forEach(s => {
-        const key = s.species?._id?.toString() || s.species?.toString();
-        if (!key) return;
-        speciesCounts[key] = (speciesCounts[key] || 0) + 1;
-        total += 1;
-      });
-      const speciesRichness = Object.keys(speciesCounts).length;
-      if (total === 0 || speciesRichness === 0) return { evenness: 0, speciesRichness: 0 };
-      let H = 0;
-      Object.values(speciesCounts).forEach(count => {
-        const pi = count / total;
-        H -= pi * Math.log(pi);
-      });
-      const maxH = Math.log(speciesRichness);
-      return { evenness: maxH > 0 ? H / maxH : 0, speciesRichness };
-    }
-
-    const ecosystemHealth = sitesList.map(site => {
-      const siteSightings = sightingsList.filter(sg => {
-        const siteId = sg.monitoringSite?._id?.toString() || sg.monitoringSite?.toString();
-        return siteId === site._id.toString();
-      });
-
-      const { evenness, speciesRichness } = shannonIndex(siteSightings);
-      const diversityScore = evenness * 100; // 0-100
-
-      const activityScore = Math.min(siteSightings.length / 10, 1) * 100; // 0-100
-
-      const speciesAtSite = new Set();
-      let highRiskSightings = 0;
-      siteSightings.forEach(sg => {
-        const spId = sg.species?._id?.toString();
-        if (spId) speciesAtSite.add(spId);
-        if (['Critical', 'Vulnerable'].includes(sg.species?.conservationStatus)) highRiskSightings += 1;
-      });
-      const conservationStabilityScore = siteSightings.length > 0
-        ? 100 - (highRiskSightings / siteSightings.length) * 100
-        : 100; // no data = neutral, not penalized
-
-      // Weights adapted from the original spec's model, reduced to
-      // components with real underlying data (no Environmental Conditions —
-      // that requires sensor data this project doesn't collect).
-      const overallScore = parseFloat((
-        diversityScore * 0.40 +
-        activityScore * 0.35 +
-        conservationStabilityScore * 0.25
-      ).toFixed(1));
-
-      let statusLabel = 'Insufficient data';
-      if (siteSightings.length > 0) {
-        if (overallScore >= 75) statusLabel = 'Excellent';
-        else if (overallScore >= 55) statusLabel = 'Healthy';
-        else if (overallScore >= 35) statusLabel = 'Moderate Concern';
-        else statusLabel = 'Vulnerable';
-      }
-
-      return {
-        siteId: site._id,
-        siteName: site.siteName,
-        diversityScore: parseFloat(diversityScore.toFixed(1)),
-        activityScore: parseFloat(activityScore.toFixed(1)),
-        conservationStabilityScore: parseFloat(conservationStabilityScore.toFixed(1)),
-        overallScore,
-        statusLabel,
-        speciesRichness,
-        totalSightings: siteSightings.length
-      };
-    });
-
-    res.json({ ecosystemHealth });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

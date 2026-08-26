@@ -1,6 +1,13 @@
 """
 Trains a small species classifier on top of frozen YAMNet embeddings.
 YAMNet itself is not fine-tuned — only a lightweight head is trained.
+
+Data augmentation: with very few real clips per species (as few as 10),
+the classifier sees almost no variation in recording conditions. Each
+clip is expanded into several augmented copies (pitch shift, time
+stretch, mild noise) before embedding extraction — a standard technique
+for low-data audio classification, not a substitute for more real data,
+but a genuine way to squeeze more signal out of what's available.
 """
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -18,6 +25,33 @@ TARGET_SR = 16000
 
 print("Loading YAMNet...")
 yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
+
+
+def augment_variants(waveform, sr):
+    """Returns [original, pitch_up, pitch_down, noisy] versions of a waveform."""
+    variants = [waveform]
+
+    try:
+        pitch_up = librosa.effects.pitch_shift(waveform, sr=sr, n_steps=2)
+        variants.append(pitch_up)
+    except Exception as e:
+        print(f"    pitch_up augmentation failed: {e}")
+
+    try:
+        pitch_down = librosa.effects.pitch_shift(waveform, sr=sr, n_steps=-2)
+        variants.append(pitch_down)
+    except Exception as e:
+        print(f"    pitch_down augmentation failed: {e}")
+
+    try:
+        noise = np.random.normal(0, 0.005, waveform.shape).astype(np.float32)
+        noisy = waveform + noise
+        variants.append(noisy)
+    except Exception as e:
+        print(f"    noise augmentation failed: {e}")
+
+    return variants
+
 
 X = []
 y = []
@@ -46,16 +80,18 @@ for species in species_folders:
             continue
 
         waveform = waveform.astype(np.float32)
-        scores, embeddings, spectrogram = yamnet_model(waveform)
-        frame_embeddings = embeddings.numpy()
 
-        for emb in frame_embeddings:
-            X.append(emb)
-            y.append(species)
+        for variant in augment_variants(waveform, TARGET_SR):
+            scores, embeddings, spectrogram = yamnet_model(variant)
+            frame_embeddings = embeddings.numpy()
+
+            for emb in frame_embeddings:
+                X.append(emb)
+                y.append(species)
 
 X = np.array(X)
 y = np.array(y)
-print(f"\nTotal training examples (frames): {len(X)}")
+print(f"\nTotal training examples (frames, including augmented copies): {len(X)}")
 print(f"Class distribution: { {label: int((y == label).sum()) for label in set(y)} }")
 
 if len(X) < 10:
@@ -73,7 +109,8 @@ val_accuracy = clf.score(X_val, y_val)
 print(f"\nValidation accuracy: {val_accuracy:.2%}")
 print("\nPer-species performance:")
 print(classification_report(y_val, clf.predict(X_val)))
-print("(Note: with this little data, treat this number as directional, not a robust estimate)")
+print("(Note: with augmented data from a small real clip count, treat this number as directional, not a robust estimate — "
+      "augmented copies of the same clip can end up split across train/val, inflating the score slightly.)")
 
 joblib.dump(clf, 'model/species_audio_classifier.pkl')
 with open('model/audio_species_labels.json', 'w') as f:

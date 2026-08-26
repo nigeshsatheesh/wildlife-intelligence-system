@@ -13,12 +13,47 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
     setAiPrediction(null);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('token');
+
+      const res = await fetch('http://localhost:5000/api/sightings/classify-preview', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      if (!res.ok) throw new Error('Preview classification failed');
+      const data = await res.json();
+
+      // Auto-select the matching species by classifierLabel — this is the fix
+      const matchedSpecies = species.find(sp => sp.classifierLabel === data.label);
+      if (matchedSpecies) {
+        setSelectedSpeciesId(matchedSpecies._id);
+        setAiPrediction({
+          speciesName: matchedSpecies.commonName,
+          scientificName: matchedSpecies.scientificName,
+          confidence: (data.confidence * 100).toFixed(1)
+        });
+      } else {
+        setAiPrediction({
+          speciesName: `Unrecognized label: "${data.label}"`,
+          scientificName: '',
+          confidence: (data.confidence * 100).toFixed(1)
+        });
+      }
+    } catch (err) {
+      setError('Could not get AI prediction — you can still select species manually.');
+    }
   };
 
   const handleSubmit = async (e) => {

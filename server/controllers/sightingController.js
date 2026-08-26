@@ -1,6 +1,8 @@
 const Sighting = require('../models/Sighting');
 const Species = require('../models/Species');
 const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
 
 exports.createSighting = async (req, res) => {
   try {
@@ -16,8 +18,6 @@ exports.createSighting = async (req, res) => {
     // Call ML Microservice at http://localhost:5001/predict if ML service is running and file uploaded
     if (req.file) {
       try {
-        const FormData = require('form-data');
-        const fs = require('fs');
         const formData = new FormData();
         formData.append('image', fs.createReadStream(req.file.path));
 
@@ -154,5 +154,25 @@ exports.deleteSighting = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.classifyPreview = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No image provided' });
+
+    const formData = new FormData();
+    formData.append('image', fs.createReadStream(req.file.path));
+
+    const mlResponse = await axios.post('http://localhost:5001/predict', formData, {
+      headers: formData.getHeaders()
+    });
+
+    res.json({
+      label: mlResponse.data.label,
+      confidence: mlResponse.data.confidence
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Classification service unavailable' });
   }
 };

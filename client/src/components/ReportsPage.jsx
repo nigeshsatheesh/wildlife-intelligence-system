@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layers, CalendarDays, FileText, TrendingDown } from 'lucide-react';
 
-export default function ReportsPage({ analytics = {}, species = [], sightings = [], ecosystemHealth = [] }) {
+export default function ReportsPage({ analytics = {}, species = [], sightings = [] }) {
+  const [healthScore, setHealthScore] = useState(null);
+  const [healthScoreError, setHealthScoreError] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    fetch(`${API_BASE}/api/health-score`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load health score');
+        return res.json();
+      })
+      .then(setHealthScore)
+      .catch(err => setHealthScoreError(err.message));
+  }, []);
+
+  const statusColor = (status) =>
+    status === 'Excellent' || status === 'Healthy' ? 'badge-green' : 'badge-red';
+
   const statusCounts = species.reduce((acc, sp) => {
     const key = sp.conservationStatus || 'Healthy';
     acc[key] = (acc[key] || 0) + 1;
@@ -16,23 +37,27 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
     const token = localStorage.getItem('token');
     if (!token) return alert('Please log in to generate the report.');
 
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    const res = await fetch(`${API_BASE}/api/reports/download`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) return alert('Failed to generate report');
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    try {
+      const res = await fetch(`${API_BASE}/api/reports/download`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return alert('Failed to generate report');
 
-    const disposition = res.headers.get('Content-Disposition');
-    const match = disposition && disposition.match(/filename=(.+)/);
-    const filename = match ? match[1].replace(/['"]/g, '') : 'wildlife-monitoring-report.pdf';
+      const disposition = res.headers.get('Content-Disposition');
+      const match = disposition && disposition.match(/filename=(.+)/);
+      const filename = match ? match[1].replace(/['"]/g, '') : 'wildlife-monitoring-report.pdf';
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Could not reach the server to generate the report. Is the backend running on port 5000?');
+    }
   };
 
   return (
@@ -100,21 +125,40 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
 
       <div className="eco-card" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>Ecosystem Health Score</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {ecosystemHealth.map(e => (
-            <div key={e.siteId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0', borderBottom: '1px solid var(--border-subtle)' }}>
-              <div>
-                <div style={{ fontWeight: '700' }}>{e.siteName}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Diversity {e.diversityScore} · Activity {e.activityScore} · Stability {e.conservationStabilityScore}
-                </div>
-              </div>
-              <span className={`badge-pill ${e.statusLabel === 'Excellent' || e.statusLabel === 'Healthy' ? 'badge-green' : 'badge-red'}`}>
-                {e.overallScore} — {e.statusLabel}
+        {healthScoreError && (
+          <div style={{ fontSize: '0.82rem', color: '#c0392b' }}>{healthScoreError}</div>
+        )}
+        {!healthScoreError && !healthScore && (
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Loading health score…</div>
+        )}
+        {healthScore && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{healthScore.weightingNote}</div>
+              <span className={`badge-pill ${statusColor(healthScore.status)}`} style={{ flexShrink: 0, marginLeft: '1rem' }}>
+                {healthScore.overallScore} — {healthScore.status}
               </span>
             </div>
-          ))}
-        </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {Object.entries(healthScore.factors).map(([key, f]) => (
+                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.5rem 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <div>
+                    <div style={{ fontWeight: '700', textTransform: 'capitalize' }}>
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                      <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> · weight {f.weight} (spec: {f.specWeight})</span>
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                      {f.score === null ? f.unavailableReason : f.note}
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: '800', flexShrink: 0, marginLeft: '1rem' }}>
+                    {f.score === null ? 'N/A' : f.score}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="eco-card" style={{ padding: '1.5rem' }}>
