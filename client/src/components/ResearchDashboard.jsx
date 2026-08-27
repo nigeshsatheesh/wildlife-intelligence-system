@@ -228,12 +228,12 @@ export default function ResearchDashboard({ analytics, sightings, species, popul
       <div className="eco-card" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>Population Trends</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          {population.filter(p => p.sightingCount > 0).map(p => (
+          {population.filter(p => p.populationSize > 0).map(p => (
             <div key={p.speciesId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border-subtle)' }}>
               <span style={{ fontWeight: '700' }}>{p.commonName}</span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.totalIndividualsObserved} individuals · {p.sitesPresent} site(s)</span>
-              <span className={`badge-pill ${p.trend === 'Declining' ? 'badge-red' : p.trend === 'Increasing' ? 'badge-green' : 'badge-pill'}`}>
-                {p.trend}
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.populationSize} individuals</span>
+              <span className={`badge-pill ${p.growthRate < 0 ? 'badge-red' : p.growthRate > 0 ? 'badge-green' : 'badge-pill'}`}>
+                {p.growthRateLabel}
               </span>
             </div>
           ))}

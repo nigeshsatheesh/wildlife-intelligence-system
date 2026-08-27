@@ -129,11 +129,11 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
                     </span>
                   </td>
                   <td style={{ padding: '0.85rem 1rem' }}>
-                    {habitatData.find(h => h.siteId === site._id) && (
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                        Activity Index: {habitatData.find(h => h.siteId === site._id).habitatActivityIndex}
-                      </span>
-                    )}
+                  {habitatData.find(h => h.siteId === site._id) && (
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      Richness Index: {habitatData.find(h => h.siteId === site._id).richnessIndex} · {habitatData.find(h => h.siteId === site._id).activityLevel}
+                    </span>
+                  )}
                   </td>
                   <td style={{ padding: '0.85rem 1rem', color: 'var(--text-medium)' }}>
                     {site.protectedArea || 'Protected Reserve'}

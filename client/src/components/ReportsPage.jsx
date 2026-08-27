@@ -123,43 +123,25 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
         </div>
       </div>
 
-      <div className="eco-card" style={{ padding: '1.5rem' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>Ecosystem Health Score</h3>
-        {healthScoreError && (
-          <div style={{ fontSize: '0.82rem', color: '#c0392b' }}>{healthScoreError}</div>
-        )}
-        {!healthScoreError && !healthScore && (
-          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Loading health score…</div>
-        )}
-        {healthScore && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{healthScore.weightingNote}</div>
-              <span className={`badge-pill ${statusColor(healthScore.status)}`} style={{ flexShrink: 0, marginLeft: '1rem' }}>
-                {healthScore.overallScore} — {healthScore.status}
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {Object.entries(healthScore.factors).map(([key, f]) => (
-                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.5rem 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <div>
-                    <div style={{ fontWeight: '700', textTransform: 'capitalize' }}>
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
-                      <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}> · weight {f.weight} (spec: {f.specWeight})</span>
-                    </div>
-                    <div style={{ color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                      {f.score === null ? f.unavailableReason : f.note}
-                    </div>
-                  </div>
-                  <div style={{ fontWeight: '800', flexShrink: 0, marginLeft: '1rem' }}>
-                    {f.score === null ? 'N/A' : f.score}
-                  </div>
-                </div>
-              ))}
-            </div>
+      {ecosystemHealth && (
+        <div className="eco-card" style={{ padding: '1.5rem' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>
+            Ecosystem Health Score — <span style={{ color: 'var(--forest-green)' }}>{ecosystemHealth.overallScore} ({ecosystemHealth.status})</span>
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {Object.entries(ecosystemHealth.factors).map(([key, f]) => (
+              <div key={key} style={{ fontSize: '0.8rem' }}>
+                <strong style={{ textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}</strong>
+                {f.score !== null ? ` — ${f.score}/100 (spec weight ${f.specWeight})` : ` — unavailable (${f.unavailableReason})`}
+                <div style={{ color: 'var(--text-muted)' }}>{f.note}</div>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic' }}>
+            {ecosystemHealth.weightingNote}
+          </p>
+        </div>
+      )}
 
       <div className="eco-card" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '1rem' }}>Conservation Status Breakdown</h3>

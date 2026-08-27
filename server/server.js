@@ -20,68 +20,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Serve raw dataset images so the client can reference them directly
 app.use('/raw-images', express.static(path.join(__dirname, '..', 'data', 'raw-images')));
 
-
-app.get('/api/analytics/population', async (req, res) => {
-  try {
-    const SpeciesModel = require('./models/Species');
-    const SightingModel = require('./models/Sighting');
-
-    const speciesList = isMongoConnected ? await SpeciesModel.find() : memoryDb.species;
-    const sightingsList = isMongoConnected ? await SightingModel.find() : memoryDb.sightings;
-
-    const now = new Date();
-    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-
-    const population = speciesList.map(sp => {
-      const speciesSightings = sightingsList.filter(sg => {
-        const sgSpeciesId = sg.species?._id?.toString() || sg.species?.toString();
-        return sgSpeciesId === sp._id.toString();
-      });
-
-      const totalIndividuals = speciesSightings.reduce((sum, sg) => sum + (sg.individualCount || 1), 0);
-      const sightingCount = speciesSightings.length;
-
-      const thisMonthIndividuals = speciesSightings
-        .filter(sg => new Date(sg.eventDate) >= startOfThisMonth)
-        .reduce((sum, sg) => sum + (sg.individualCount || 1), 0);
-      const lastMonthIndividuals = speciesSightings
-        .filter(sg => new Date(sg.eventDate) >= startOfLastMonth && new Date(sg.eventDate) < startOfThisMonth)
-        .reduce((sum, sg) => sum + (sg.individualCount || 1), 0);
-
-      let growthRate = null;
-      let trend = 'Insufficient data';
-      if (lastMonthIndividuals > 0) {
-        growthRate = parseFloat((((thisMonthIndividuals - lastMonthIndividuals) / lastMonthIndividuals) * 100).toFixed(1));
-        if (growthRate > 10) trend = 'Increasing';
-        else if (growthRate < -10) trend = 'Declining';
-        else trend = 'Stable';
-      } else if (thisMonthIndividuals > 0) {
-        trend = 'New activity this month';
-      }
-
-      const siteIds = new Set(
-        speciesSightings.map(sg => sg.monitoringSite?._id?.toString() || sg.monitoringSite?.toString()).filter(Boolean)
-      );
-
-      return {
-        speciesId: sp._id,
-        commonName: sp.commonName,
-        conservationStatus: sp.conservationStatus,
-        totalIndividualsObserved: totalIndividuals,
-        sightingCount,
-        sitesPresent: siteIds.size,
-        growthRate,
-        trend
-      };
-    });
-
-    res.json({ population });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // Helper endpoint: return a representative thumbnail for a species label
 const fs = require('fs');
 app.get('/raw-images/thumbnail/:label', (req, res) => {
@@ -289,61 +227,7 @@ app.get('/api/analytics', async (req, res) => {
     sightingTrends
   });
 });
-app.get('/api/analytics/habitat', async (req, res) => {
-  try {
-    const MonitoringSiteModel = require('./models/MonitoringSite');
-    const SightingModel = require('./models/Sighting');
 
-    const sitesList = isMongoConnected ? await MonitoringSiteModel.find() : memoryDb.sites;
-    const sightingsList = isMongoConnected ? await SightingModel.find().populate('species') : memoryDb.sightings;
-
-    const habitat = sitesList.map(site => {
-      const siteSightings = sightingsList.filter(sg => {
-        const siteId = sg.monitoringSite?._id?.toString() || sg.monitoringSite?.toString();
-        return siteId === site._id.toString();
-      });
-
-      // Species diversity actually observed at this site
-      const speciesAtSite = {};
-      siteSightings.forEach(sg => {
-        const spId = sg.species?._id?.toString();
-        if (!spId) return;
-        if (!speciesAtSite[spId]) {
-          speciesAtSite[spId] = { commonName: sg.species.commonName, conservationStatus: sg.species.conservationStatus, count: 0 };
-        }
-        speciesAtSite[spId].count += 1;
-      });
-
-      const speciesList = Object.values(speciesAtSite).sort((a, b) => b.count - a.count);
-      const speciesRichness = speciesList.length;
-      const criticalOrVulnerableCount = speciesList.filter(s => ['Critical', 'Vulnerable'].includes(s.conservationStatus)).length;
-
-      // Simple, honestly-labeled heuristic score — NOT a predictive/ML model.
-      // Combines how many different species use this site and how much
-      // recent monitoring activity it has. Real habitat quality would need
-      // vegetation/environmental sensor data this project doesn't have.
-      const activityScore = Math.min(siteSightings.length / 10, 1); // caps at 10 sightings = full score
-      const diversityScore = Math.min(speciesRichness / 8, 1); // caps at 8 species = full score
-      const habitatActivityIndex = parseFloat(((activityScore * 0.5 + diversityScore * 0.5) * 100).toFixed(1));
-
-      return {
-        siteId: site._id,
-        siteName: site.siteName,
-        habitatType: site.habitatType,
-        protectedArea: site.protectedArea,
-        totalSightings: siteSightings.length,
-        speciesRichness,
-        criticalOrVulnerableSpeciesCount: criticalOrVulnerableCount,
-        topSpecies: speciesList.slice(0, 3).map(s => s.commonName),
-        habitatActivityIndex
-      };
-    });
-
-    res.json({ habitat });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
 app.get('/api/analytics/conservation-recommendations', async (req, res) => {
   try {
     const SpeciesModel = require('./models/Species');

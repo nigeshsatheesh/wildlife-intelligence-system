@@ -135,9 +135,10 @@ export default function App() {
           fetch(`${API_BASE}/sightings`),
           fetch(`${API_BASE}/analytics`),
           fetch(`${API_BASE}/recordings`),
-          fetch(`${API_BASE}/analytics/population`),
-          fetch(`${API_BASE}/analytics/habitat`),
-          fetch(`${API_BASE}/analytics/conservation-recommendations`)
+          fetch(`${API_BASE}/population`),
+          fetch(`${API_BASE}/habitat`),
+          fetch(`${API_BASE}/analytics/conservation-recommendations`),
+          fetch(`${API_BASE}/health-score`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
         ]);
 
         if (spRes.ok && stRes.ok && sgRes.ok && anRes.ok) {
@@ -151,9 +152,10 @@ export default function App() {
           if (sgData.length) setSightings(sgData);
           setAnalytics(anData);
         }
-        if (popRes.ok) setPopulationData((await popRes.json()).population);
-        if (habRes.ok) setHabitatData((await habRes.json()).habitat);
+        if (popRes.ok) setPopulationData((await popRes.json()).speciesMetrics);
+        if (habRes.ok) setHabitatData((await habRes.json()).siteReports);
         if (conRes.ok) setConservationRecs((await conRes.json()).recommendations);
+        if (healthRes.ok) setEcosystemHealth(await healthRes.json());
         if (recRes.ok) {
           const recData = await recRes.json();
           setRecordings(recData);
