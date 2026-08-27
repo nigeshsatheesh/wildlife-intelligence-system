@@ -1,25 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Layers, CalendarDays, FileText, TrendingDown } from 'lucide-react';
 
-export default function ReportsPage({ analytics = {}, species = [], sightings = [] }) {
-  const [healthScore, setHealthScore] = useState(null);
-  const [healthScoreError, setHealthScoreError] = useState('');
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    fetch(`${API_BASE}/api/health-score`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to load health score');
-        return res.json();
-      })
-      .then(setHealthScore)
-      .catch(err => setHealthScoreError(err.message));
-  }, []);
-
+export default function ReportsPage({ analytics = {}, species = [], sightings = [], ecosystemHealth = null }) {
   const statusColor = (status) =>
     status === 'Excellent' || status === 'Healthy' ? 'badge-green' : 'badge-red';
 

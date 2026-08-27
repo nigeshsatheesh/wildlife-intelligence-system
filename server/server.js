@@ -126,11 +126,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-    console.log('REQUEST:', req.method, req.url);
-    console.log('BODY:', req.body);
-    next();
-  });
+
   
 // Reports
 app.use('/api/reports', require('./routes/reportRoutes'));
@@ -379,10 +375,8 @@ const server = app.listen(PORT, () => {
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-      console.log(`Port ${PORT} occupied, starting on port 5001...`);
-      app.listen(5001, () => {
-          console.log(`Wildlife Intelligence API running on port 5001`);
-      });
+      console.error(`Port ${PORT} is already in use. Please free the port or set a different PORT in your .env file.`);
+      process.exit(1);
   }
   else {
     console.error('Server error:', err.message);

@@ -123,13 +123,14 @@ export default function App() {
   const [populationData, setPopulationData] = useState([]);
   const [habitatData, setHabitatData] = useState([]);
   const [conservationRecs, setConservationRecs] = useState([]);
+  const [ecosystemHealth, setEcosystemHealth] = useState(null);
 
   // Fetch API data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setDataLoadError(null);
-        const [spRes, stRes, sgRes, anRes, recRes, popRes, habRes, conRes] = await Promise.all([
+        const [spRes, stRes, sgRes, anRes, recRes, popRes, habRes, conRes, healthRes] = await Promise.all([
           fetch(`${API_BASE}/species`),
           fetch(`${API_BASE}/sites`),
           fetch(`${API_BASE}/sightings`),
@@ -458,7 +459,7 @@ export default function App() {
               )}
 
               {activeTab === 'reports' && (
-                <ReportsPage analytics={analytics} species={species} sightings={sightings} />
+                <ReportsPage analytics={analytics} species={species} sightings={sightings} ecosystemHealth={ecosystemHealth} />
               )}
 
               {/* Sightings / Surveys Listing Page (Page 10) */}
