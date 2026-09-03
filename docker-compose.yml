@@ -1,0 +1,48 @@
+services:
+  ml-image:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile.image
+    ports:
+      - "5001:5001"
+    volumes:
+      - tfhub-cache:/app/tfhub_cache
+    restart: unless-stopped
+
+  ml-audio:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile.audio
+    ports:
+      - "5002:5002"
+    volumes:
+      - tfhub-cache:/app/tfhub_cache
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - PORT=5000
+      - JWT_SECRET=${JWT_SECRET}
+      - ML_IMAGE_SERVICE_URL=http://ml-image:5001
+      - ML_AUDIO_SERVICE_URL=http://ml-audio:5002
+    volumes:
+      - ./server/uploads:/app/uploads
+    depends_on:
+      - ml-image
+      - ml-audio
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  tfhub-cache:

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Upload, Sparkles, Save, X } from 'lucide-react';
 
+const API_ROOT = import.meta.env.VITE_API_URL || window.location.origin;
+
 export default function SightingLogForm({ species, sites, onSaveSighting, onClose }) {
   const [selectedSpeciesId, setSelectedSpeciesId] = useState(species[0]?._id || '');
   const [selectedSiteId, setSelectedSiteId] = useState(sites[0]?._id || '');
@@ -26,7 +28,7 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
       formData.append('image', file);
       const token = localStorage.getItem('token');
 
-      const res = await fetch('http://localhost:5000/api/sightings/classify-preview', {
+      const res = await fetch(`${API_ROOT}/api/sightings/classify-preview`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -82,7 +84,7 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
       }
 
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/sightings', {
+      const res = await fetch(`${API_ROOT}/api/sightings`, {
         method: 'POST',
         headers: {
           Authorization: token ? `Bearer ${token}` : ''

@@ -19,7 +19,7 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
     const token = localStorage.getItem('token');
     if (!token) return alert('Please log in to generate the report.');
 
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const API_BASE = import.meta.env.VITE_API_URL || window.location.origin;
     try {
       const res = await fetch(`${API_BASE}/api/reports/download`, {
         headers: { Authorization: `Bearer ${token}` }

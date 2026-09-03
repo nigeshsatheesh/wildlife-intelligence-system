@@ -37,7 +37,7 @@ exports.createRecording = async (req, res) => {
       const formData = new FormData();
       formData.append('audio', fs.createReadStream(req.file.path));
 
-      const mlRes = await axios.post('http://localhost:5002/predict-audio', formData, {
+      const mlRes = await axios.post(`${process.env.ML_AUDIO_SERVICE_URL || 'http://localhost:5002'}/predict-audio`, formData, {
         headers: formData.getHeaders(),
         timeout: 15000
       });
@@ -75,6 +75,8 @@ exports.createRecording = async (req, res) => {
     }
 
     const top = detectedEvents[0];
+    const normalizedSpeciesPrediction = speciesClassifierLabel || null;
+    const normalizedSpeciesConfidence = typeof speciesClassifierConfidence === 'number' ? speciesClassifierConfidence : null;
 
     const recordingData = {
       ...req.body,
@@ -86,6 +88,8 @@ exports.createRecording = async (req, res) => {
       detectedEvents,
       topLabel: top.label,
       topConfidence: top.confidence,
+      speciesPrediction: normalizedSpeciesPrediction,
+      speciesPredictionConfidence: normalizedSpeciesConfidence,
       speciesClassifierLabel,
       speciesClassifierConfidence,
       durationSeconds,

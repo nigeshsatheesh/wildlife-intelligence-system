@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Upload, Sparkles, Save, X, Music } from 'lucide-react';
 
+const API_ROOT = import.meta.env.VITE_API_URL || window.location.origin;
+
 const CATEGORY_COLORS = {
   'Bird Call': '#2f855a',
   'Mammal Vocalization': '#b7791f',
@@ -52,7 +54,7 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
       }
 
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/recordings', {
+      const res = await fetch(`${API_ROOT}/api/recordings`, {
         method: 'POST',
         headers: {
           Authorization: token ? `Bearer ${token}` : ''

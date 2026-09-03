@@ -34,6 +34,15 @@ const recordingSchema = new mongoose.Schema({
     type: Number,
     max: 1
   },
+  // Compatibility aliases used by the UI and API payloads. Keep both variants so
+  // older recordings and newer classifier responses can be displayed consistently.
+  speciesPrediction: {
+    type: String
+  },
+  speciesPredictionConfidence: {
+    type: Number,
+    max: 1
+  },
   // Populated only when the optional species-level classifier (train_audio.py)
   // is loaded in the audio ML service. Distinct from topLabel/topConfidence,
   // which come from generic YAMNet AudioSet categories.

@@ -1,4 +1,4 @@
-const SERVER_ORIGIN = 'http://localhost:5000';
+const SERVER_ORIGIN = import.meta.env.VITE_API_URL || window.location.origin;
 
 export function resolveImageUrl(imageUrl) {
   if (!imageUrl) return null;

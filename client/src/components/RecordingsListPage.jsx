@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Search, MapPin, Music } from 'lucide-react';
 
+const API_ROOT = import.meta.env.VITE_API_URL || window.location.origin;
+
 const CATEGORY_COLORS = {
   'Bird Call': '#2f855a',
   'Mammal Vocalization': '#b7791f',
@@ -110,7 +112,7 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
                         <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#e8f3ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Music size={16} color="var(--forest-green)" />
                         </div>
-                        <audio controls src={`http://localhost:5000${rec.audioUrl}`} style={{ height: '30px', maxWidth: '160px' }} />
+                        <audio controls src={`${API_ROOT}${rec.audioUrl}`} style={{ height: '30px', maxWidth: '160px' }} />
                       </div>
                     </td>
 
@@ -119,18 +121,18 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem' }}>
-                      {rec.speciesPrediction ? (
+                      {rec.speciesClassifierLabel ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                           <span style={{ fontWeight: '700', color: 'var(--forest-green)', textTransform: 'capitalize' }}>
-                            {rec.speciesPrediction}
+                            {rec.speciesClassifierLabel}
                           </span>
                           <span style={{
                             fontSize: '0.65rem', fontWeight: 700,
-                            color: (rec.speciesPredictionConfidence * 100) > 70 ? '#2f855a' : '#b7791f',
-                            background: (rec.speciesPredictionConfidence * 100) > 70 ? '#e8f3ee' : '#fef3d9',
+                            color: (rec.speciesClassifierConfidence * 100) > 70 ? '#2f855a' : '#b7791f',
+                            background: (rec.speciesClassifierConfidence * 100) > 70 ? '#e8f3ee' : '#fef3d9',
                             borderRadius: '999px', padding: '0.15rem 0.5rem'
                           }}>
-                            {(rec.speciesPredictionConfidence * 100).toFixed(1)}%
+                            {(rec.speciesClassifierConfidence * 100).toFixed(1)}%
                           </span>
                         </div>
                       ) : (

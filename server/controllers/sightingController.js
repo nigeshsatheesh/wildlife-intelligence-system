@@ -15,13 +15,15 @@ exports.createSighting = async (req, res) => {
     let classifierConfidence = req.body.classifierConfidence ? Number(req.body.classifierConfidence) : undefined;
     let matchedSpeciesDoc = null; // will hold the real species matched to the AI prediction
 
-    // Call ML Microservice at http://localhost:5001/predict if ML service is running and file uploaded
+    // Call ML Microservice if an image was uploaded — real inference only, no fake fallback.
+    // If the service is down and no classifierPrediction was already supplied manually,
+    // we tell the user honestly instead of inventing a result.
     if (req.file) {
       try {
         const formData = new FormData();
         formData.append('image', fs.createReadStream(req.file.path));
 
-        const mlRes = await axios.post('http://localhost:5001/predict', formData, {
+        const mlRes = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL || 'http://localhost:5001'}/predict`, formData, {
           headers: formData.getHeaders(),
           timeout: 3000
         });
@@ -37,12 +39,13 @@ exports.createSighting = async (req, res) => {
           }
         }
       } catch (mlErr) {
-        // Fallback classifier simulation if ML service not running
         if (!classifierPrediction) {
-          const sampleLabels = ['Panthera tigris', 'Loxodonta africana', 'Aquila chrysaetos', 'Canis lupus'];
-          classifierPrediction = sampleLabels[Math.floor(Math.random() * sampleLabels.length)];
-          classifierConfidence = 0.94;
+          return res.status(503).json({
+            message: 'Image classification service is unavailable. Make sure the image ML service is running on port 5001.',
+            detail: mlErr.message
+          });
         }
+        // A classifierPrediction was already supplied manually — proceed without AI classification.
       }
     }
 
@@ -164,7 +167,7 @@ exports.classifyPreview = async (req, res) => {
     const formData = new FormData();
     formData.append('image', fs.createReadStream(req.file.path));
 
-    const mlResponse = await axios.post('http://localhost:5001/predict', formData, {
+    const mlResponse = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL || 'http://localhost:5001'}/predict`, formData, {
       headers: formData.getHeaders()
     });
 

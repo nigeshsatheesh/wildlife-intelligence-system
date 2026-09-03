@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Users, TrendingUp, TrendingDown, MapPin, Info } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
 function speciesRadius(count, maxCount) {
   if (!maxCount) return 8;

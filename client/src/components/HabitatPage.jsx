@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Leaf, MapPin, AlertCircle, Activity } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
 const activityColor = {
   'Active': '#2e7d32',

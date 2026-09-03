@@ -20,9 +20,11 @@ import PopulationPage from './components/PopulationPage';
 import HabitatPage from './components/HabitatPage';
 import BiodiversityPage from './components/BiodiversityPage';
 import HealthScorePage from './components/HealthScorePage';
+import ConservationOfficerDashboard from './components/ConservationOfficerDashboard';
+import ForestDepartmentDashboard from './components/ForestDepartmentDashboard';
 import { Search, Bell, Plus, UserCheck, Shield } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
 const defaultSpecies = [
   { _id: 's1', commonName: 'Bengal Tiger', scientificName: 'Panthera tigris', category: 'Mammal', classifierLabel: 'tiger', conservationStatus: 'Critical', imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=600&q=80' },
@@ -92,6 +94,7 @@ const defaultSightings = [
 ];
 
 export default function App() {
+  const roleCycle = ['Researcher', 'Conservation Officer', 'Forest Department Officer', 'Admin'];
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register' | 'authenticated'
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -353,7 +356,7 @@ export default function App() {
             
             {/* Role Switcher Badge */}
             <button
-              onClick={() => setUser(prev => ({ ...prev, role: prev.role === 'Admin' ? 'Researcher' : 'Admin' }))}
+              onClick={() => setUser(prev => ({ ...prev, role: roleCycle[(roleCycle.indexOf(prev.role) + 1) % roleCycle.length] }))}
               style={{
                 background: '#ffffff',
                 border: '1px solid var(--border-light)',
@@ -445,11 +448,14 @@ export default function App() {
               {(activeTab === 'dashboard') && (
                 user?.role === 'Admin' ? (
                   <AdminDashboard analytics={analytics} species={species} sites={sites} sightings={sightings} users={users} />
+                ) : user?.role === 'Conservation Officer' ? (
+                  <ConservationOfficerDashboard analytics={analytics} species={species} recommendations={conservationRecs} />
+                ) : user?.role === 'Forest Department Officer' ? (
+                  <ForestDepartmentDashboard sites={sites} sightings={sightings} species={species} />
                 ) : (
                   <ResearchDashboard analytics={analytics} sightings={sightings} species={species} population={populationData} />
                 )
               )}
-
               {activeTab === 'population' && (
                 <PopulationPage />
               )}
@@ -526,7 +532,7 @@ export default function App() {
                 <div className="eco-card" style={{ padding: '2.5rem', textAlign: 'center' }}>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-dark)' }}>Settings</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                    Account and system settings will be available in a future update.
+                    No system settings available.
                   </p>
                 </div>
               )}

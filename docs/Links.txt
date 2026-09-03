@@ -1,0 +1,5 @@
+Frontend: http://localhost
+Backend: http://localhost:5000
+ML services:
+Image service: http://localhost:5001
+Audio service: http://localhost:5002
