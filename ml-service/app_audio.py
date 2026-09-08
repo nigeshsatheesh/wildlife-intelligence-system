@@ -35,6 +35,7 @@ import csv
 import io
 import json
 import warnings
+from typing import Any, Optional, List
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
@@ -44,34 +45,35 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 try:
-    import tensorflow as tf
+    import tensorflow as tf  # type: ignore
 except ImportError as e:
     sys.exit(f"Import Error: TensorFlow missing ({e}). Activate virtual environment.")
 
 try:
-    import tensorflow_hub as hub
+    import tensorflow_hub as hub  # type: ignore
 except ImportError as e:
     sys.exit(f"Import Error: tensorflow_hub missing ({e}). Activate virtual environment.")
 
 try:
-    import librosa
+    import librosa  # type: ignore
+    import librosa.effects  # type: ignore
 except ImportError as e:
     sys.exit(f"Import Error: librosa missing ({e}). Activate virtual environment.")
 
 import numpy as np
-import joblib
+import joblib  # type: ignore
 
 app = Flask(__name__)
 CORS(app)
 
 print("Loading YAMNet model from TensorFlow Hub...")
 try:
-    yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
+    yamnet_model: Any = hub.load('https://tfhub.dev/google/yamnet/1')
 except Exception as e:
     sys.exit(f"Error loading YAMNet model: {e}")
 
 class_map_path = yamnet_model.class_map_path().numpy().decode('utf-8')
-class_names = []
+class_names: List[str] = []
 with tf.io.gfile.GFile(class_map_path) as f:
     reader = csv.DictReader(f)
     for row in reader:
@@ -91,37 +93,41 @@ CHUNK_SAMPLES = int(PERCH_SR * CHUNK_SECONDS)  # 160000
 # --- Optional species-level classifier (trained via train_audio.py) ---
 SPECIES_MODEL_PATH = 'model/species_audio_classifier.pkl'
 SPECIES_LABELS_PATH = 'model/audio_species_labels.json'
-species_model = None
-species_labels = []
-perch_infer = None
-PERCH_INPUT_KEY = None
+species_model: Any = None
+species_labels: List[str] = []
+perch_infer: Any = None
+PERCH_INPUT_KEY: Optional[str] = None
 
 if os.path.exists(SPECIES_MODEL_PATH) and os.path.exists(SPECIES_LABELS_PATH):
     try:
         species_model = joblib.load(SPECIES_MODEL_PATH)
-        with open(SPECIES_LABELS_PATH) as f:
+        with open(SPECIES_LABELS_PATH, encoding='utf-8') as f:
             species_labels = json.load(f)
         print(f"Species-level audio classifier loaded. Classes: {species_labels}")
 
         print("Loading Perch 2.0 model for species-classifier embeddings "
               "(downloads from Kaggle on first run, may take a minute)...")
-        perch_model = hub.load(PERCH_URL)
+        perch_model: Any = hub.load(PERCH_URL)
         perch_infer = perch_model.signatures.get(
             "serving_default", next(iter(perch_model.signatures.values()))
         )
-        PERCH_INPUT_KEY = list(perch_infer.structured_input_signature[1].keys())[0]
+        if perch_infer is not None and hasattr(perch_infer, 'structured_input_signature'):
+            sig_dict = perch_infer.structured_input_signature[1]
+            if isinstance(sig_dict, dict) and len(sig_dict) > 0:
+                PERCH_INPUT_KEY = list(sig_dict.keys())[0]
         print(f"Perch loaded. Input key: '{PERCH_INPUT_KEY}'")
     except Exception as e:
         print(f"Found species classifier files but failed to load them or Perch ({e}). "
               f"Continuing with generic YAMNet detection only.")
         species_model = None
         perch_infer = None
+        PERCH_INPUT_KEY = None
 else:
     print("No trained species-level audio classifier found (run train_audio.py to add one). "
           "Continuing with generic YAMNet detection only.")
 
 
-def chunk_waveform(waveform, chunk_samples=CHUNK_SAMPLES):
+def chunk_waveform(waveform: np.ndarray, chunk_samples: int = CHUNK_SAMPLES) -> List[np.ndarray]:
     """Splits into non-overlapping chunk_samples-length chunks, zero-padding
     the final (and only, if the clip is short) chunk so every chunk is a
     consistent length for Perch. Must match train_audio.py exactly, or
@@ -137,16 +143,29 @@ def chunk_waveform(waveform, chunk_samples=CHUNK_SAMPLES):
     return chunks
 
 
-def embed_chunk(chunk):
-    """Runs one 5s/32kHz chunk through Perch, returns the 1536-dim pooled
-    embedding vector. Must match train_audio.py's embed_chunk exactly."""
-    batch = tf.constant(chunk[np.newaxis, :], dtype=tf.float32)  # (1, 160000)
-    out = perch_infer(**{PERCH_INPUT_KEY: batch})
-    return out['embedding'].numpy()[0]  # (1536,)
+def embed_chunk(chunk: np.ndarray) -> np.ndarray:
+    """Runs one 5s/32kHz chunk through Perch + YAMNet, returning the 2560-dim
+    concatenated embedding vector (1024 YAMNet + 1536 Perch). Must match train_audio.py's
+    combined_embedding exactly."""
+    if perch_infer is None or PERCH_INPUT_KEY is None:
+        raise RuntimeError("Perch model is not loaded.")
+    # Perch embedding (native 32kHz)
+    perch_batch = tf.constant(chunk[np.newaxis, :], dtype=tf.float32)
+    perch_out = perch_infer(**{str(PERCH_INPUT_KEY): perch_batch})
+    perch_emb = perch_out['embedding'].numpy()[0]  # (1536,)
+
+    # YAMNet embedding: resample the SAME chunk to 16kHz, mean-pool frames
+    chunk_16k = librosa.resample(chunk, orig_sr=PERCH_SR, target_sr=TARGET_SR)
+    _, yamnet_frames, _ = yamnet_model(chunk_16k)
+    yamnet_emb = yamnet_frames.numpy().mean(axis=0)  # (1024,)
+
+    return np.concatenate([yamnet_emb, perch_emb])  # (2560,)
+
 
 
 @app.route('/predict-audio', methods=['POST'])
 def predict_audio():
+    """Endpoint for bioacoustic recognition from uploaded audio file."""
     if 'audio' not in request.files:
         return jsonify({'error': 'No audio file provided'}), 400
 
@@ -154,7 +173,7 @@ def predict_audio():
     audio_bytes = file.read()  # read once, reused for both YAMNet (16kHz) and Perch (32kHz) decoding
 
     try:
-        waveform, sr = librosa.load(io.BytesIO(audio_bytes), sr=TARGET_SR, mono=True)
+        waveform, _ = librosa.load(io.BytesIO(audio_bytes), sr=TARGET_SR, mono=True)
     except Exception as e:
         return jsonify({'error': f'Could not decode audio file: {str(e)}'}), 400
 
@@ -164,7 +183,7 @@ def predict_audio():
     duration_seconds = float(len(waveform) / TARGET_SR)
 
     waveform = waveform.astype(np.float32)
-    scores, embeddings, spectrogram = yamnet_model(waveform)
+    scores, _, _ = yamnet_model(waveform)
     scores_np = scores.numpy()
 
     mean_scores = scores_np.mean(axis=0)
@@ -213,8 +232,8 @@ def predict_audio():
             best_label = species_model.classes_[best_idx]
             best_confidence = float(avg_probs[best_idx])
 
-            SPECIES_CONFIDENCE_FLOOR = 0.35
-            if best_confidence >= SPECIES_CONFIDENCE_FLOOR:
+            species_confidence_floor = 0.35
+            if best_confidence >= species_confidence_floor:
                 species_prediction = {
                     'label': str(best_label),
                     'confidence': round(best_confidence, 4)
@@ -228,6 +247,7 @@ def predict_audio():
 
 @app.route('/health', methods=['GET'])
 def health():
+    """Health check endpoint."""
     return jsonify({
         'status': 'ok',
         'model': 'YAMNet + Perch 2.0 (species classifier)',
@@ -238,4 +258,4 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002, debug=False)
+    app.run(host='0.0.0.0', port=5002, debug=False)

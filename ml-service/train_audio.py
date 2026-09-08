@@ -24,32 +24,34 @@ import os
 import sys
 import json
 import warnings
+from typing import Any, List, Optional
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 warnings.filterwarnings('ignore')
 
 try:
-    import tensorflow as tf
+    import tensorflow as tf  # type: ignore
 except ImportError as e:
     sys.exit(f"Import Error: TensorFlow is missing ({e}). Activate your venv first.")
 
 try:
-    import tensorflow_hub as hub
+    import tensorflow_hub as hub  # type: ignore
 except ImportError as e:
     sys.exit(f"Import Error: tensorflow_hub is missing ({e}).")
 
 try:
-    import librosa
+    import librosa  # type: ignore
+    import librosa.effects  # type: ignore
 except ImportError as e:
     sys.exit(f"Import Error: librosa is missing ({e}).")
 
 try:
     import numpy as np
-    import joblib
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.metrics import classification_report, confusion_matrix
-    from sklearn.model_selection import train_test_split
+    import joblib  # type: ignore
+    from sklearn.ensemble import RandomForestClassifier  # type: ignore
+    from sklearn.metrics import classification_report, confusion_matrix  # type: ignore
+    from sklearn.model_selection import train_test_split  # type: ignore
 except ImportError as e:
     sys.exit(f"Import Error: Required dependency missing ({e}).")
 
@@ -63,23 +65,23 @@ MIN_CLIP_SECONDS = 0.5
 
 print("Loading YAMNet model from TensorFlow Hub...")
 try:
-    yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
+    yamnet_model: Any = hub.load('https://tfhub.dev/google/yamnet/1')
 except Exception as e:
     sys.exit(f"Error loading YAMNet model: {e}")
 
 print("Loading Perch 2.0 model (downloads from Kaggle on first run, may take a minute)...")
 try:
-    perch_model = hub.load(PERCH_URL)
-    perch_infer = perch_model.signatures.get(
+    perch_model: Any = hub.load(PERCH_URL)
+    perch_infer: Any = perch_model.signatures.get(
         "serving_default", next(iter(perch_model.signatures.values()))
     )
-    PERCH_INPUT_KEY = list(perch_infer.structured_input_signature[1].keys())[0]
+    PERCH_INPUT_KEY: Optional[str] = list(perch_infer.structured_input_signature[1].keys())[0]
     print(f"Perch loaded. Input key: '{PERCH_INPUT_KEY}'")
 except Exception as e:
     sys.exit(f"Error loading Perch model: {e}")
 
 
-def chunk_waveform_32k(waveform, chunk_samples=CHUNK_SAMPLES_32K):
+def chunk_waveform_32k(waveform: np.ndarray, chunk_samples: int = CHUNK_SAMPLES_32K) -> List[np.ndarray]:
     """Splits a 32kHz waveform into non-overlapping chunk_samples-length
     chunks, zero-padding the final (and only, if the clip is short) chunk."""
     chunks = []
@@ -92,13 +94,15 @@ def chunk_waveform_32k(waveform, chunk_samples=CHUNK_SAMPLES_32K):
     return chunks
 
 
-def combined_embedding(chunk_32k):
+def combined_embedding(chunk_32k: np.ndarray) -> np.ndarray:
     """Given one 5s/32kHz chunk, returns a 2560-dim vector: YAMNet's
     mean-pooled 1024-dim embedding (computed on the SAME audio, resampled
     to 16kHz) concatenated with Perch's 1536-dim embedding."""
+    if perch_infer is None or PERCH_INPUT_KEY is None:
+        raise RuntimeError("Perch model is not loaded.")
     # Perch embedding (native 32kHz)
     perch_batch = tf.constant(chunk_32k[np.newaxis, :], dtype=tf.float32)
-    perch_out = perch_infer(**{PERCH_INPUT_KEY: perch_batch})
+    perch_out = perch_infer(**{str(PERCH_INPUT_KEY): perch_batch})
     perch_emb = perch_out['embedding'].numpy()[0]  # (1536,)
 
     # YAMNet embedding: resample the SAME chunk to 16kHz, mean-pool frames
@@ -109,7 +113,7 @@ def combined_embedding(chunk_32k):
     return np.concatenate([yamnet_emb, perch_emb])  # (2560,)
 
 
-def augment_variants(waveform, sr):
+def augment_variants(waveform: np.ndarray, sr: int) -> List[np.ndarray]:
     """Returns [original, pitch_up, pitch_down, noisy] versions of a waveform."""
     variants = [waveform]
     try:
@@ -128,7 +132,7 @@ def augment_variants(waveform, sr):
     return variants
 
 
-def load_clip(fpath):
+def load_clip(fpath: str) -> Optional[np.ndarray]:
     """Loads, resamples to 32kHz, and trims silence. Returns None if unusable."""
     try:
         waveform, sr = librosa.load(fpath, sr=PERCH_SR, mono=True)
@@ -190,26 +194,26 @@ for i, (fpath, species) in enumerate(zip(val_paths, val_labels)):
         y_val.append(species)
         val_clip_ids.append(i)
 
-X_train, y_train = np.array(X_train), np.array(y_train)
-X_val, y_val = np.array(X_val), np.array(y_val)
-val_clip_ids = np.array(val_clip_ids)
+X_train_arr, y_train_arr = np.array(X_train), np.array(y_train)
+X_val_arr, y_val_arr = np.array(X_val), np.array(y_val)
+val_clip_ids_arr = np.array(val_clip_ids)
 
-print(f"\nTraining examples (chunks, incl. augmented copies): {len(X_train)}")
-print(f"Validation examples (chunks, real clips only): {len(X_val)}")
-print(f"Feature dimensionality: {X_train.shape[1]} (1024 YAMNet + 1536 Perch)")
-print(f"Train class distribution: { {l: int((y_train == l).sum()) for l in set(y_train)} }")
+print(f"\nTraining examples (chunks, incl. augmented copies): {len(X_train_arr)}")
+print(f"Validation examples (chunks, real clips only): {len(X_val_arr)}")
+print(f"Feature dimensionality: {X_train_arr.shape[1]} (1024 YAMNet + 1536 Perch)")
+print(f"Train class distribution: { {l: int((y_train_arr == l).sum()) for l in set(y_train_arr)} }")
 
 clf = RandomForestClassifier(n_estimators=200, max_depth=12, class_weight='balanced', random_state=42)
-clf.fit(X_train, y_train)
+clf.fit(X_train_arr, y_train_arr)
 
 # --- Chunk-level accuracy (each chunk judged independently) ---
-chunk_accuracy = clf.score(X_val, y_val)
+chunk_accuracy = clf.score(X_val_arr, y_val_arr)
 print(f"\nChunk-level validation accuracy: {chunk_accuracy:.2%}")
 print("\nPer-species performance (chunk-level):")
-print(classification_report(y_val, clf.predict(X_val)))
+print(classification_report(y_val_arr, clf.predict(X_val_arr)))
 
-labels_sorted = sorted(set(y_val))
-cm = confusion_matrix(y_val, clf.predict(X_val), labels=labels_sorted)
+labels_sorted = sorted(set(y_val_arr))
+cm = confusion_matrix(y_val_arr, clf.predict(X_val_arr), labels=labels_sorted)
 print("Confusion matrix (rows = actual, columns = predicted):")
 header = "        " + " ".join(f"{l[:6]:>6}" for l in labels_sorted)
 print(header)
@@ -218,15 +222,15 @@ for label, row in zip(labels_sorted, cm):
 
 # --- Clip-level accuracy — the number that matches real production behavior ---
 print("\nComputing clip-level accuracy (matches real app_audio.py prediction behavior)...")
-chunk_probs = clf.predict_proba(X_val)
+chunk_probs = clf.predict_proba(X_val_arr)
 class_order = clf.classes_
 
 clip_true, clip_pred = [], []
-for clip_idx in sorted(set(val_clip_ids)):
-    mask = val_clip_ids == clip_idx
+for clip_idx in sorted(set(val_clip_ids_arr)):
+    mask = val_clip_ids_arr == clip_idx
     avg_probs = chunk_probs[mask].mean(axis=0)
     predicted_label = class_order[np.argmax(avg_probs)]
-    true_label = y_val[mask][0]
+    true_label = y_val_arr[mask][0]
     clip_true.append(true_label)
     clip_pred.append(predicted_label)
 
@@ -237,10 +241,10 @@ print(classification_report(clip_true, clip_pred))
 
 os.makedirs('model', exist_ok=True)
 joblib.dump(clf, 'model/species_audio_classifier.pkl')
-with open('model/audio_species_labels.json', 'w') as f:
-    json.dump(sorted(set(y_train.tolist())), f)
+with open('model/audio_species_labels.json', 'w', encoding='utf-8') as f:
+    json.dump(sorted(set(y_train_arr.tolist())), f)
 
 print("\nSaved model/species_audio_classifier.pkl and model/audio_species_labels.json")
 print("\nNOTE: This model now expects 2560-dim combined embeddings (1024 YAMNet")
 print("+ 1536 Perch), not the 1536-dim Perch-only embeddings from before.")
-print("app_audio.py must be updated to match before restarting the audio service.")
+print("app_audio.py must be updated to match before restarting the audio service.")
