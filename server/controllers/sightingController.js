@@ -23,7 +23,7 @@ exports.createSighting = async (req, res) => {
         const formData = new FormData();
         formData.append('image', fs.createReadStream(req.file.path));
 
-        const mlRes = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL || 'http://localhost:5001'}/predict`, formData, {
+        const mlRes = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL}/predict`, formData, {
           headers: formData.getHeaders(),
           timeout: 3000
         });

@@ -41,3 +41,5 @@ wrapt==2.3.0
 tensorflow-hub==0.16.1
 librosa==0.10.2
 soundfile==0.12.1
+torch==2.14.0
+transformers==5.17.0

@@ -7,10 +7,36 @@ const Sighting = require('./models/Sighting');
 
 dotenv.config();
 
+if (process.env.NODE_ENV === 'production') {
+  const requiredEnv = [
+    'MONGO_URI',
+    'JWT_SECRET',
+    'CORS_ORIGIN',
+    'ML_IMAGE_SERVICE_URL',
+    'ML_AUDIO_SERVICE_URL'
+  ];
+  const missingEnv = requiredEnv.filter((name) => !process.env[name]);
+  if (missingEnv.length > 0) {
+    throw new Error(`Missing required production environment variables: ${missingEnv.join(', ')}`);
+  }
+}
+
 const app = express();
 
 // Global middleware
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origin is not allowed by CORS'));
+  }
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -113,6 +139,13 @@ const memoryDb = {
 };
 
 let isMongoConnected = false;
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    mongoConnected: isMongoConnected
+  });
+});
 
 // Connect Database
 connectDB().then((connected) => {

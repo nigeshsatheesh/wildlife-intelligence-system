@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const connStr = process.env.MONGO_URI || 'mongodb://localhost:27017/wildlife_intelligence';
+    const connStr = process.env.MONGO_URI;
+    if (!connStr) {
+      throw new Error('MONGO_URI is required');
+    }
     await mongoose.connect(connStr);
     console.log('MongoDB connected successfully');
     return true;

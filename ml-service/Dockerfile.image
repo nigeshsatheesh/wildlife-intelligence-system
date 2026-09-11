@@ -11,5 +11,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 ENV TFHUB_CACHE_DIR=/app/tfhub_cache
 
-EXPOSE 5001
+EXPOSE 7860
 CMD ["python", "app.py"]

@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ecoguard_wildlife_secret_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required');
+}
 
 const generateToken = (userId, role) =>
   jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '7d' });

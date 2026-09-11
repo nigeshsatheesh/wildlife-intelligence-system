@@ -37,7 +37,7 @@ exports.createRecording = async (req, res) => {
       const formData = new FormData();
       formData.append('audio', fs.createReadStream(req.file.path));
 
-      const mlRes = await axios.post(`${process.env.ML_AUDIO_SERVICE_URL || 'http://localhost:5002'}/predict-audio`, formData, {
+      const mlRes = await axios.post(`${process.env.ML_AUDIO_SERVICE_URL}/predict-audio`, formData, {
         headers: formData.getHeaders(),
         timeout: 15000
       });
