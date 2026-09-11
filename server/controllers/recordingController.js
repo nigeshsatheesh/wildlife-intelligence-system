@@ -39,7 +39,7 @@ exports.createRecording = async (req, res) => {
 
       const mlRes = await axios.post(`${process.env.ML_AUDIO_SERVICE_URL}/predict-audio`, formData, {
         headers: formData.getHeaders(),
-        timeout: 15000
+        timeout: 120000
       });
 
       if (mlRes.data && Array.isArray(mlRes.data.events)) {
@@ -64,8 +64,13 @@ exports.createRecording = async (req, res) => {
         }
       }
     } catch (mlErr) {
+      console.error('ML request failed', {
+        code: mlErr.code,
+        status: mlErr.response?.status,
+        message: mlErr.message
+      });
       return res.status(503).json({
-        message: 'Bioacoustic analysis service is unavailable. Make sure the audio ML service is running on port 5002.',
+        message: 'Bioacoustic analysis could not complete. Please try again.',
         detail: mlErr.message
       });
     }

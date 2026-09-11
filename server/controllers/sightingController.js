@@ -25,7 +25,7 @@ exports.createSighting = async (req, res) => {
 
         const mlRes = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL}/predict`, formData, {
           headers: formData.getHeaders(),
-          timeout: 3000
+          timeout: 120000
         });
         if (mlRes.data && mlRes.data.label) {
           classifierPrediction = mlRes.data.label;
@@ -39,9 +39,14 @@ exports.createSighting = async (req, res) => {
           }
         }
       } catch (mlErr) {
+        console.error('ML request failed', {
+          code: mlErr.code,
+          status: mlErr.response?.status,
+          message: mlErr.message
+        });
         if (!classifierPrediction) {
           return res.status(503).json({
-            message: 'Image classification service is unavailable. Make sure the image ML service is running on port 5001.',
+            message: 'Image classification could not complete. Please try again.',
             detail: mlErr.message
           });
         }
@@ -204,7 +209,8 @@ exports.classifyPreview = async (req, res) => {
     formData.append('image', fs.createReadStream(req.file.path));
 
     const mlResponse = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL || 'http://localhost:5001'}/predict`, formData, {
-      headers: formData.getHeaders()
+      headers: formData.getHeaders(),
+      timeout: 120000
     });
 
     res.json({
