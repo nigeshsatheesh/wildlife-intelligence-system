@@ -1,0 +1,61 @@
+{
+  "family": "ecoguard-ml",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "2048",
+  "memory": "4096",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/ecoguardMLTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "ml-service",
+      "image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/ecoguard-ml:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5002,
+          "hostPort": 5002,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "PORT",
+          "value": "5002"
+        },
+        {
+          "name": "OMP_NUM_THREADS",
+          "value": "4"
+        },
+        {
+          "name": "MKL_NUM_THREADS",
+          "value": "4"
+        },
+        {
+          "name": "TF_ENABLE_ONEDNN_OPTS",
+          "value": "0"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/ecoguard-ml",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ml-service"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:5002/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3,
+        "startPeriod": 45
+      }
+    }
+  ]
+}

@@ -49,6 +49,41 @@ exports.createSighting = async (req, res) => {
       }
     }
 
+    let lat = parseFloat(req.body.latitude);
+    let lng = parseFloat(req.body.longitude);
+
+    let siteId = req.body.monitoringSite;
+    let siteDoc = null;
+
+    if (req.isMongoConnected) {
+      const MonitoringSite = require('../models/MonitoringSite');
+      if (siteId) {
+        siteDoc = await MonitoringSite.findById(siteId).catch(() => null);
+      }
+      if (!siteDoc) {
+        siteDoc = await MonitoringSite.findOne();
+      }
+    } else {
+      siteDoc = (req.memoryDb.sites || []).find(s => s._id === siteId || s.id === siteId) || (req.memoryDb.sites || [])[0];
+    }
+
+    if (isNaN(lat) || isNaN(lng)) {
+      if (siteDoc && siteDoc.location) {
+        lat = Number(siteDoc.location.latitude) || 0;
+        lng = Number(siteDoc.location.longitude) || 0;
+      } else {
+        lat = 0;
+        lng = 0;
+      }
+    }
+
+    let observedBy = req.user ? (req.user._id || req.user.id) : null;
+    if (!observedBy && req.isMongoConnected) {
+      const User = require('../models/user');
+      const fallbackUser = await User.findOne();
+      if (fallbackUser) observedBy = fallbackUser._id;
+    }
+
     const sightingData = {
       ...req.body,
       // Use the AI-matched species if we found one; otherwise fall back to whatever was submitted
@@ -56,14 +91,15 @@ exports.createSighting = async (req, res) => {
       imageUrl,
       classifierPrediction,
       classifierConfidence: classifierConfidence || 0.95,
-      observedBy: req.user ? req.user._id : undefined,
+      observedBy,
       eventDate: req.body.eventDate || new Date(),
 
       location: {
-        latitude: Number(req.body.latitude),
-        longitude: Number(req.body.longitude)
+        latitude: lat,
+        longitude: lng
       }
     };
+
     if (req.isMongoConnected) {
       const sighting = await Sighting.create(sightingData);
       const populated = await Sighting.findById(sighting._id)

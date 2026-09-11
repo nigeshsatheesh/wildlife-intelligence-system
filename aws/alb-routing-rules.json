@@ -1,0 +1,62 @@
+{
+  "ListenerRules": [
+    {
+      "Priority": 10,
+      "Conditions": [
+        {
+          "Field": "path-pattern",
+          "PathPatternConfig": {
+            "Values": ["/predict-audio", "/api/v1/ml/*"]
+          }
+        }
+      ],
+      "Actions": [
+        {
+          "Type": "forward",
+          "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/ecoguard-ml-tg/1234567890123456"
+        }
+      ]
+    },
+    {
+      "Priority": 20,
+      "Conditions": [
+        {
+          "Field": "path-pattern",
+          "PathPatternConfig": {
+            "Values": ["/api/*"]
+          }
+        }
+      ],
+      "Actions": [
+        {
+          "Type": "forward",
+          "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/ecoguard-backend-tg/6543210987654321"
+        }
+      ]
+    }
+  ],
+  "TargetGroups": {
+    "ecoguard-backend-tg": {
+      "Protocol": "HTTP",
+      "Port": 5000,
+      "VpcId": "vpc-0123456789abcdef0",
+      "TargetType": "ip",
+      "HealthCheckPath": "/api/health",
+      "HealthCheckIntervalSeconds": 30,
+      "HealthCheckTimeoutSeconds": 5,
+      "HealthyThresholdCount": 2,
+      "UnhealthyThresholdCount": 3
+    },
+    "ecoguard-ml-tg": {
+      "Protocol": "HTTP",
+      "Port": 5002,
+      "VpcId": "vpc-0123456789abcdef0",
+      "TargetType": "ip",
+      "HealthCheckPath": "/health",
+      "HealthCheckIntervalSeconds": 30,
+      "HealthCheckTimeoutSeconds": 10,
+      "HealthyThresholdCount": 2,
+      "UnhealthyThresholdCount": 3
+    }
+  }
+}

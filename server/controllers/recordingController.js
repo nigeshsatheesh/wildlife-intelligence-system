@@ -78,11 +78,54 @@ exports.createRecording = async (req, res) => {
     const normalizedSpeciesPrediction = speciesClassifierLabel || null;
     const normalizedSpeciesConfidence = typeof speciesClassifierConfidence === 'number' ? speciesClassifierConfidence : null;
 
+    // Resolve location (latitude & longitude) safely without returning NaN
+    let lat = parseFloat(req.body.latitude);
+    let lng = parseFloat(req.body.longitude);
+
+    let siteId = req.body.monitoringSite;
+    let siteDoc = null;
+
+    if (req.isMongoConnected) {
+      const MonitoringSite = require('../models/MonitoringSite');
+      if (siteId) {
+        siteDoc = await MonitoringSite.findById(siteId).catch(() => null);
+      }
+      if (!siteDoc) {
+        siteDoc = await MonitoringSite.findOne();
+      }
+      if (siteDoc) {
+        siteId = siteDoc._id;
+      }
+    } else {
+      siteDoc = (req.memoryDb.sites || []).find(s => s._id === siteId || s.id === siteId) || (req.memoryDb.sites || [])[0];
+      if (siteDoc) {
+        siteId = siteDoc._id || siteDoc.id;
+      }
+    }
+
+    if (isNaN(lat) || isNaN(lng)) {
+      if (siteDoc && siteDoc.location) {
+        lat = Number(siteDoc.location.latitude) || 0;
+        lng = Number(siteDoc.location.longitude) || 0;
+      } else {
+        lat = 0;
+        lng = 0;
+      }
+    }
+
+    // Resolve recordedBy safely
+    let recordedBy = req.user ? (req.user._id || req.user.id) : null;
+    if (!recordedBy && req.isMongoConnected) {
+      const User = require('../models/user');
+      const fallbackUser = await User.findOne();
+      if (fallbackUser) {
+        recordedBy = fallbackUser._id;
+      }
+    }
+
     const recordingData = {
       ...req.body,
-      // Real species match from the optional species-level audio classifier, if one fired.
-      // Left unset (null) when only generic YAMNet categories were detected — we don't
-      // guess a species from a "Bird call" / "Animal" generic label.
+      monitoringSite: siteId,
       species: matchedSpeciesDoc ? (matchedSpeciesDoc._id || matchedSpeciesDoc.id) : null,
       audioUrl,
       detectedEvents,
@@ -93,11 +136,11 @@ exports.createRecording = async (req, res) => {
       speciesClassifierLabel,
       speciesClassifierConfidence,
       durationSeconds,
-      recordedBy: req.user ? req.user._id : undefined,
+      recordedBy,
       eventDate: req.body.eventDate || new Date(),
       location: {
-        latitude: Number(req.body.latitude),
-        longitude: Number(req.body.longitude)
+        latitude: lat,
+        longitude: lng
       }
     };
 
@@ -109,7 +152,7 @@ exports.createRecording = async (req, res) => {
         .populate('recordedBy', 'name email');
       res.status(201).json(populated);
     } else {
-      const matchedSite = req.memoryDb.sites.find(st => st._id === req.body.monitoringSite) || req.memoryDb.sites[0];
+      const matchedSite = siteDoc || req.memoryDb.sites[0];
       const newRecording = {
         _id: 'rec_' + Date.now(),
         ...recordingData,
@@ -123,7 +166,8 @@ exports.createRecording = async (req, res) => {
       res.status(201).json(newRecording);
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error creating recording:', error);
+    res.status(500).json({ message: error.message || 'Failed to save recording' });
   }
 };
 

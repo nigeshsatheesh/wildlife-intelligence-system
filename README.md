@@ -50,6 +50,26 @@ This project intentionally scopes down from a much larger original specification
 - [ ] Biodiversity Index engine (Shannon Diversity Index) — backend endpoint written (`/api/analytics/biodiversity`), computes real species richness and evenness from actual sighting data; **not yet wired into the Dashboard/Reports UI**.
 - [ ] Wire biodiversity metrics into Dashboard/Reports pages
 
+### Audio data quality gate
+
+The species classifier must be trained on genuine field recordings, not stock
+SFX. Use Xeno-canto for eagle/owl recordings and Macaulay Library,
+iNaturalist sound observations, or Freesound recordings explicitly tagged as
+field recordings for mammals. Keep at least 30 original clips per species.
+
+For every downloaded clip, add a record to
+`data/audio-train-clean/source_manifest.json` with `species`, `filename`,
+`source`, `source_url`, `license`, and `recording_type` set to `field
+recording`. Run this before training:
+
+```
+python scripts/validate_audio_dataset.py
+```
+
+The validator rejects missing provenance, missing files, stock/SFX filename
+markers, non-field recordings, and species below the 30-clip minimum. The
+audio files themselves are intentionally kept outside Git.
+
 **What was deliberately not pursued:**
 - Full species-level bioacoustic classification with production-grade accuracy — not achievable within project timeline given real data scarcity for wildlife call recordings. General event detection (a real, working, defensible feature) is the honest scope here instead.
 

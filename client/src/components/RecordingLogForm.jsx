@@ -48,10 +48,11 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
       formData.append('notes', notes);
 
       const site = sites.find(s => s._id === selectedSiteId);
-      if (site?.location) {
-        formData.append('latitude', site.location.latitude);
-        formData.append('longitude', site.location.longitude);
-      }
+      const lat = site?.location?.latitude ?? 0;
+      const lng = site?.location?.longitude ?? 0;
+      formData.append('latitude', lat);
+      formData.append('longitude', lng);
+
 
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_ROOT}/api/recordings`, {
