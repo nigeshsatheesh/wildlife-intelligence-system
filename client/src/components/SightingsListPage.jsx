@@ -123,6 +123,10 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
                         <img 
                           src={resolveImageUrl(sighting.imageUrl) || getSpeciesImageUrl(sighting.species)}
                           alt="Thumbnail" 
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = getSpeciesImageUrl(sighting.species);
+                          }}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         />
                       </div>

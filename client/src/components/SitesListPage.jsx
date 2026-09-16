@@ -75,22 +75,26 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
             <path d="M -10 160 C 100 140, 150 200, 250 180 C 350 160, 400 220, 610 180" fill="none" stroke="#60a5fa" strokeWidth="4" opacity="0.8" />
           </svg>
 
-          {/* Map Location Labels */}
-          <div style={{ position: 'absolute', top: '30%', left: '15%', fontSize: '0.72rem', fontWeight: '800', color: '#165b40', background: 'rgba(255,255,255,0.88)', padding: '3px 8px', borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {/* Map Location Labels matching existing map UI */}
+          <div style={{ position: 'absolute', top: '45%', left: '15%', fontSize: '0.65rem', fontWeight: '800', color: '#165b40', background: 'rgba(255,255,255,0.85)', padding: '2px 7px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
             <MapPin size={12} color="#113829" /> Bandipur Tiger Reserve
           </div>
-          <div style={{ position: 'absolute', top: '22%', right: '15%', fontSize: '0.72rem', fontWeight: '800', color: '#165b40', background: 'rgba(255,255,255,0.88)', padding: '3px 8px', borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ position: 'absolute', top: '25%', right: '18%', fontSize: '0.65rem', fontWeight: '800', color: '#165b40', background: 'rgba(255,255,255,0.85)', padding: '2px 7px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
             <MapPin size={12} color="#10b981" /> Kaziranga Wetland Station
           </div>
 
-          {/* Map Station Markers */}
-          <div style={{ position: 'absolute', top: '48%', left: '26%', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          {/* Map Station Markers at exact dashboard coordinates (35% / 30%, 55% / 55%, 25% / 70%) */}
+          <div style={{ position: 'absolute', top: '35%', left: '30%', display: 'flex', alignItems: 'center', gap: '5px' }}>
             <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#113829', border: '2px solid #ffffff', boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}></span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#113829', background: 'rgba(255,255,255,0.85)', padding: '1px 5px', borderRadius: '4px' }}>BTR-ALPHA-01</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#113829', background: 'rgba(255,255,255,0.88)', padding: '1px 5px', borderRadius: '4px' }}>BTR-ALPHA-01</span>
           </div>
-          <div style={{ position: 'absolute', top: '42%', right: '28%', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <div style={{ position: 'absolute', top: '55%', left: '55%', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#113829', border: '2px solid #ffffff', boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}></span>
+            <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#113829', background: 'rgba(255,255,255,0.85)', padding: '1px 4px', borderRadius: '4px' }}>Sector 4 Field Hub</span>
+          </div>
+          <div style={{ position: 'absolute', top: '25%', left: '70%', display: 'flex', alignItems: 'center', gap: '5px' }}>
             <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981', border: '2px solid #ffffff', boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}></span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#10b981', background: 'rgba(255,255,255,0.85)', padding: '1px 5px', borderRadius: '4px' }}>KZR-WET-02</span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#10b981', background: 'rgba(255,255,255,0.88)', padding: '1px 5px', borderRadius: '4px' }}>KZR-WET-02</span>
           </div>
 
           {/* Bottom Right Legend */}

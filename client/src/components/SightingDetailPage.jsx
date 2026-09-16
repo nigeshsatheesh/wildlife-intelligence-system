@@ -51,7 +51,13 @@ export default function SightingDetailPage({ sighting, speciesList, onVerify, on
         <div className="eco-card" style={{ padding: '1rem' }}>
           <div style={{ height: '360px', borderRadius: '12px', overflow: 'hidden', background: '#0a1612', position: 'relative' }}>
             <img 
-                src={resolveImageUrl(sighting.imageUrl) || getSpeciesImageUrl(sighting.species)}
+              src={resolveImageUrl(sighting.imageUrl) || getSpeciesImageUrl(sighting.species)}
+              alt={sighting.species?.commonName || 'Specimen'}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = getSpeciesImageUrl(sighting.species);
+              }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
 

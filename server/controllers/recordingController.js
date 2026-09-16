@@ -83,6 +83,12 @@ exports.createRecording = async (req, res) => {
     const normalizedSpeciesPrediction = speciesClassifierLabel || null;
     const normalizedSpeciesConfidence = typeof speciesClassifierConfidence === 'number' ? speciesClassifierConfidence : null;
 
+    // Synchronize overall audio analysis confidence with the species prediction confidence
+    const effectiveTopConfidence = normalizedSpeciesConfidence !== null ? normalizedSpeciesConfidence : top.confidence;
+    if (normalizedSpeciesConfidence !== null && detectedEvents.length > 0) {
+      detectedEvents[0].confidence = normalizedSpeciesConfidence;
+    }
+
     // Resolve location (latitude & longitude) safely without returning NaN
     let lat = parseFloat(req.body.latitude);
     let lng = parseFloat(req.body.longitude);
@@ -135,7 +141,7 @@ exports.createRecording = async (req, res) => {
       audioUrl,
       detectedEvents,
       topLabel: top.label,
-      topConfidence: top.confidence,
+      topConfidence: effectiveTopConfidence,
       speciesPrediction: normalizedSpeciesPrediction,
       speciesPredictionConfidence: normalizedSpeciesConfidence,
       speciesClassifierLabel,

@@ -101,7 +101,13 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
                   </td>
                 </tr>
               ) : filteredRecordings.map((rec) => {
-                const conf = (rec.topConfidence || 0) * 100;
+                const speciesConf = typeof rec.speciesClassifierConfidence === 'number'
+                  ? rec.speciesClassifierConfidence
+                  : typeof rec.speciesPredictionConfidence === 'number'
+                  ? rec.speciesPredictionConfidence
+                  : null;
+                const rawConf = speciesConf !== null ? speciesConf : (rec.topConfidence || 0);
+                const conf = rawConf * 100;
                 const confBadge = conf > 80 ? 'badge-green' : conf >= 50 ? 'badge-pill' : 'badge-red';
                 const topEventCategory = rec.detectedEvents?.[0]?.category || 'Environmental Noise';
 
