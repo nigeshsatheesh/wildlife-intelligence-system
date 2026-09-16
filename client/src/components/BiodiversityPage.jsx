@@ -3,19 +3,33 @@ import { Sprout, Info, MapPin } from 'lucide-react';
 
 const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
+let cachedBiodiversityData = null;
+
 export default function BiodiversityPage() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(cachedBiodiversityData);
+  const [loading, setLoading] = useState(!cachedBiodiversityData);
   const [error, setError] = useState('');
 
   useEffect(() => {
     let cancelled = false;
+
+    if (cachedBiodiversityData) {
+      setData(cachedBiodiversityData);
+      setLoading(false);
+      return;
+    }
+
     fetch(`${API_BASE}/analytics/biodiversity`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to load biodiversity metrics');
         return res.json();
       })
-      .then(d => { if (!cancelled) setData(d); })
+      .then(d => {
+        if (!cancelled) {
+          cachedBiodiversityData = d;
+          setData(d);
+        }
+      })
       .catch(err => { if (!cancelled) setError(err.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };

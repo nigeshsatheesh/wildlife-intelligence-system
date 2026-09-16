@@ -22,24 +22,22 @@ import BiodiversityPage from './components/BiodiversityPage';
 import HealthScorePage from './components/HealthScorePage';
 import ConservationOfficerDashboard from './components/ConservationOfficerDashboard';
 import ForestDepartmentDashboard from './components/ForestDepartmentDashboard';
-import { Search, Bell, Plus, UserCheck, Shield } from 'lucide-react';
+import { Search, Bell, Plus, UserCheck, Shield, Camera, Mic, X } from 'lucide-react';
 
 const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
 const defaultSpecies = [
-  { _id: 's1', commonName: 'Bengal Tiger', scientificName: 'Panthera tigris', category: 'Mammal', classifierLabel: 'tiger', conservationStatus: 'Critical', imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=600&q=80' },
-  { _id: 's2', commonName: 'African Elephant', scientificName: 'Loxodonta africana', category: 'Mammal', classifierLabel: 'elephant', conservationStatus: 'Vulnerable', imageUrl: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=600&q=80' },
-  { _id: 's3', commonName: 'Golden Eagle', scientificName: 'Aquila chrysaetos', category: 'Bird', classifierLabel: 'eagle', conservationStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1611689342806-0863700ce1e4?auto=format&fit=crop&w=600&q=80' },
-  { _id: 's4', commonName: 'Eurasian Wolf', scientificName: 'Canis lupus', category: 'Mammal', classifierLabel: 'wolf', conservationStatus: 'Moderate Concern', imageUrl: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef9?auto=format&fit=crop&w=600&q=80' },
+  { _id: 's1', commonName: 'Bengal Tiger', scientificName: 'Panthera tigris', category: 'Mammal', classifierLabel: 'tiger', conservationStatus: 'Critical', imageUrl: '/species-images/bengal-tiger.jpg' },
+  { _id: 's2', commonName: 'African Elephant', scientificName: 'Loxodonta africana', category: 'Mammal', classifierLabel: 'elephant', conservationStatus: 'Vulnerable', imageUrl: '/species-images/asian-elephant.jpg' },
+  { _id: 's3', commonName: 'Golden Eagle', scientificName: 'Aquila chrysaetos', category: 'Bird', classifierLabel: 'eagle', conservationStatus: 'Healthy', imageUrl: '/species-images/golden-eagle.jpg' },
+  { _id: 's4', commonName: 'Eurasian Wolf', scientificName: 'Canis lupus', category: 'Mammal', classifierLabel: 'wolf', conservationStatus: 'Moderate Concern', imageUrl: '/species-images/indian-wolf.jpg' },
   { _id: 's5', commonName: 'Eurasian Lynx', scientificName: 'Lynx lynx', category: 'Mammal', classifierLabel: 'lynx', conservationStatus: 'Vulnerable', imageUrl: 'https://images.unsplash.com/photo-1540573133985-780688d1728b?auto=format&fit=crop&w=600&q=80' },
-  { _id: 's6', commonName: 'Red Fox', scientificName: 'Vulpes vulpes', category: 'Mammal', classifierLabel: 'fox', conservationStatus: 'Healthy', imageUrl: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=600&q=80' }
+  { _id: 's6', commonName: 'Red Fox', scientificName: 'Vulpes vulpes', category: 'Mammal', classifierLabel: 'fox', conservationStatus: 'Healthy', imageUrl: '/species-images/red-fox.jpg' }
 ];
 
 const defaultSites = [
   { _id: 'st1', siteName: 'Bandipur Tiger Reserve', siteCode: 'BTR-ALPHA-01', habitatType: 'Forest', protectedArea: 'Bandipur National Park', location: { latitude: 11.6664, longitude: 76.6292 }, monitoringDevice: 'Camera Trap', active: true },
-  { _id: 'st2', siteName: 'Serengeti North Grid', siteCode: 'SER-GRID-04', habitatType: 'Grassland', protectedArea: 'Serengeti Ecosystem', location: { latitude: -2.3333, longitude: 34.8333 }, monitoringDevice: 'Camera Trap', active: true },
-  { _id: 'st3', siteName: 'Kaziranga Wetland Station', siteCode: 'KZR-WET-02', habitatType: 'Wetland', protectedArea: 'Kaziranga Reserve', location: { latitude: 26.5775, longitude: 93.1711 }, monitoringDevice: 'Manual Observation', active: true },
-  { _id: 'st4', siteName: 'Bialowieza Ancient Forest', siteCode: 'BWZ-FOR-09', habitatType: 'Forest', protectedArea: 'Bialowieza Biosphere', location: { latitude: 52.7000, longitude: 23.8667 }, monitoringDevice: 'Camera Trap', active: true }
+  { _id: 'st2', siteName: 'Kaziranga Wetland Station', siteCode: 'KZR-WET-02', habitatType: 'Wetland', protectedArea: 'Kaziranga National Park', location: { latitude: 26.5775, longitude: 93.1711 }, monitoringDevice: 'Camera Trap', active: true }
 ];
 
 const defaultSightings = [
@@ -48,7 +46,7 @@ const defaultSightings = [
     species: defaultSpecies[0],
     monitoringSite: defaultSites[0],
     observedBy: { name: 'Nigesh Researcher' },
-    imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/species-images/bengal-tiger.jpg',
     classifierPrediction: 'Panthera tigris',
     classifierConfidence: 0.964,
     verified: true,
@@ -64,30 +62,30 @@ const defaultSightings = [
     species: defaultSpecies[1],
     monitoringSite: defaultSites[1],
     observedBy: { name: 'Nigesh Researcher' },
-    imageUrl: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/species-images/asian-elephant.jpg',
     classifierPrediction: 'Loxodonta africana',
     classifierConfidence: 0.988,
     verified: true,
     individualCount: 14,
-    location: { latitude: -2.3333, longitude: 34.8333 },
-    locality: 'Mara River Basin',
-    country: 'Tanzania',
+    location: { latitude: 26.5775, longitude: 93.1711 },
+    locality: 'Kaziranga Wetland Corridor',
+    country: 'India',
     eventDate: new Date('2026-08-04T09:15:00Z'),
     notes: 'Matriarch herd migrating towards northern pastures.'
   },
   {
     _id: 'sg3',
     species: defaultSpecies[3],
-    monitoringSite: defaultSites[3],
+    monitoringSite: defaultSites[0],
     observedBy: { name: 'Nigesh Researcher' },
-    imageUrl: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef9?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/species-images/indian-wolf.jpg',
     classifierPrediction: 'Canis lupus',
     classifierConfidence: 0.912,
     verified: false,
     individualCount: 4,
-    location: { latitude: 52.7000, longitude: 23.8667 },
-    locality: 'Bialowieza Core Zone',
-    country: 'Poland',
+    location: { latitude: 11.6664, longitude: 76.6292 },
+    locality: 'Bandipur Ridge Zone',
+    country: 'India',
     eventDate: new Date('2026-08-06T22:45:00Z'),
     notes: 'Night camera trap trigger. Pack movement recorded.'
   }
@@ -107,6 +105,7 @@ export default function App() {
   const [selectedSightingDetail, setSelectedSightingDetail] = useState(null);
   const [isLogSightingFormOpen, setIsLogSightingFormOpen] = useState(false);
   const [isLogRecordingFormOpen, setIsLogRecordingFormOpen] = useState(false);
+  const [isSightingTypeModalOpen, setIsSightingTypeModalOpen] = useState(false);
 
   // Modals
   const [isSpeciesModalOpen, setIsSpeciesModalOpen] = useState(false);
@@ -382,7 +381,7 @@ export default function App() {
             </div>
 
             {/* + New Survey / Log Sighting Button */}
-            <button className="btn-new-survey" onClick={() => setIsLogSightingFormOpen(true)}>
+            <button className="btn-new-survey" onClick={() => setIsSightingTypeModalOpen(true)}>
               <Plus size={16} /> Log Sighting
             </button>
           </div>
@@ -556,6 +555,157 @@ export default function App() {
         onSaveSite={handleSaveSite} 
         initialData={editingSiteData} 
       />
+
+      {/* Sighting Type Selection Modal */}
+      {isSightingTypeModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          backdropFilter: 'blur(3px)'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '16px',
+            padding: '2rem',
+            width: '90%',
+            maxWidth: '480px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setIsSightingTypeModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '1.25rem',
+                right: '1.25rem',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--text-muted)'
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '0.5rem' }}>
+              Select Sighting Modality
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.4 }}>
+              Choose whether you are uploading a camera trap image or a field bioacoustic audio recording.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSightingTypeModalOpen(false);
+                  setActiveTab('image-analysis');
+                  setIsLogSightingFormOpen(true);
+                  setIsLogRecordingFormOpen(false);
+                  setSelectedSpeciesDetail(null);
+                  setSelectedSightingDetail(null);
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '1.5rem 1rem',
+                  background: '#f8fafc',
+                  border: '2px solid var(--border-light)',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--forest-green)';
+                  e.currentTarget.style.background = '#e8f3ee';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-light)';
+                  e.currentTarget.style.background = '#f8fafc';
+                }}
+              >
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: '#e8f3ee',
+                  color: 'var(--forest-green)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Camera size={24} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)' }}>Image Sighting</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Camera trap photo & AI classification</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSightingTypeModalOpen(false);
+                  setActiveTab('bioacoustics');
+                  setIsLogRecordingFormOpen(true);
+                  setIsLogSightingFormOpen(false);
+                  setSelectedSpeciesDetail(null);
+                  setSelectedSightingDetail(null);
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '1.5rem 1rem',
+                  background: '#f8fafc',
+                  border: '2px solid var(--border-light)',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--forest-green)';
+                  e.currentTarget.style.background = '#e8f3ee';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-light)';
+                  e.currentTarget.style.background = '#f8fafc';
+                }}
+              >
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: '#e8f3ee',
+                  color: 'var(--forest-green)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Mic size={24} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-dark)' }}>Audio Sighting</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>Bioacoustic audio & YAMNet detection</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

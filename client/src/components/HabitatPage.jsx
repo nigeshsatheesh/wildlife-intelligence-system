@@ -10,19 +10,33 @@ const activityColor = {
   'No Data': 'var(--text-muted)'
 };
 
+let cachedHabitatData = null;
+
 export default function HabitatPage() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(cachedHabitatData);
+  const [loading, setLoading] = useState(!cachedHabitatData);
   const [error, setError] = useState('');
 
   useEffect(() => {
     let cancelled = false;
+
+    if (cachedHabitatData) {
+      setData(cachedHabitatData);
+      setLoading(false);
+      return;
+    }
+
     fetch(`${API_BASE}/habitat?periodDays=90`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to load habitat metrics');
         return res.json();
       })
-      .then(d => { if (!cancelled) setData(d); })
+      .then(d => {
+        if (!cancelled) {
+          cachedHabitatData = d;
+          setData(d);
+        }
+      })
       .catch(err => { if (!cancelled) setError(err.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };

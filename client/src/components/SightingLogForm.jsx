@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Upload, Sparkles, Save, X } from 'lucide-react';
 
 const API_ROOT = import.meta.env.VITE_API_URL || window.location.origin;
 
 export default function SightingLogForm({ species, sites, onSaveSighting, onClose }) {
+  const fileInputRef = useRef(null);
   const [selectedSpeciesId, setSelectedSpeciesId] = useState(species[0]?._id || '');
   const [selectedSiteId, setSelectedSiteId] = useState(sites[0]?._id || '');
   const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0]);
@@ -105,7 +106,6 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
       });
 
       onSaveSighting(saved);
-      setTimeout(onClose, 1200);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -133,18 +133,43 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
           {imagePreview ? (
             <div style={{ position: 'relative', height: '220px', borderRadius: '10px', overflow: 'hidden', margin: '0 auto', maxWidth: '400px' }}>
               <img src={imagePreview} alt="Sighting Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }}
+              <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); setAiPrediction(null); }}
                 style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer' }}>
                 <X size={16} />
               </button>
             </div>
           ) : (
-            <div>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#e8f3ee', color: 'var(--forest-green)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                <Upload size={22} />
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              style={{ cursor: 'pointer', padding: '1rem 0' }}
+            >
+              <div style={{
+                width: '52px',
+                height: '52px',
+                borderRadius: '50%',
+                background: '#e8f3ee',
+                color: 'var(--forest-green)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '0.75rem',
+                cursor: 'pointer'
+              }}>
+                <Upload size={24} />
               </div>
-              <h4 style={{ fontWeight: '800', fontSize: '0.95rem', marginBottom: '0.5rem' }}>Upload a real camera trap photo</h4>
-              <input type="file" accept="image/jpeg,image/png" onChange={handleFileSelect} required />
+              <h4 style={{ fontWeight: '800', fontSize: '0.95rem', marginBottom: '0.4rem', color: 'var(--text-dark)' }}>
+                Upload a real camera trap photo
+              </h4>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Click icon or area to select image (.jpg, .jpeg, .png)
+              </p>
+              <input 
+                ref={fileInputRef}
+                type="file" 
+                accept="image/jpeg,image/png,image/webp" 
+                onChange={handleFileSelect} 
+                style={{ display: 'none' }}
+              />
             </div>
           )}
         </div>
@@ -158,7 +183,16 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
             <div style={{ fontWeight: '800', fontSize: '1.05rem' }}>
               {aiPrediction.speciesName} <span style={{ fontStyle: 'italic', fontWeight: 400 }}>({aiPrediction.scientificName})</span>
             </div>
-            <div style={{ fontSize: '0.75rem' }}>Confidence: <strong style={{ color: 'var(--forest-green)' }}>{aiPrediction.confidence}%</strong></div>
+            <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>Confidence: <strong style={{ color: 'var(--forest-green)' }}>{aiPrediction.confidence}%</strong></div>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ marginTop: '1rem', width: '100%', padding: '0.6rem',
+                       borderRadius: '8px', border: 'none', fontWeight: 700,
+                       cursor: 'pointer', background: 'var(--forest-green)', color: '#fff' }}
+            >
+              Done — Close
+            </button>
           </div>
         )}
 

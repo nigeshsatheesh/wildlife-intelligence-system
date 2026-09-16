@@ -31,14 +31,23 @@ function FactorCard({ title, factor }) {
   );
 }
 
+let cachedHealthScoreData = {};
+
 export default function HealthScorePage() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [periodDays, setPeriodDays] = useState(90);
+  const [data, setData] = useState(cachedHealthScoreData[90] || null);
+  const [loading, setLoading] = useState(!cachedHealthScoreData[90]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let cancelled = false;
+
+    if (cachedHealthScoreData[periodDays]) {
+      setData(cachedHealthScoreData[periodDays]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
     const token = localStorage.getItem('token');
@@ -50,7 +59,12 @@ export default function HealthScorePage() {
         if (!res.ok) throw new Error('Failed to load ecosystem health score');
         return res.json();
       })
-      .then(json => { if (!cancelled) setData(json); })
+      .then(json => {
+        if (!cancelled) {
+          cachedHealthScoreData[periodDays] = json;
+          setData(json);
+        }
+      })
       .catch(err => { if (!cancelled) setError(err.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
 

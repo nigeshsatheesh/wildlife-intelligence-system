@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Upload, Sparkles, Save, X, Music } from 'lucide-react';
 
 const API_ROOT = import.meta.env.VITE_API_URL || window.location.origin;
@@ -12,6 +12,7 @@ const CATEGORY_COLORS = {
 };
 
 export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
+  const fileInputRef = useRef(null);
   const [selectedSiteId, setSelectedSiteId] = useState(sites[0]?._id || '');
   const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
@@ -111,12 +112,23 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
             </div>
           ) : (
             <div>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#e8f3ee', color: 'var(--forest-green)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                <Upload size={22} />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                style={{ cursor: 'pointer', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#e8f3ee', color: 'var(--forest-green)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                  <Upload size={22} />
+                </div>
+                <h4 style={{ fontWeight: '800', fontSize: '0.95rem', marginBottom: '0.5rem' }}>Upload a real field audio recording</h4>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Click here to select an audio file (.wav, .mp3, .ogg, .flac, .m4a)</p>
               </div>
-              <h4 style={{ fontWeight: '800', fontSize: '0.95rem', marginBottom: '0.5rem' }}>Upload a real field audio recording</h4>
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>.wav, .mp3, .ogg, .flac, .m4a</p>
-              <input type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/flac,audio/x-m4a,audio/mp4" onChange={handleFileSelect} required />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/wav,audio/mpeg,audio/ogg,audio/flac,audio/x-m4a,audio/mp4"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
             </div>
           )}
         </div>

@@ -48,52 +48,78 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
         </div>
       </div>
 
-      {/* Static Placeholder Map Preview Section */}
-      <div className="eco-card" style={{ padding: '1rem', position: 'relative', overflow: 'hidden', minHeight: '200px', background: 'linear-gradient(135deg, #dcfce7 0%, #e0f2fe 100%)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--forest-green)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <Compass size={16} /> GIS Spatial Location Map Preview
+      {/* GIS Spatial Location Map Preview Section (same as Dashboard Wildlife Distribution) */}
+      <div className="eco-card" style={{ padding: '1.25rem', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <Compass size={18} color="var(--forest-green)" /> GIS Spatial Location Map Preview
           </span>
           <span className="badge-pill badge-green">{sites.length} Active Stations Plotted</span>
         </div>
 
-        {/* Map Grid Container with Pins */}
+        {/* Interactive GIS Map Canvas Graphic */}
         <div style={{
-          width: '100%',
-          height: '140px',
-          borderRadius: '10px',
-          background: 'rgba(255,255,255,0.7)',
-          border: '1px solid var(--border-light)',
+          height: '220px',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #c7e9d9 0%, #b8decb 50%, #d4ede1 100%)',
           position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
+          overflow: 'hidden',
+          border: '1px solid #b2d8c5'
         }}>
-          <img 
-            src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80" 
-            alt="Map preview" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} 
-          />
+          {/* Topography vector paths / map terrain */}
+          <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
+            <path d="M 0 60 Q 80 20 160 80 T 320 50 T 480 110 T 600 70" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.6" />
+            <path d="M 0 120 Q 100 80 200 140 T 400 100 T 600 150" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.6" />
+            <path d="M 0 170 Q 120 140 240 180 T 480 160 T 600 190" fill="none" stroke="#90c8ad" strokeWidth="2" opacity="0.7" />
+            {/* River path */}
+            <path d="M -10 160 C 100 140, 150 200, 250 180 C 350 160, 400 220, 610 180" fill="none" stroke="#60a5fa" strokeWidth="4" opacity="0.8" />
+          </svg>
 
-          {/* Interactive Map Pin Overlays */}
-          {sites.map((st, idx) => (
-            <div key={st._id} style={{
-              position: 'absolute',
-              top: `${25 + (idx * 18) % 55}%`,
-              left: `${20 + (idx * 22) % 65}%`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-              background: '#ffffff',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '9999px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              border: '1px solid var(--forest-green)'
-            }}>
-              <MapPin size={12} color="var(--forest-green)" />
-              <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dark)' }}>{st.siteCode}</span>
+          {/* Map Location Labels */}
+          <div style={{ position: 'absolute', top: '30%', left: '15%', fontSize: '0.72rem', fontWeight: '800', color: '#165b40', background: 'rgba(255,255,255,0.88)', padding: '3px 8px', borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <MapPin size={12} color="#113829" /> Bandipur Tiger Reserve
+          </div>
+          <div style={{ position: 'absolute', top: '22%', right: '15%', fontSize: '0.72rem', fontWeight: '800', color: '#165b40', background: 'rgba(255,255,255,0.88)', padding: '3px 8px', borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <MapPin size={12} color="#10b981" /> Kaziranga Wetland Station
+          </div>
+
+          {/* Map Station Markers */}
+          <div style={{ position: 'absolute', top: '48%', left: '26%', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#113829', border: '2px solid #ffffff', boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}></span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#113829', background: 'rgba(255,255,255,0.85)', padding: '1px 5px', borderRadius: '4px' }}>BTR-ALPHA-01</span>
+          </div>
+          <div style={{ position: 'absolute', top: '42%', right: '28%', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981', border: '2px solid #ffffff', boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}></span>
+            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#10b981', background: 'rgba(255,255,255,0.85)', padding: '1px 5px', borderRadius: '4px' }}>KZR-WET-02</span>
+          </div>
+
+          {/* Bottom Right Legend */}
+          <div style={{
+            position: 'absolute',
+            bottom: '10px',
+            right: '10px',
+            background: 'rgba(255, 255, 255, 0.92)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: '6px',
+            padding: '0.35rem 0.6rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.62rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#113829' }}></span>
+              Camera Trap Station
             </div>
-          ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.62rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span>
+              High Activity Station
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.62rem', fontWeight: '700', color: 'var(--text-dark)' }}>
+              <span style={{ width: '10px', height: '2px', background: '#60a5fa' }}></span>
+              River Corridor
+            </div>
+          </div>
         </div>
       </div>
 

@@ -50,15 +50,24 @@ function DistributionMap({ species }) {
   );
 }
 
+let cachedPopulationData = {};
+
 export default function PopulationPage() {
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [periodDays, setPeriodDays] = useState(90);
+  const [metrics, setMetrics] = useState(cachedPopulationData[90] || null);
+  const [loading, setLoading] = useState(!cachedPopulationData[90]);
+  const [error, setError] = useState('');
   const [mapSpeciesId, setMapSpeciesId] = useState('');
 
   useEffect(() => {
     let cancelled = false;
+
+    if (cachedPopulationData[periodDays]) {
+      setMetrics(cachedPopulationData[periodDays]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -67,7 +76,12 @@ export default function PopulationPage() {
         if (!res.ok) throw new Error('Failed to load population metrics');
         return res.json();
       })
-      .then(data => { if (!cancelled) setMetrics(data); })
+      .then(data => {
+        if (!cancelled) {
+          cachedPopulationData[periodDays] = data;
+          setMetrics(data);
+        }
+      })
       .catch(err => { if (!cancelled) setError(err.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
 

@@ -1,17 +1,20 @@
-// Local static images (real photos from your training dataset) — checked first.
 const speciesImages = {
-  'Asian Elephant': '/images/asian-elephant.jpg',
-  'Asiatic Lion': '/images/asiatic-lion.jpg',
-  'Bengal Tiger': '/images/bengal-tiger.jpg',
-  'Eurasian Owl': '/images/eurasian-owl.jpg',
-  'Golden Eagle': '/images/golden-eagle.jpg',
-  'Indian Giant Squirrel': '/images/indian-giant-squirrel.jpg',
-  'Indian Wolf': '/images/indian-wolf.jpg',
-  'Leopard': '/images/leopard.jpg',
-  'Plains Zebra': '/images/plains-zebra.jpg',
-  'Red Fox': '/images/red-fox.jpg',
-  'Sambar Deer': '/images/sambar-deer.jpg',
-  'Sloth Bear': '/images/sloth-bear.jpg'
+  'Asian Elephant': '/species-images/asian-elephant.jpg',
+  'African Elephant': '/species-images/asian-elephant.jpg',
+  'Elephant': '/species-images/asian-elephant.jpg',
+  'Asiatic Lion': '/species-images/asiatic-lion.jpg',
+  'Bengal Tiger': '/species-images/bengal-tiger.jpg',
+  'Eurasian Owl': '/species-images/eurasian-owl.jpg',
+  'Golden Eagle': '/species-images/golden-eagle.jpg',
+  'Indian Giant Squirrel': '/species-images/indian-giant-squirrel.jpg',
+  'Indian Wolf': '/species-images/indian-wolf.jpg',
+  'Eurasian Wolf': '/species-images/indian-wolf.jpg',
+  'Wolf': '/species-images/indian-wolf.jpg',
+  'Leopard': '/species-images/leopard.jpg',
+  'Plains Zebra': '/species-images/plains-zebra.jpg',
+  'Red Fox': '/species-images/red-fox.jpg',
+  'Sambar Deer': '/species-images/sambar-deer.jpg',
+  'Sloth Bear': '/species-images/sloth-bear.jpg'
 };
 
 const externalFallback = {
@@ -19,14 +22,17 @@ const externalFallback = {
 };
 
 export function getSpeciesImageUrl(species) {
-  if (!species) return externalFallback.tiger;
+  if (!species) return '/species-images/bengal-tiger.jpg';
 
-  // 1. Use image URL stored directly on the species record, if present
-  if (species.imageUrl) return species.imageUrl;
+  const name = species.commonName || '';
+  // 1. Prioritize real local high-res photo by species name
+  if (speciesImages[name]) {
+    return speciesImages[name];
+  }
 
-  // 2. Use the locally copied real dataset photo, matched by common name
-  if (speciesImages[species.commonName]) {
-    return speciesImages[species.commonName];
+  // 2. Use direct imageUrl if non-unsplash or if local
+  if (species.imageUrl && !species.imageUrl.includes('unsplash.com')) {
+    return species.imageUrl;
   }
 
   // 3. Fall back to the dynamic server endpoint (reads from data/raw-images/)

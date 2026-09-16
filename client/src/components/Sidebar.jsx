@@ -32,7 +32,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onL
   }, []);
 
   const monitoringItems = [
-    { id: 'surveys', label: 'Surveys', icon: Map },
+    { id: 'surveys', label: 'Surveys', icon: Compass },
     { id: 'camera-traps', label: 'Camera Traps', icon: Camera }
   ];
 
@@ -64,8 +64,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onL
               }}
             />
             <div>
-              <div className="logo-text-main">Wildlife Intelligence System</div>
-              <div className="logo-text-sub">ECOLOGICAL INTELLIGENCE</div>
+              <div className="logo-text-main" style={{ fontSize: '0.88rem', lineHeight: 1.25 }}>EcoGuard — Wildlife Intelligence System</div>
             </div>
           </div>
         </div>
@@ -91,9 +90,10 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onL
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`nav-sub-item ${isActive ? 'active-sub' : ''}`}
+                  className={`nav-item ${isActive ? 'active' : ''}`}
+                  style={{ padding: '0.45rem 0.75rem', fontSize: '0.82rem' }}
                 >
-                  {Icon && <Icon size={14} />}
+                  {Icon && <Icon size={16} strokeWidth={2.2} />}
                   <span>{item.label}</span>
                 </button>
               );

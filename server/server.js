@@ -81,9 +81,7 @@ const memoryDb = {
     ],
   sites: [
     { _id: 'st1', siteName: 'Bandipur Tiger Reserve', siteCode: 'BTR-ALPHA-01', habitatType: 'Forest', protectedArea: 'Bandipur National Park', location: { latitude: 11.6664, longitude: 76.6292 }, monitoringDevice: 'Camera Trap', active: true },
-    { _id: 'st2', siteName: 'Serengeti North Grid', siteCode: 'SER-GRID-04', habitatType: 'Grassland', protectedArea: 'Serengeti Ecosystem', location: { latitude: -2.3333, longitude: 34.8333 }, monitoringDevice: 'Camera Trap', active: true },
-    { _id: 'st3', siteName: 'Kaziranga Wetland Station', siteCode: 'KZR-WET-02', habitatType: 'Wetland', protectedArea: 'Kaziranga Reserve', location: { latitude: 26.5775, longitude: 93.1711 }, monitoringDevice: 'Manual Observation', active: true },
-    { _id: 'st4', siteName: 'Bialowieza Ancient Forest', siteCode: 'BWZ-FOR-09', habitatType: 'Forest', protectedArea: 'Bialowieza Biosphere', location: { latitude: 52.7000, longitude: 23.8667 }, monitoringDevice: 'Camera Trap', active: true }
+    { _id: 'st2', siteName: 'Kaziranga Wetland Station', siteCode: 'KZR-WET-02', habitatType: 'Wetland', protectedArea: 'Kaziranga National Park', location: { latitude: 26.5775, longitude: 93.1711 }, monitoringDevice: 'Camera Trap', active: true }
   ],
   sightings: [
     {
@@ -91,7 +89,7 @@ const memoryDb = {
       species: { _id: 's1', commonName: 'Bengal Tiger', scientificName: 'Panthera tigris' },
       monitoringSite: { _id: 'st1', siteName: 'Bandipur Tiger Reserve' },
       observedBy: { name: 'Dr. Sarah Chen' },
-      imageUrl: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=800&q=80',
+      imageUrl: '/species-images/bengal-tiger.jpg',
       classifierPrediction: 'Panthera tigris',
       classifierConfidence: 0.964,
       verified: true,
@@ -105,25 +103,25 @@ const memoryDb = {
     {
       _id: 'sg2',
       species: { _id: 's2', commonName: 'African Elephant', scientificName: 'Loxodonta africana' },
-      monitoringSite: { _id: 'st2', siteName: 'Serengeti North Grid' },
+      monitoringSite: { _id: 'st2', siteName: 'Kaziranga Wetland Station' },
       observedBy: { name: 'Alex Rivera' },
-      imageUrl: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=800&q=80',
+      imageUrl: '/species-images/asian-elephant.jpg',
       classifierPrediction: 'Loxodonta africana',
       classifierConfidence: 0.988,
       verified: true,
       individualCount: 14,
-      location: { latitude: -2.3333, longitude: 34.8333 },
-      locality: 'Mara River Basin',
-      country: 'Tanzania',
+      location: { latitude: 26.5775, longitude: 93.1711 },
+      locality: 'Kaziranga Wetland Sector',
+      country: 'India',
       eventDate: new Date('2026-08-04T09:15:00Z'),
       notes: 'Matriarch herd migrating towards northern pastures.'
     },
     {
       _id: 'sg3',
       species: { _id: 's4', commonName: 'Eurasian Wolf', scientificName: 'Canis lupus' },
-      monitoringSite: { _id: 'st4', siteName: 'Bialowieza Ancient Forest' },
+      monitoringSite: { _id: 'st1', siteName: 'Bandipur Tiger Reserve' },
       observedBy: { name: 'Dr. Sarah Chen' },
-      imageUrl: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef9?auto=format&fit=crop&w=800&q=80',
+      imageUrl: '/species-images/indian-wolf.jpg',
       classifierPrediction: 'Canis lupus',
       classifierConfidence: 0.912,
       verified: false,
