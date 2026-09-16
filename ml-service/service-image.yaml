@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: wildlife-image
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "3"
+    spec:
+      containerConcurrency: 80
+      containers:
+        - image: IMAGE_URL
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+---
+# Deploy from ml-service/ with:
+# gcloud run deploy wildlife-image --source . --dockerfile Dockerfile.image --region REGION --platform managed --allow-unauthenticated --memory 2Gi --cpu 2 --min 0 --max 3 --port 8080

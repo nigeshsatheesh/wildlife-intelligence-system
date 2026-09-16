@@ -2,6 +2,8 @@
 node_modules/
 ml-service/venv/
 ml-service/__pycache__/
+ml-service/.mypy_cache/
+ml-service/model/audio_records_cache_*.pkl
 
 # Environment secrets
 .env
