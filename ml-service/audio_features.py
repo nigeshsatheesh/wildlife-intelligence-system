@@ -143,8 +143,10 @@ def load_dual_sr(raw_bytes: bytes, top_db: int = 25) -> Tuple[np.ndarray, np.nda
     return waveform_16k, waveform_32k
 
 
-def chunk_waveform_32k(waveform: np.ndarray, chunk_samples: int = CHUNK_SAMPLES_32K) -> List[np.ndarray]:
-    """Splits a 32kHz waveform into non-overlapping 5-second (chunk_samples) windows, zero-padding the last chunk."""
+def chunk_waveform_32k(waveform: np.ndarray, chunk_samples: int = CHUNK_SAMPLES_32K, max_chunks: Optional[int] = None) -> List[np.ndarray]:
+    """Splits a 32kHz waveform into non-overlapping 5-second (chunk_samples) windows, zero-padding the last chunk.
+    If max_chunks is set, ranks chunks by RMS power to isolate the most salient vocalization window and eliminate CPU latency.
+    """
     chunks = []
     total = len(waveform)
     for start in range(0, total, chunk_samples):
@@ -152,6 +154,12 @@ def chunk_waveform_32k(waveform: np.ndarray, chunk_samples: int = CHUNK_SAMPLES_
         if len(chunk) < chunk_samples:
             chunk = np.pad(chunk, (0, chunk_samples - len(chunk)))
         chunks.append(chunk.astype(np.float32))
+
+    if max_chunks is not None and len(chunks) > max_chunks:
+        # Sort descending by RMS energy so we prioritize the loudest/most salient vocalization segment
+        chunks.sort(key=lambda c: float(np.mean(c ** 2)), reverse=True)
+        chunks = chunks[:max_chunks]
+
     return chunks
 
 
@@ -179,9 +187,9 @@ def extract_combined_embeddings_batch(chunks_32k_list: List[np.ndarray]) -> List
         yamnet_embs.append(yamnet_frames.numpy().mean(axis=0))
     yamnet_embs = np.array(yamnet_embs)  # (N, 1024)
 
-    # AST batched PyTorch inference (vectorized across all N chunks)
+    # AST batched PyTorch inference with inference_mode for maximum CPU throughput
     ast_inputs = ast_extractor(list(batch_16k), sampling_rate=YAMNET_SR, return_tensors='pt', padding=True)
-    with torch.no_grad():
+    with torch.inference_mode():
         ast_outputs = ast_model(**ast_inputs, output_hidden_states=True)
         ast_embs = ast_outputs.hidden_states[-1].mean(dim=1).cpu().numpy()  # (N, 768)
 
@@ -189,13 +197,14 @@ def extract_combined_embeddings_batch(chunks_32k_list: List[np.ndarray]) -> List
 
 
 
-def extract_combined_embedding(arg1: Union[np.ndarray, List[np.ndarray]], arg2: Optional[np.ndarray] = None) -> np.ndarray:
+def extract_combined_embedding(arg1: Union[np.ndarray, List[np.ndarray], None], arg2: Optional[np.ndarray] = None, max_chunks: Optional[int] = None) -> np.ndarray:
     """Flexible combined embedding extraction:
     - Single 5s chunk or list of chunks -> returns 3328-dim feature vector.
+    - If arg2 is passed, extracts features from at most max_chunks highest-energy segments.
     """
     if arg2 is not None:
         waveform_32k = arg2
-        chunks = chunk_waveform_32k(waveform_32k)
+        chunks = chunk_waveform_32k(waveform_32k, max_chunks=max_chunks)
         embs = extract_combined_embeddings_batch(chunks)
         return np.mean(embs, axis=0) if embs else np.zeros(3328, dtype=np.float32)
     else:

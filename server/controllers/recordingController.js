@@ -19,6 +19,10 @@ function categorize(label) {
   return hit ? hit.category : 'Environmental Noise';
 }
 
+const crypto = require('crypto');
+const audioPredictionCache = new Map();
+const MAX_AUDIO_CACHE_SIZE = 200;
+
 exports.createRecording = async (req, res) => {
   try {
     if (!req.file) {
@@ -26,36 +30,50 @@ exports.createRecording = async (req, res) => {
     }
     const audioUrl = `/uploads/${req.file.filename}`;
 
-    // Call the bioacoustic ML microservice for real inference — no fake/random fallback here.
-    // If the service is down, we tell the user honestly instead of inventing a result.
     let detectedEvents = [];
-    let durationSeconds;
+    let durationSeconds = 0;
     let speciesClassifierLabel;
     let speciesClassifierConfidence;
     let matchedSpeciesDoc = null;
+    let mlData = null;
+
     try {
-      const formData = new FormData();
-      formData.append('audio', fs.createReadStream(req.file.path));
+      // Check cache by SHA-256 of file buffer
+      const fileBuffer = fs.readFileSync(req.file.path);
+      const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
 
-      const mlRes = await axios.post(`${process.env.ML_AUDIO_SERVICE_URL}/predict-audio`, formData, {
-        headers: formData.getHeaders(),
-        timeout: 120000
-      });
+      if (audioPredictionCache.has(fileHash)) {
+        mlData = audioPredictionCache.get(fileHash);
+      } else {
+        const formData = new FormData();
+        formData.append('audio', fs.createReadStream(req.file.path));
 
-      if (mlRes.data && Array.isArray(mlRes.data.events)) {
-        detectedEvents = mlRes.data.events.map(e => ({
+        const mlAudioUrl = process.env.ML_AUDIO_SERVICE_URL || 'http://localhost:5002';
+        const mlRes = await axios.post(`${mlAudioUrl}/predict-audio`, formData, {
+          headers: formData.getHeaders(),
+          timeout: 45000
+        });
+        mlData = mlRes.data;
+
+        if (audioPredictionCache.size >= MAX_AUDIO_CACHE_SIZE) {
+          const firstKey = audioPredictionCache.keys().next().value;
+          audioPredictionCache.delete(firstKey);
+        }
+        audioPredictionCache.set(fileHash, mlData);
+      }
+
+      if (mlData && Array.isArray(mlData.events)) {
+        detectedEvents = mlData.events.map(e => ({
           label: e.label,
           confidence: e.confidence,
           category: categorize(e.label)
         }));
-        durationSeconds = mlRes.data.duration_seconds;
+        durationSeconds = mlData.duration_seconds;
       }
 
-      // Optional species-level prediction — only present once train_audio.py has
-      // been run and the audio service has a trained classifier loaded.
-      if (mlRes.data && mlRes.data.species_prediction) {
-        speciesClassifierLabel = mlRes.data.species_prediction.label;
-        speciesClassifierConfidence = mlRes.data.species_prediction.confidence;
+      if (mlData && mlData.species_prediction) {
+        speciesClassifierLabel = mlData.species_prediction.label;
+        speciesClassifierConfidence = mlData.species_prediction.confidence;
 
         if (req.isMongoConnected) {
           matchedSpeciesDoc = await Species.findOne({ classifierLabel: speciesClassifierLabel });

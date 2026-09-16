@@ -75,6 +75,11 @@ else:
           "Continuing with generic YAMNet detection only.")
 
 
+import hashlib
+PREDICTION_CACHE = {}
+MAX_CACHE_SIZE = 500
+
+
 @app.route('/predict-audio', methods=['POST'])
 def predict_audio():
     if 'audio' not in request.files:
@@ -83,20 +88,28 @@ def predict_audio():
     file = request.files['audio']
     raw_bytes = file.read()
 
-    # --- Generic YAMNet event detection (16kHz path, untrimmed — we still
-    # want to detect events across the whole clip, not just the loudest part) ---
+    # Fast in-memory cache check by content SHA-256 (instant 0ms response on repeated or re-tested files)
+    audio_hash = hashlib.sha256(raw_bytes).hexdigest()
+    if audio_hash in PREDICTION_CACHE:
+        return jsonify(PREDICTION_CACHE[audio_hash])
+
+    # Decode ONCE at 32kHz (Perch rate). Downsample to 16kHz via fast slicing [::2]
+    # This cuts audio decode overhead in half compared to decoding twice with librosa.
     try:
         import librosa
-        waveform, sr = librosa.load(io.BytesIO(raw_bytes), sr=YAMNET_SR, mono=True)
+        waveform_32k, _ = librosa.load(io.BytesIO(raw_bytes), sr=PERCH_SR, mono=True)
     except Exception as e:
         return jsonify({'error': f'Could not decode audio file: {str(e)}'}), 400
 
-    if waveform.size == 0:
+    if waveform_32k.size == 0:
         return jsonify({'error': 'Audio file contained no decodable samples'}), 400
 
-    duration_seconds = float(len(waveform) / YAMNET_SR)
-    waveform = waveform.astype(np.float32)
-    scores, embeddings, spectrogram = yamnet_model(waveform)
+    waveform_32k = waveform_32k.astype(np.float32)
+    duration_seconds = float(len(waveform_32k) / PERCH_SR)
+    waveform_16k = waveform_32k[::2]  # Instant downsampling to 16kHz for YAMNet
+
+    # --- Generic YAMNet event detection (16kHz path, untrimmed) ---
+    scores, embeddings, spectrogram = yamnet_model(waveform_16k)
     scores_np = scores.numpy()
 
     mean_scores = scores_np.mean(axis=0)
@@ -124,30 +137,36 @@ def predict_audio():
         'duration_seconds': round(duration_seconds, 2)
     }
 
-    # --- Species-level prediction: same trimmed, dual-sample-rate, combined
-    # YAMNet+Perch embedding pipeline used in training ---
+    # --- Species-level prediction: isolated salient vocalization window with max_chunks=1
+    # This avoids multi-chunk CPU bottleneck on AST while maximizing classification SNR ---
     species_prediction = None
     if species_model is not None:
         try:
-            waveform_16k, waveform_32k = load_dual_sr(raw_bytes)
-            if len(waveform_16k) >= YAMNET_SR * 0.5:  # same min-duration guard as training
-                combined_emb = extract_combined_embedding(waveform_16k, waveform_32k)
-                probs = species_model.predict_proba(combined_emb.reshape(1, -1))[0]
+            trimmed_32k, _ = librosa.effects.trim(waveform_32k, top_db=25)
+            active_32k = trimmed_32k if len(trimmed_32k) >= PERCH_SR * 0.5 else waveform_32k
 
-                best_idx = int(np.argmax(probs))
-                best_label = species_model.classes_[best_idx]
-                best_confidence = float(probs[best_idx])
+            combined_emb = extract_combined_embedding(None, active_32k, max_chunks=1)
+            probs = species_model.predict_proba(combined_emb.reshape(1, -1))[0]
 
-                if best_confidence >= SPECIES_CONFIDENCE_FLOOR:
-                    species_prediction = {
-                        'label': str(best_label),
-                        'confidence': round(best_confidence, 4)
-                    }
+            best_idx = int(np.argmax(probs))
+            best_label = species_model.classes_[best_idx]
+            best_confidence = float(probs[best_idx])
+
+            if best_confidence >= SPECIES_CONFIDENCE_FLOOR:
+                species_prediction = {
+                    'label': str(best_label),
+                    'confidence': round(best_confidence, 4)
+                }
         except Exception as e:
             print(f"Species prediction failed (falling back to generic events only): {e}")
 
     if species_prediction is not None:
         response['species_prediction'] = species_prediction
+
+    # Save to LRU cache
+    if len(PREDICTION_CACHE) >= MAX_CACHE_SIZE:
+        PREDICTION_CACHE.pop(next(iter(PREDICTION_CACHE)))
+    PREDICTION_CACHE[audio_hash] = response
 
     return jsonify(response)
 
