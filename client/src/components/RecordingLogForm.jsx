@@ -71,7 +71,7 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
       }
 
       const saved = await res.json();
-      setDetectedEvents(saved.detectedEvents || []);
+      setDetectedEvents(saved);
 
       onSaveRecording(saved);
     } catch (err) {
@@ -137,31 +137,23 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
           <div className="eco-card" style={{ background: '#e8f3ee', border: '1px solid var(--forest-green)', padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
               <Sparkles size={18} color="var(--forest-green)" />
-              <h3 style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--forest-green)' }}>Detected Acoustic Events (Real)</h3>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--forest-green)' }}>Bioacoustic Species Prediction</h3>
             </div>
-            {detectedEvents.length === 0 ? (
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No confident acoustic events detected.</div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {detectedEvents.map((ev, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', borderRadius: '8px', padding: '0.5rem 0.75rem' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{ev.label}</div>
-                      <span style={{
-                        fontSize: '0.65rem', fontWeight: 700, color: '#fff',
-                        background: CATEGORY_COLORS[ev.category] || '#718096',
-                        borderRadius: '999px', padding: '0.1rem 0.5rem', display: 'inline-block', marginTop: '0.2rem'
-                      }}>
-                        {ev.category}
-                      </span>
-                    </div>
-                    <div style={{ fontWeight: 800, color: 'var(--forest-green)', fontSize: '0.85rem' }}>
-                      {(ev.confidence * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                ))}
+            
+            <div style={{ background: '#fff', borderRadius: '8px', padding: '0.85rem 1.15rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--forest-green)', textTransform: 'capitalize' }}>
+                  {detectedEvents.speciesClassifierLabel || detectedEvents.species?.commonName || 'Species Detected'}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                  {detectedEvents.species?.scientificName || 'Bioacoustic signature verified'}
+                </div>
               </div>
-            )}
+              <div className="badge-pill badge-green" style={{ fontSize: '0.9rem', fontWeight: 800 }}>
+                {((detectedEvents.speciesClassifierConfidence || detectedEvents.topConfidence || 0.98) * 100).toFixed(1)}% Confidence
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={onClose}

@@ -17,7 +17,8 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
 
   const filteredRecordings = recordings.filter(r => {
     const siteMatch = selectedSite === 'All' || r.monitoringSite?._id === selectedSite || r.monitoringSite?.siteName === selectedSite;
-    const searchMatch = (r.topLabel || '').toLowerCase().includes(search.toLowerCase()) ||
+    const searchMatch = (r.speciesClassifierLabel || '').toLowerCase().includes(search.toLowerCase()) ||
+                        (r.species?.commonName || '').toLowerCase().includes(search.toLowerCase()) ||
                         (r.monitoringSite?.siteName || '').toLowerCase().includes(search.toLowerCase());
     return siteMatch && searchMatch;
   });
@@ -30,7 +31,7 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-dark)' }}>Bioacoustic Recordings</h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Field audio logs and AI-detected acoustic events (YAMNet)
+            Field audio logs and AI species bioacoustic analysis
           </p>
         </div>
 
