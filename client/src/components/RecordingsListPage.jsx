@@ -85,7 +85,6 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                 <th style={{ padding: '0.75rem 1rem' }}>Recording</th>
-                <th style={{ padding: '0.75rem 1rem' }}>Top Detected Event</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Species Prediction</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Category</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Site / Locality</th>
@@ -96,7 +95,7 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
             <tbody>
               {filteredRecordings.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <td colSpan={6} style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No bioacoustic recordings logged yet.
                   </td>
                 </tr>
@@ -120,10 +119,6 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
                         </div>
                         <audio controls src={`${API_ROOT}${rec.audioUrl}`} style={{ height: '30px', maxWidth: '160px' }} />
                       </div>
-                    </td>
-
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <div style={{ fontWeight: '700', color: 'var(--text-dark)' }}>{rec.topLabel || 'Unclassified'}</div>
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem' }}>
