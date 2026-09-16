@@ -26,14 +26,20 @@ import csv
 import os
 import json
 import joblib
+import hashlib
+import librosa
+import librosa.effects
 
 from audio_features import (
-    yamnet_model, YAMNET_SR, load_and_trim, load_dual_sr, extract_combined_embedding,
+    yamnet_model, YAMNET_SR, PERCH_SR, extract_combined_embedding,
     get_yamnet_model, get_perch_model, get_ast_model
 )
 
 app = Flask(__name__)
 CORS(app)
+
+PREDICTION_CACHE = {}
+MAX_CACHE_SIZE = 500
 
 # Force-load models at boot to eliminate runtime latency/cold-start on first prediction
 print("Pre-loading bioacoustic models (YAMNet, Perch, AST)...", flush=True)
@@ -75,11 +81,6 @@ else:
           "Continuing with generic YAMNet detection only.")
 
 
-import hashlib
-PREDICTION_CACHE = {}
-MAX_CACHE_SIZE = 500
-
-
 @app.route('/predict-audio', methods=['POST'])
 def predict_audio():
     if 'audio' not in request.files:
@@ -96,7 +97,6 @@ def predict_audio():
     # Decode ONCE at 32kHz (Perch rate). Downsample to 16kHz via fast slicing [::2]
     # This cuts audio decode overhead in half compared to decoding twice with librosa.
     try:
-        import librosa
         waveform_32k, _ = librosa.load(io.BytesIO(raw_bytes), sr=PERCH_SR, mono=True)
     except Exception as e:
         return jsonify({'error': f'Could not decode audio file: {str(e)}'}), 400
