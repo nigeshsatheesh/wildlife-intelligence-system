@@ -144,7 +144,7 @@ export default function SightingsListPage({ sightings, speciesList, sitesList, o
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem', color: 'var(--text-medium)' }}>
-                      {sighting.observedBy?.name || 'Nigesh Researcher'}
+                      Nigesh Researcher
                     </td>
 
                     <td style={{ padding: '0.75rem 1rem' }}>

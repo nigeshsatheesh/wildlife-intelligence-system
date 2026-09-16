@@ -144,7 +144,7 @@ export default function SpeciesDetailPage({ speciesItem, sightings, onBack }) {
                       {new Date(s.eventDate || s.createdAt).toLocaleDateString()}
                     </td>
                     <td style={{ padding: '0.75rem 1rem', color: 'var(--text-medium)' }}>
-                      {s.observedBy?.name || 'Dr. Sarah Chen'}
+                      {s.observedBy?.name || 'Nigesh Researcher'}
                     </td>
                     <td style={{ padding: '0.75rem 1rem' }}>
                       <span className="badge-pill badge-green">

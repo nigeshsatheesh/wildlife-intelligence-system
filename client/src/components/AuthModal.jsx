@@ -13,8 +13,8 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const userData = {
-      name: name || (isRegister ? 'Field Researcher' : 'Dr. Sarah Chen'),
-      email: email || 'sarah.chen@wildlife.org',
+      name: name || (isRegister ? 'Field Researcher' : 'Nigesh Researcher'),
+      email: email || 'nigesh@wildlife.org',
       role: role
     };
     onLoginSuccess(userData);
