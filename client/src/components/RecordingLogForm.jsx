@@ -73,7 +73,6 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
       setDetectedEvents(saved.detectedEvents || []);
 
       onSaveRecording(saved);
-      setTimeout(onClose, 1800);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -151,6 +150,15 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
                 ))}
               </div>
             )}
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ marginTop: '1rem', width: '100%', padding: '0.6rem',
+                       borderRadius: '8px', border: 'none', fontWeight: 700,
+                       cursor: 'pointer', background: 'var(--forest-green)', color: '#fff' }}
+            >
+              Done — Close
+            </button>
           </div>
         )}
 

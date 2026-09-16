@@ -6,7 +6,7 @@ spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/minScale: "1"
         autoscaling.knative.dev/maxScale: "2"
     spec:
       containerConcurrency: 80
@@ -20,4 +20,4 @@ spec:
               memory: 4Gi
 ---
 # Deploy from ml-service/ with:
-# gcloud run deploy wildlife-audio --source . --dockerfile Dockerfile.audio --region REGION --platform managed --allow-unauthenticated --memory 4Gi --cpu 2 --min 0 --max 2 --port 8080
+# gcloud run deploy wildlife-audio --source . --dockerfile Dockerfile.audio --region REGION --platform managed --allow-unauthenticated --memory 4Gi --cpu 2 --min-instances=1 --max-instances=2 --port 8080

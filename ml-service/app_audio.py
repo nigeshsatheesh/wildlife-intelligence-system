@@ -28,11 +28,19 @@ import json
 import joblib
 
 from audio_features import (
-    yamnet_model, YAMNET_SR, load_and_trim, load_dual_sr, extract_combined_embedding
+    yamnet_model, YAMNET_SR, load_and_trim, load_dual_sr, extract_combined_embedding,
+    get_yamnet_model, get_perch_model, get_ast_model
 )
 
 app = Flask(__name__)
 CORS(app)
+
+# Force-load models at boot to eliminate runtime latency/cold-start on first prediction
+print("Pre-loading bioacoustic models (YAMNet, Perch, AST)...", flush=True)
+get_yamnet_model()
+get_perch_model()
+get_ast_model()
+print("All bioacoustic models pre-loaded into memory.", flush=True)
 
 class_map_path = yamnet_model.class_map_path().numpy().decode('utf-8')
 class_names = []

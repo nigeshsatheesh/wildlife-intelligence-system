@@ -19,6 +19,7 @@ RUN python -m pip install --no-cache-dir gunicorn
 
 COPY . .
 ENV TFHUB_CACHE_DIR=/app/tfhub_cache
+RUN python -c "from audio_features import get_yamnet_model, get_perch_model, get_ast_model; get_yamnet_model(); get_perch_model(); get_ast_model()"
 
 EXPOSE 8080
 CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 300 --access-logfile - --error-logfile - app_audio:app"]

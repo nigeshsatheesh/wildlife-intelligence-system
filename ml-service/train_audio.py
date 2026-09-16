@@ -44,10 +44,19 @@ CACHE_PATH = 'model/audio_records_cache_3328.pkl'
 
 
 def augment_variants(waveform: np.ndarray, sr: int = PERCH_SR) -> List[np.ndarray]:
-    """Returns [original, pitch_shift] versions of a waveform for training."""
+    """Returns [original, pitch_shift, time_stretch, noise] versions of a waveform for training."""
     variants = [waveform]
     try:
         variants.append(librosa.effects.pitch_shift(waveform, sr=sr, n_steps=2))
+    except Exception:
+        pass
+    try:
+        variants.append(librosa.effects.time_stretch(waveform, rate=0.9))
+    except Exception:
+        pass
+    try:
+        noise = np.random.normal(0, 0.005, waveform.shape).astype(np.float32)
+        variants.append(waveform + noise)
     except Exception:
         pass
     return variants
@@ -98,12 +107,12 @@ def main():
 
             orig_chunks = chunk_waveform_32k(waveform)
             for chunk in orig_chunks:
-                all_chunk_metadata.append((clip_id, species, False, chunk))
+                all_chunk_metadata.append((clip_id, species, False, chunk, fpath))
 
             for variant in augment_variants(waveform, PERCH_SR)[1:]:  # skip original
                 aug_chunks = chunk_waveform_32k(variant)
                 for chunk in aug_chunks:
-                    all_chunk_metadata.append((clip_id, species, True, chunk))
+                    all_chunk_metadata.append((clip_id, species, True, chunk, fpath))
 
         print(f"\nTotal chunk samples to process: {len(all_chunk_metadata)}. Running batched feature extraction (batch_size=32)...", flush=True)
         BATCH_SIZE = 32
@@ -117,7 +126,8 @@ def main():
                     'clip_id': item[0],
                     'species': item[1],
                     'is_aug': item[2],
-                    'embedding': emb
+                    'embedding': emb,
+                    'fpath': item[4]
                 })
             if (b_end) % 64 == 0 or b_end == len(all_chunk_metadata):
                 print(f"  Processed {b_end}/{len(all_chunk_metadata)} chunks...", flush=True)
@@ -146,6 +156,7 @@ def main():
     # Metrics for Ablated 2560-dim model (YAMNet + Perch only)
     fold_clip_accs_ablated = []
 
+    oof_clip_id = []
     oof_clip_true = []
     oof_clip_pred_uncalib = []
     oof_clip_conf_uncalib = []
@@ -190,8 +201,10 @@ def main():
 
         # 1. Full 3328-dim model (YAMNet + Perch + AST)
         base_clf = LGBMClassifier(
-            n_estimators=150,
-            max_depth=6,
+            n_estimators=300,
+            num_leaves=31,
+            reg_alpha=0.1,
+            reg_lambda=0.1,
             learning_rate=0.05,
             class_weight='balanced',
             random_state=42 + fold,
@@ -213,8 +226,10 @@ def main():
         X_tr_2560 = X_tr_3328[:, :2560]
         X_va_2560 = X_va_3328[:, :2560]
         ablated_clf = LGBMClassifier(
-            n_estimators=150,
-            max_depth=6,
+            n_estimators=300,
+            num_leaves=31,
+            reg_alpha=0.1,
+            reg_lambda=0.1,
             learning_rate=0.05,
             class_weight='balanced',
             random_state=42 + fold,
@@ -249,6 +264,7 @@ def main():
             fold_clip_pred.append(pred_calib_sp)
             fold_clip_pred_abl.append(pred_abl_sp)
 
+            oof_clip_id.append(cid)
             oof_clip_true.append(true_sp)
             oof_clip_pred_uncalib.append(pred_uncalib_sp)
             oof_clip_conf_uncalib.append(conf_uncalib)
@@ -298,8 +314,10 @@ def main():
     y_full_cal = np.array([r['species'] for r in final_cal_records])
 
     final_lgbm = LGBMClassifier(
-        n_estimators=200,
-        max_depth=7,
+        n_estimators=300,
+        num_leaves=31,
+        reg_alpha=0.1,
+        reg_lambda=0.1,
         learning_rate=0.05,
         class_weight='balanced',
         random_state=42,
@@ -352,6 +370,28 @@ def main():
     print(header, flush=True)
     for label, row in zip(species_list, cm):
         print(f"{label[:6]:>6}  " + " ".join(f"{v:>6}" for v in row), flush=True)
+
+    print("\n=== MISCLASSIFIED CLIPS SUMMARY (3328-dim Triple) ===", flush=True)
+    oof_clip_id_arr = np.array(oof_clip_id)
+    clip_id_to_fpath = {r['clip_id']: r.get('fpath', f"clip_{r['clip_id']}") for r in clip_records}
+    misclassified_count = 0
+    for cid, true_sp, pred_sp, conf in zip(oof_clip_id_arr, oof_true_arr, oof_pred_calib_arr, oof_conf_calib_arr):
+        if true_sp != pred_sp:
+            misclassified_count += 1
+            fpath = clip_id_to_fpath.get(cid, '')
+            print(f"  [Misclassified] Clip {cid} ({os.path.basename(fpath)}) | True: {true_sp} -> Pred: {pred_sp} (Conf: {conf:.1%}) | Path: {fpath}", flush=True)
+    if misclassified_count == 0:
+        print("  None! 100% accuracy on all validation clips.", flush=True)
+
+    print("\n=== MISCLASSIFIED CLIPS SUMMARY (2560-dim YAMNet+Perch Ablated) ===", flush=True)
+    mis_abl_count = 0
+    for cid, true_sp, pred_sp in zip(oof_clip_id_arr, oof_true_arr, oof_pred_ablated_arr):
+        if true_sp != pred_sp:
+            mis_abl_count += 1
+            fpath = clip_id_to_fpath.get(cid, '')
+            print(f"  [Misclassified Ablated] Clip {cid} ({os.path.basename(fpath)}) | True: {true_sp} -> Pred: {pred_sp} | Path: {fpath}", flush=True)
+    if mis_abl_count == 0:
+        print("  None! 100% accuracy on all validation clips.", flush=True)
 
     os.makedirs('model', exist_ok=True)
     joblib.dump(final_calibrated, 'model/species_audio_classifier.pkl')

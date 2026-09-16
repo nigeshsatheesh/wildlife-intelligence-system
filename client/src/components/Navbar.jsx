@@ -33,19 +33,11 @@ export default function Navbar({ activeTab, setActiveTab, onOpenAuth, onOpenSigh
         
         {/* Brand Logo & Name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <div style={{ 
-            width: '42px', 
-            height: '42px', 
-            borderRadius: '12px', 
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.3) 100%)',
-            border: '1px solid rgba(16, 185, 129, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 15px rgba(16, 185, 129, 0.3)'
-          }}>
-            <ShieldAlert size={24} color="#10b981" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="Wildlife Intelligence"
+            style={{ width: '42px', height: '42px', objectFit: 'contain', borderRadius: '8px' }}
+          />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <h1 style={{ fontSize: '1.2rem', fontWeight: '700', letterSpacing: '-0.02em', color: '#f0fdf4' }}>Wildlife Intelligence System</h1>
