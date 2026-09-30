@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Users, TrendingUp, TrendingDown, MapPin, Info } from 'lucide-react';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 
 const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
-
-function speciesRadius(count, maxCount) {
-  if (!maxCount) return 8;
-  const min = 6, max = 26;
-  return min + (max - min) * (count / maxCount);
-}
 
 function DistributionMap({ species }) {
   const points = species?.distributionPoints || [];
@@ -21,31 +14,65 @@ function DistributionMap({ species }) {
     );
   }
 
-  const maxCount = Math.max(...points.map(p => p.count));
-  const center = [points[0].latitude, points[0].longitude];
+  const xPositions = [28, 52, 72, 85, 38, 62];
+  const yPositions = [38, 56, 32, 62, 68, 42];
 
   return (
-    <div className="eco-card" style={{ padding: 0, overflow: 'hidden' }}>
-      <MapContainer center={center} zoom={6} style={{ height: '360px', width: '100%' }} scrollWheelZoom={false}>
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    <div className="eco-card" style={{ padding: 0, overflow: 'hidden', borderRadius: '12px' }}>
+      <div style={{ padding: '0.85rem 1.25rem', background: '#f8fafc', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-dark)' }}>Wildlife Distribution GIS Map</h3>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>{points.length} Observation Zones</span>
+      </div>
+
+      <div style={{
+        height: '280px',
+        borderRadius: '0 0 12px 12px',
+        background: 'linear-gradient(135deg, #c7e9d9 0%, #b8decb 50%, #d4ede1 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        borderTop: '1px solid #b2d8c5'
+      }}>
+        <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
+          <path d="M 0 60 Q 80 20 160 80 T 320 50 T 480 110 T 600 70" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.6" />
+          <path d="M 0 120 Q 100 80 200 140 T 400 100 T 600 150" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.6" />
+          <path d="M 0 170 Q 120 140 240 180 T 480 160 T 600 190" fill="none" stroke="#90c8ad" strokeWidth="2" opacity="0.7" />
+          <path d="M -10 160 C 100 140, 150 200, 250 180 C 350 160, 400 220, 610 180" fill="none" stroke="#60a5fa" strokeWidth="4" opacity="0.8" />
+        </svg>
+
         {points.map((p, idx) => (
-          <CircleMarker
+          <div
             key={idx}
-            center={[p.latitude, p.longitude]}
-            radius={speciesRadius(p.count, maxCount)}
-            pathOptions={{ color: '#1f4d3d', fillColor: '#2e7d32', fillOpacity: 0.55, weight: 2 }}
+            style={{
+              position: 'absolute',
+              top: `${yPositions[idx % yPositions.length]}%`,
+              left: `${xPositions[idx % xPositions.length]}%`,
+              transform: 'translate(-50%, -50%)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
           >
-            <Popup>
-              <strong>{p.siteName}</strong>
-              <br />
-              {p.count} individual{p.count === 1 ? '' : 's'} recorded
-            </Popup>
-          </CircleMarker>
+            <span style={{
+              width: '14px',
+              height: '14px',
+              borderRadius: '50%',
+              background: '#113829',
+              border: '2px solid #ffffff',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+            }} />
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              color: '#113829',
+              background: 'rgba(255,255,255,0.92)',
+              padding: '2px 6px',
+              borderRadius: '4px'
+            }}>
+              {p.siteName}: {p.count} sighted
+            </span>
+          </div>
         ))}
-      </MapContainer>
+      </div>
     </div>
   );
 }

@@ -25,6 +25,7 @@ import ForestDepartmentDashboard from './components/ForestDepartmentDashboard';
 import SurveysPage from './components/SurveysPage';
 import CameraTrapsPage from './components/CameraTrapsPage';
 import ProfileModal from './components/ProfileModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Search, Bell, Plus, UserCheck, Shield, Camera, Mic, X } from 'lucide-react';
 
 const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
@@ -503,7 +504,7 @@ export default function App() {
 
           {/* Main Views */}
           {!isLogSightingFormOpen && !isLogRecordingFormOpen && !selectedSightingDetail && !selectedSpeciesDetail && (
-            <>
+            <ErrorBoundary key={activeTab}>
               {/* Dashboard View: Researcher (Page 3) or Admin (Page 4) */}
               {(activeTab === 'dashboard') && (
                 user?.role === 'Admin' ? (
@@ -577,8 +578,8 @@ export default function App() {
                 <HealthScorePage />
               )}
 
-              {/* Monitoring Sites / Camera Traps Listing Page (Page 8) */}
-              {(activeTab === 'sites' || activeTab === 'camera-traps') && (
+              {/* Monitoring Sites Listing Page */}
+              {activeTab === 'sites' && (
                 <SitesListPage 
                   sites={sites} 
                   onOpenAddSite={() => { setEditingSiteData(null); setIsSiteModalOpen(true); }} 
@@ -603,7 +604,7 @@ export default function App() {
                   </p>
                 </div>
               )}
-            </>
+            </ErrorBoundary>
           )}
         </main>
 
