@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Search, Plus, MapPin, Trees, Radio, Compass, ShieldCheck } from 'lucide-react';
+import { Search, Plus, MapPin, Trees, Radio } from 'lucide-react';
 
-export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }) {
+export default function SitesListPage({ sites = [], onOpenAddSite, habitatData = [] }) {
   const [search, setSearch] = useState('');
   const [isEnvModalOpen, setIsEnvModalOpen] = useState(false);
-  const [envSite, setEnvSite] = useState(sites[0]?._id || '');
+  const [envSite, setEnvSite] = useState(sites?.[0]?._id || '');
   const [temp, setTemp] = useState('28.5');
   const [rainfall, setRainfall] = useState('10.0');
   const [humidity, setHumidity] = useState('65');
@@ -39,10 +39,13 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
     }
   };
 
-  const filteredSites = sites.filter(s => 
-    (s.siteName || '').toLowerCase().includes(search.toLowerCase()) ||
-    (s.siteCode || '').toLowerCase().includes(search.toLowerCase()) ||
-    (s.protectedArea || '').toLowerCase().includes(search.toLowerCase())
+  const safeSites = Array.isArray(sites) ? sites : [];
+  const safeHabitatData = Array.isArray(habitatData) ? habitatData : [];
+
+  const filteredSites = safeSites.filter(s => 
+    (s?.siteName || '').toLowerCase().includes(search.toLowerCase()) ||
+    (s?.siteCode || '').toLowerCase().includes(search.toLowerCase()) ||
+    (s?.protectedArea || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -202,9 +205,9 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
                     </span>
                   </td>
                   <td style={{ padding: '0.85rem 1rem' }}>
-                  {habitatData.find(h => h.siteId === site._id) && (
+                  {safeHabitatData.find(h => (h?.siteId === site._id || h?.siteId === site._id?.toString())) && (
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      Richness Index: {habitatData.find(h => h.siteId === site._id).richnessIndex} · {habitatData.find(h => h.siteId === site._id).activityLevel}
+                      Richness Index: {safeHabitatData.find(h => (h?.siteId === site._id || h?.siteId === site._id?.toString()))?.richnessIndex} · {safeHabitatData.find(h => (h?.siteId === site._id || h?.siteId === site._id?.toString()))?.activityLevel}
                     </span>
                   )}
                   </td>

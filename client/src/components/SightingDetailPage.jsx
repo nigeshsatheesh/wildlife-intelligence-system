@@ -4,9 +4,9 @@ import { getSpeciesImageUrl } from '../utils/speciesImages';
 import { resolveImageUrl } from '../utils/resolveImageUrl';
 
 export default function SightingDetailPage({ sighting, speciesList, onVerify, onCorrectSpecies, onBack }) {
-  if (!sighting) return null;
+  const [selectedCorrectSpecies, setSelectedCorrectSpecies] = useState(sighting?.species?._id || '');
 
-  const [selectedCorrectSpecies, setSelectedCorrectSpecies] = useState(sighting.species?._id || '');
+  if (!sighting) return null;
 
   const confidence = (sighting.classifierConfidence || 0.95) * 100;
   const confidenceBadge = 
