@@ -96,3 +96,53 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Not authenticated' });
+    const { name, organization, avatarColor } = req.body;
+
+    if (req.isMongoConnected) {
+      const user = await User.findById(req.user._id);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      if (name) user.name = name;
+      await user.save();
+
+      return res.json({ _id: user._id, name: user.name, email: user.email, role: user.role, organization: organization || 'EcoGuard Org', avatarColor: avatarColor || '#113829' });
+    } else {
+      const user = req.memoryDb.users.find(u => u._id === req.user._id || u.id === req.user._id) || req.memoryDb.users[0];
+      if (name) user.name = name;
+      user.organization = organization || 'EcoGuard Org';
+      user.avatarColor = avatarColor || '#113829';
+      return res.json(user);
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Not authenticated' });
+    const { currentPassword, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    if (req.isMongoConnected) {
+      const user = await User.findById(req.user._id);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      if (currentPassword && !(await user.comparePassword(currentPassword))) {
+        return res.status(400).json({ message: 'Current password incorrect' });
+      }
+      user.password = newPassword;
+      await user.save();
+      return res.json({ message: 'Password updated successfully' });
+    } else {
+      return res.json({ message: 'Password updated successfully (in-memory mode)' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

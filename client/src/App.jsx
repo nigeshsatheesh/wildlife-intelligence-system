@@ -22,6 +22,9 @@ import BiodiversityPage from './components/BiodiversityPage';
 import HealthScorePage from './components/HealthScorePage';
 import ConservationOfficerDashboard from './components/ConservationOfficerDashboard';
 import ForestDepartmentDashboard from './components/ForestDepartmentDashboard';
+import SurveysPage from './components/SurveysPage';
+import CameraTrapsPage from './components/CameraTrapsPage';
+import ProfileModal from './components/ProfileModal';
 import { Search, Bell, Plus, UserCheck, Shield, Camera, Mic, X } from 'lucide-react';
 
 const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
@@ -31,8 +34,14 @@ const defaultSpecies = [
   { _id: 's2', commonName: 'African Elephant', scientificName: 'Loxodonta africana', category: 'Mammal', classifierLabel: 'elephant', conservationStatus: 'Vulnerable', imageUrl: '/species-images/asian-elephant.jpg' },
   { _id: 's3', commonName: 'Golden Eagle', scientificName: 'Aquila chrysaetos', category: 'Bird', classifierLabel: 'eagle', conservationStatus: 'Healthy', imageUrl: '/species-images/golden-eagle.jpg' },
   { _id: 's4', commonName: 'Eurasian Wolf', scientificName: 'Canis lupus', category: 'Mammal', classifierLabel: 'wolf', conservationStatus: 'Moderate Concern', imageUrl: '/species-images/indian-wolf.jpg' },
-  { _id: 's5', commonName: 'Eurasian Lynx', scientificName: 'Lynx lynx', category: 'Mammal', classifierLabel: 'lynx', conservationStatus: 'Vulnerable', imageUrl: 'https://images.unsplash.com/photo-1540573133985-780688d1728b?auto=format&fit=crop&w=600&q=80' },
-  { _id: 's6', commonName: 'Red Fox', scientificName: 'Vulpes vulpes', category: 'Mammal', classifierLabel: 'fox', conservationStatus: 'Healthy', imageUrl: '/species-images/red-fox.jpg' }
+  { _id: 's5', commonName: 'Red Fox', scientificName: 'Vulpes vulpes', category: 'Mammal', classifierLabel: 'fox', conservationStatus: 'Healthy', imageUrl: '/species-images/red-fox.jpg' },
+  { _id: 's6', commonName: 'Sloth Bear', scientificName: 'Melursus ursinus', category: 'Mammal', classifierLabel: 'bear', conservationStatus: 'Vulnerable', imageUrl: '/species-images/sloth-bear.jpg' },
+  { _id: 's7', commonName: 'Sambar Deer', scientificName: 'Rusa unicolor', category: 'Mammal', classifierLabel: 'deer', conservationStatus: 'Healthy', imageUrl: '/species-images/sambar-deer.jpg' },
+  { _id: 's8', commonName: 'Leopard', scientificName: 'Panthera pardus', category: 'Mammal', classifierLabel: 'leopard', conservationStatus: 'Vulnerable', imageUrl: '/species-images/leopard.jpg' },
+  { _id: 's9', commonName: 'Asiatic Lion', scientificName: 'Panthera leo persica', category: 'Mammal', classifierLabel: 'lion', conservationStatus: 'Critical', imageUrl: '/species-images/asiatic-lion.jpg' },
+  { _id: 's10', commonName: 'Eurasian Owl', scientificName: 'Bubo bubo', category: 'Bird', classifierLabel: 'owl', conservationStatus: 'Healthy', imageUrl: '/species-images/eurasian-owl.jpg' },
+  { _id: 's11', commonName: 'Indian Giant Squirrel', scientificName: 'Ratufa indica', category: 'Mammal', classifierLabel: 'squirrel', conservationStatus: 'Healthy', imageUrl: '/species-images/giant-squirrel.jpg' },
+  { _id: 's12', commonName: 'Plains Zebra', scientificName: 'Equus quagga', category: 'Mammal', classifierLabel: 'zebra', conservationStatus: 'Healthy', imageUrl: '/species-images/plains-zebra.jpg' }
 ];
 
 const defaultSites = [
@@ -113,6 +122,7 @@ export default function App() {
   
   const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
   const [editingSiteData, setEditingSiteData] = useState(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Data states
   const [species, setSpecies] = useState([]);
@@ -126,13 +136,15 @@ export default function App() {
   const [habitatData, setHabitatData] = useState([]);
   const [conservationRecs, setConservationRecs] = useState([]);
   const [ecosystemHealth, setEcosystemHealth] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [isBellDrawerOpen, setIsBellDrawerOpen] = useState(false);
 
   // Fetch API data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         setDataLoadError(null);
-        const [spRes, stRes, sgRes, anRes, recRes, popRes, habRes, conRes, healthRes] = await Promise.all([
+        const [spRes, stRes, sgRes, anRes, recRes, popRes, habRes, conRes, healthRes, notifRes] = await Promise.all([
           fetch(`${API_BASE}/species`),
           fetch(`${API_BASE}/sites`),
           fetch(`${API_BASE}/sightings`),
@@ -141,7 +153,8 @@ export default function App() {
           fetch(`${API_BASE}/population`),
           fetch(`${API_BASE}/habitat`),
           fetch(`${API_BASE}/analytics/conservation-recommendations`),
-          fetch(`${API_BASE}/health-score`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+          fetch(`${API_BASE}/health-score`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+          fetch(`${API_BASE}/notifications`)
         ]);
 
         if (spRes.ok && stRes.ok && sgRes.ok && anRes.ok) {
@@ -155,6 +168,7 @@ export default function App() {
           if (sgData.length) setSightings(sgData);
           setAnalytics(anData);
         }
+        if (notifRes.ok) setNotifications(await notifRes.json());
         if (popRes.ok) setPopulationData((await popRes.json()).speciesMetrics);
         if (habRes.ok) setHabitatData((await habRes.json()).siteReports);
         if (conRes.ok) setConservationRecs((await conRes.json()).recommendations);
@@ -337,6 +351,7 @@ export default function App() {
         user={user} 
         onOpenAuth={() => setAuthMode('login')} 
         onLogout={handleLogout}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -375,9 +390,55 @@ export default function App() {
             </button>
 
             {/* Bell Notification */}
-            <div style={{ position: 'relative', cursor: 'pointer', background: '#ffffff', width: '38px', height: '38px', borderRadius: '50%', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Bell size={18} color="var(--text-medium)" />
-              <span style={{ position: 'absolute', top: '6px', right: '6px', width: '7px', height: '7px', borderRadius: '50%', background: '#ef4444' }}></span>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setIsBellDrawerOpen(prev => !prev)}
+                style={{ position: 'relative', cursor: 'pointer', background: '#ffffff', width: '38px', height: '38px', borderRadius: '50%', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Toggle notifications"
+              >
+                <Bell size={18} color="var(--text-medium)" />
+                {notifications.filter(n => !n.read).length > 0 && (
+                  <span style={{ position: 'absolute', top: '-2px', right: '-2px', minWidth: '16px', height: '16px', borderRadius: '9999px', background: '#ef4444', color: '#ffffff', fontSize: '0.65rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+                    {notifications.filter(n => !n.read).length}
+                  </span>
+                )}
+              </button>
+
+              {isBellDrawerOpen && (
+                <div style={{ position: 'absolute', right: 0, top: '48px', width: '320px', background: '#ffffff', border: '1px solid var(--border-light)', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 300, overflow: 'hidden' }}>
+                  <div style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-dark)' }}>Notifications</span>
+                    <button
+                      onClick={() => { setActiveTab('alerts'); setIsBellDrawerOpen(false); }}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--forest-green)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      View All
+                    </button>
+                  </div>
+
+                  <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                    {notifications.slice(0, 5).map(n => (
+                      <div
+                        key={n._id || n.id}
+                        onClick={() => { setActiveTab('alerts'); setIsBellDrawerOpen(false); }}
+                        style={{
+                          padding: '0.75rem 1rem',
+                          borderBottom: '1px solid var(--border-subtle)',
+                          borderLeft: `3px solid ${n.severity === 'critical' ? '#ef4444' : n.severity === 'warning' ? '#f59e0b' : '#3b82f6'}`,
+                          cursor: 'pointer',
+                          background: n.read ? '#ffffff' : '#fcfdfe'
+                        }}
+                      >
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '0.2rem' }}>{n.title}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-medium)', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{n.message}</div>
+                      </div>
+                    ))}
+                    {notifications.length === 0 && (
+                      <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>No notifications</div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* + New Survey / Log Sighting Button */}
@@ -467,8 +528,7 @@ export default function App() {
                 <ReportsPage analytics={analytics} species={species} sightings={sightings} ecosystemHealth={ecosystemHealth} />
               )}
 
-              {/* Sightings / Surveys Listing Page (Page 10) */}
-              {(activeTab === 'sightings' || activeTab === 'surveys') && (
+              {activeTab === 'sightings' && (
                 <SightingsListPage 
                   sightings={sightings} 
                   speciesList={species} 
@@ -476,6 +536,14 @@ export default function App() {
                   onSelectSighting={(sg) => setSelectedSightingDetail(sg)} 
                   onOpenLogSighting={() => setIsLogSightingFormOpen(true)} 
                 />
+              )}
+
+              {activeTab === 'surveys' && (
+                <SurveysPage sites={sites} />
+              )}
+
+              {activeTab === 'camera-traps' && (
+                <CameraTrapsPage sites={sites} />
               )}
 
               {/* Bioacoustic Recordings Listing Page */}
@@ -554,6 +622,13 @@ export default function App() {
         onClose={() => setIsSiteModalOpen(false)} 
         onSaveSite={handleSaveSite} 
         initialData={editingSiteData} 
+      />
+
+      <ProfileModal
+        user={user}
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onUpdateUser={(updated) => setUser(prev => ({ ...prev, ...updated }))}
       />
 
       {/* Sighting Type Selection Modal */}

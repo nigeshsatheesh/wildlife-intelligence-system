@@ -60,6 +60,15 @@ const recordingSchema = new mongoose.Schema({
   durationSeconds: {
     type: Number
   },
+  noiseLevelDb: {
+    type: Number
+  },
+  snrEstimate: {
+    type: Number
+  },
+  environmentalNoise: {
+    type: String
+  },
   location: {
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true }

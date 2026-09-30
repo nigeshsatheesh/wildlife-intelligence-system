@@ -124,18 +124,34 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
 
                     <td style={{ padding: '0.75rem 1rem' }}>
                       {rec.speciesClassifierLabel ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <span style={{ fontWeight: '700', color: 'var(--forest-green)', textTransform: 'capitalize' }}>
-                            {rec.speciesClassifierLabel}
-                          </span>
-                          <span style={{
-                            fontSize: '0.65rem', fontWeight: 700,
-                            color: (rec.speciesClassifierConfidence * 100) > 70 ? '#2f855a' : '#b7791f',
-                            background: (rec.speciesClassifierConfidence * 100) > 70 ? '#e8f3ee' : '#fef3d9',
-                            borderRadius: '999px', padding: '0.15rem 0.5rem'
-                          }}>
-                            {(rec.speciesClassifierConfidence * 100).toFixed(1)}%
-                          </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <span style={{ fontWeight: '700', color: 'var(--forest-green)', textTransform: 'capitalize' }}>
+                              {rec.speciesClassifierLabel}
+                            </span>
+                            <span style={{
+                              fontSize: '0.65rem', fontWeight: 700,
+                              color: (rec.speciesClassifierConfidence * 100) > 70 ? '#2f855a' : '#b7791f',
+                              background: (rec.speciesClassifierConfidence * 100) > 70 ? '#e8f3ee' : '#fef3d9',
+                              borderRadius: '999px', padding: '0.15rem 0.5rem'
+                            }}>
+                              {(rec.speciesClassifierConfidence * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          {(typeof rec.snrEstimate === 'number' || typeof rec.noiseLevelDb === 'number') && (
+                            <div style={{ display: 'flex', gap: '0.35rem', fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                              {typeof rec.snrEstimate === 'number' && (
+                                <span style={{ background: '#f3f4f6', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 600 }}>
+                                  SNR: {rec.snrEstimate.toFixed(1)} dB
+                                </span>
+                              )}
+                              {typeof rec.noiseLevelDb === 'number' && (
+                                <span style={{ background: '#f3f4f6', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 600 }}>
+                                  Noise: {rec.noiseLevelDb.toFixed(1)} dB
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.8rem' }}>

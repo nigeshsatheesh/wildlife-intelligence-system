@@ -1,0 +1,50 @@
+name: EcoGuard CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm ci || npm install
+
+      - name: Run Backend Tests
+        run: |
+          cd server
+          npm test
+
+  ml-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install ML Dependencies
+        run: |
+          cd ml-service
+          pip install -r requirements.txt || true
+
+      - name: Run Pytest ML Suite
+        run: |
+          cd ml-service
+          python test_ml.py

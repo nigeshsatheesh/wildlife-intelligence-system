@@ -165,6 +165,9 @@ exports.createRecording = async (req, res) => {
       speciesClassifierLabel,
       speciesClassifierConfidence,
       durationSeconds,
+      noiseLevelDb: mlData?.noise_level_db ?? mlData?.noiseLevelDb ?? null,
+      snrEstimate: mlData?.snr_estimate ?? mlData?.snrEstimate ?? null,
+      environmentalNoise: mlData?.environmental_noise ?? mlData?.environmentalNoise ?? null,
       recordedBy,
       eventDate: req.body.eventDate || new Date(),
       location: {

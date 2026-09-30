@@ -42,18 +42,16 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
       const matchedSpecies = species.find(sp => sp.classifierLabel === data.label);
       if (matchedSpecies) {
         setSelectedSpeciesId(matchedSpecies._id);
-        setAiPrediction({
-          speciesName: matchedSpecies.commonName,
-          scientificName: matchedSpecies.scientificName,
-          confidence: (data.confidence * 100).toFixed(1)
-        });
-      } else {
-        setAiPrediction({
-          speciesName: `Unrecognized label: "${data.label}"`,
-          scientificName: '',
-          confidence: (data.confidence * 100).toFixed(1)
-        });
       }
+
+      setAiPrediction({
+        speciesName: matchedSpecies ? matchedSpecies.commonName : `Unrecognized label: "${data.label}"`,
+        scientificName: matchedSpecies ? matchedSpecies.scientificName : '',
+        confidence: (data.confidence * 100).toFixed(1),
+        topK: data.topK || [],
+        quality: data.quality || {},
+        isUnknown: data.isUnknown || false
+      });
     } catch (err) {
       setError('Could not get AI prediction — you can still select species manually.');
     }
@@ -175,24 +173,54 @@ export default function SightingLogForm({ species, sites, onSaveSighting, onClos
         </div>
 
         {aiPrediction && (
-          <div className="eco-card" style={{ background: '#e8f3ee', border: '1px solid var(--forest-green)', padding: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.65rem' }}>
-              <Sparkles size={18} color="var(--forest-green)" />
-              <h3 style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--forest-green)' }}>AI Prediction (Real)</h3>
+          <div className="eco-card" style={{ background: '#e8f3ee', border: '1px solid var(--forest-green)', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Sparkles size={18} color="var(--forest-green)" />
+                <h3 style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--forest-green)' }}>AI Vision Classifier</h3>
+              </div>
+              {aiPrediction.quality?.qualityChip && (
+                <span style={{
+                  fontSize: '0.7rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '999px',
+                  background: aiPrediction.quality.qualityChip.includes('High') ? '#d1fae5' : '#fef3c7',
+                  color: aiPrediction.quality.qualityChip.includes('High') ? '#065f46' : '#92400e'
+                }}>
+                  {aiPrediction.quality.qualityChip} ({aiPrediction.quality.resolution})
+                </span>
+              )}
             </div>
-            <div style={{ fontWeight: '800', fontSize: '1.05rem' }}>
-              {aiPrediction.speciesName} <span style={{ fontStyle: 'italic', fontWeight: 400 }}>({aiPrediction.scientificName})</span>
+
+            {aiPrediction.isUnknown && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', padding: '0.6rem 0.85rem', borderRadius: '8px', color: '#991b1b', fontSize: '0.75rem', fontWeight: 700 }}>
+                ⚠️ Low confidence prediction ({aiPrediction.confidence}%). Species marked as potentially UNKNOWN or uncatalogued.
+              </div>
+            )}
+
+            <div>
+              <div style={{ fontWeight: '800', fontSize: '1.05rem', color: 'var(--text-dark)' }}>
+                {aiPrediction.speciesName} {aiPrediction.scientificName && <span style={{ fontStyle: 'italic', fontWeight: 400 }}>({aiPrediction.scientificName})</span>}
+              </div>
+              <div style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: 'var(--text-medium)' }}>
+                Top Confidence: <strong style={{ color: 'var(--forest-green)' }}>{aiPrediction.confidence}%</strong>
+              </div>
             </div>
-            <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>Confidence: <strong style={{ color: 'var(--forest-green)' }}>{aiPrediction.confidence}%</strong></div>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{ marginTop: '1rem', width: '100%', padding: '0.6rem',
-                       borderRadius: '8px', border: 'none', fontWeight: 700,
-                       cursor: 'pointer', background: 'var(--forest-green)', color: '#fff' }}
-            >
-              Done — Close
-            </button>
+
+            {aiPrediction.topK && aiPrediction.topK.length > 0 && (
+              <div style={{ background: 'rgba(255,255,255,0.7)', padding: '0.75rem', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Top Candidate Probabilities</div>
+                {aiPrediction.topK.slice(0, 3).map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                    <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{item.label}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '50%' }}>
+                      <div style={{ flex: 1, background: '#e5e7eb', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: `${(item.confidence * 100).toFixed(0)}%`, background: idx === 0 ? 'var(--forest-green)' : '#9ca3af', height: '100%' }} />
+                      </div>
+                      <span style={{ fontWeight: 700, width: '38px', textAlign: 'right' }}>{(item.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

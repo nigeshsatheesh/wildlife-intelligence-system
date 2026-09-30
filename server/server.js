@@ -133,7 +133,195 @@ const memoryDb = {
       notes: 'Night camera trap trigger. Pack movement recorded.'
     }
   ],
-  recordings: []
+  recordings: [],
+  notifications: [
+    {
+      _id: 'n1',
+      type: 'endangered_sighting',
+      severity: 'critical',
+      title: 'Critical Species Sighting: Bengal Tiger',
+      message: 'Female Bengal Tiger with cub spotted at Bandipur Tiger Reserve Sector 4.',
+      roleTargets: ['Admin', 'Conservation Officer', 'Researcher', 'Forest Department Officer'],
+      read: false,
+      createdAt: new Date('2026-09-30T10:15:00Z')
+    },
+    {
+      _id: 'n2',
+      type: 'population_decline',
+      severity: 'warning',
+      title: 'Population Decline Alert: Sloth Bear',
+      message: 'Sloth Bear sightings have decreased by 35% MoM across Western Ghats corridor.',
+      roleTargets: ['Admin', 'Conservation Officer', 'Researcher'],
+      read: false,
+      createdAt: new Date('2026-09-29T14:30:00Z')
+    },
+    {
+      _id: 'n3',
+      type: 'habitat_degradation',
+      severity: 'warning',
+      title: 'Habitat Index Alert: Kaziranga Sector B',
+      message: 'Fragmentation index increased by 14% following heavy monsoonal runoff.',
+      roleTargets: ['Admin', 'Forest Department Officer'],
+      read: true,
+      createdAt: new Date('2026-09-28T09:00:00Z')
+    },
+    {
+      _id: 'n4',
+      type: 'device_offline',
+      severity: 'warning',
+      title: 'Camera Trap Telemetry Warning',
+      message: 'Camera Trap CT-BTR-04 has not transmitted data for 72 hours.',
+      roleTargets: ['Admin', 'Forest Department Officer'],
+      read: false,
+      createdAt: new Date('2026-09-27T18:20:00Z')
+    },
+    {
+      _id: 'n5',
+      type: 'endangered_sighting',
+      severity: 'warning',
+      title: 'Vulnerable Species Sighting: Asian Elephant',
+      message: 'Herd of 14 matriarch Asian Elephants recorded at Kaziranga Wetland Station.',
+      roleTargets: ['Admin', 'Conservation Officer', 'Researcher'],
+      read: true,
+      createdAt: new Date('2026-09-26T11:45:00Z')
+    },
+    {
+      _id: 'n6',
+      type: 'conservation',
+      severity: 'info',
+      title: 'Monthly Conservation Patrol Report Ready',
+      message: 'The September 2026 Executive Field Patrol Report is ready for download.',
+      roleTargets: ['Admin', 'Conservation Officer', 'Forest Department Officer'],
+      read: false,
+      createdAt: new Date('2026-09-25T08:30:00Z')
+    },
+    {
+      _id: 'n7',
+      type: 'device_offline',
+      severity: 'critical',
+      title: 'Critical Sensor Low Battery',
+      message: 'Audio Sensor AS-KZR-02 battery level dropped below 15%.',
+      roleTargets: ['Admin', 'Forest Department Officer'],
+      read: false,
+      createdAt: new Date('2026-09-24T16:10:00Z')
+    },
+    {
+      _id: 'n8',
+      type: 'habitat_degradation',
+      severity: 'info',
+      title: 'Environmental Reading Exceeds Threshold',
+      message: 'Ambient temperature at Bandipur Station exceeded seasonal average by 4.2°C.',
+      roleTargets: ['Admin', 'Researcher'],
+      read: true,
+      createdAt: new Date('2026-09-23T12:00:00Z')
+    }
+  ],
+  environmentReadings: [
+    {
+      _id: 'env1',
+      site: 'st1',
+      temperature: 27.5,
+      rainfall: 12.4,
+      humidity: 65,
+      readingDate: new Date('2026-09-29T10:00:00Z')
+    },
+    {
+      _id: 'env2',
+      site: 'st2',
+      temperature: 29.1,
+      rainfall: 45.0,
+      humidity: 82,
+      readingDate: new Date('2026-09-30T08:30:00Z')
+    }
+  ],
+  surveys: [
+    {
+      _id: 'srv1',
+      surveyId: 'SRV-2026-001',
+      name: 'Bandipur Monsoon Census 2026',
+      site: 'st1',
+      protectedArea: 'Bandipur National Park',
+      habitatType: 'Forest',
+      surveyDate: new Date('2026-09-15T00:00:00Z'),
+      status: 'active',
+      notes: 'Active tiger & leopard camera trap census.'
+    },
+    {
+      _id: 'srv2',
+      surveyId: 'SRV-2026-002',
+      name: 'Kaziranga Wetland Bird Survey',
+      site: 'st2',
+      protectedArea: 'Kaziranga National Park',
+      habitatType: 'Wetland',
+      surveyDate: new Date('2026-09-10T00:00:00Z'),
+      status: 'active',
+      notes: 'Bioacoustic monitoring for waterfowl & eagles.'
+    }
+  ],
+  devices: [
+    {
+      _id: 'dev1',
+      deviceCode: 'CT-BTR-01',
+      type: 'camera_trap',
+      site: 'st1',
+      status: 'active',
+      batteryLevel: 88,
+      lastSeen: new Date('2026-09-30T12:00:00Z')
+    },
+    {
+      _id: 'dev2',
+      deviceCode: 'AS-BTR-01',
+      type: 'audio_sensor',
+      site: 'st1',
+      status: 'active',
+      batteryLevel: 92,
+      lastSeen: new Date('2026-09-30T14:15:00Z')
+    },
+    {
+      _id: 'dev3',
+      deviceCode: 'CT-KZR-02',
+      type: 'camera_trap',
+      site: 'st2',
+      status: 'active',
+      batteryLevel: 64,
+      lastSeen: new Date('2026-09-29T22:30:00Z')
+    },
+    {
+      _id: 'dev4',
+      deviceCode: 'AS-KZR-02',
+      type: 'audio_sensor',
+      site: 'st2',
+      status: 'maintenance',
+      batteryLevel: 14,
+      lastSeen: new Date('2026-09-24T16:10:00Z')
+    }
+  ],
+  incidents: [
+    {
+      _id: 'inc1',
+      title: 'Illegal Fence Construction near Northern Corridor',
+      incidentType: 'Illegal Encroachment',
+      severity: 'high',
+      status: 'Open',
+      monitoringSite: { _id: 'st1', siteName: 'Bandipur Tiger Reserve' },
+      reportedBy: { name: 'Forest Patrol Team A' },
+      eventDate: new Date('2026-09-29T10:00:00Z'),
+      location: { latitude: 11.6700, longitude: 76.6300 },
+      notes: 'Wire fencing erected within 200m of tiger breeding zone.'
+    },
+    {
+      _id: 'inc2',
+      title: 'Elephant Herd Approaching Agricultural Fringe',
+      incidentType: 'Human-Wildlife Conflict',
+      severity: 'medium',
+      status: 'Under Investigation',
+      monitoringSite: { _id: 'st2', siteName: 'Kaziranga Wetland Station' },
+      reportedBy: { name: 'Rapid Action Squad' },
+      eventDate: new Date('2026-09-28T18:30:00Z'),
+      location: { latitude: 26.5800, longitude: 93.1800 },
+      notes: 'Matriarch herd grazing near paddy fields. Solar fence team dispatched.'
+    }
+  ]
 };
 
 let isMongoConnected = false;
@@ -157,8 +345,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// Notifications & Alerts
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
-  
+// Environmental Readings
+app.use('/api/environment', require('./routes/environmentRoutes'));
+
+// Surveys & Devices
+app.use('/api/surveys', require('./routes/surveyRoutes'));
+app.use('/api/devices', require('./routes/deviceRoutes'));
+
 // Reports
 app.use('/api/reports', require('./routes/reportRoutes'));
 
@@ -172,6 +368,7 @@ app.use('/api/species', require('./routes/speciesRoutes'));
 app.use('/api/sites', require('./routes/siteRoutes'));
 app.use('/api/sightings', require('./routes/sightingRoutes'));
 app.use('/api/recordings', require('./routes/recordingRoutes'));
+app.use('/api/incidents', require('./routes/incidentRoutes'));
 app.use('/api/population', require('./routes/populationRoutes'));
 app.use('/api/habitat', require('./routes/habitatRoutes'));
 

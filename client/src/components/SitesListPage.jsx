@@ -3,6 +3,41 @@ import { Search, Plus, MapPin, Trees, Radio, Compass, ShieldCheck } from 'lucide
 
 export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }) {
   const [search, setSearch] = useState('');
+  const [isEnvModalOpen, setIsEnvModalOpen] = useState(false);
+  const [envSite, setEnvSite] = useState(sites[0]?._id || '');
+  const [temp, setTemp] = useState('28.5');
+  const [rainfall, setRainfall] = useState('10.0');
+  const [humidity, setHumidity] = useState('65');
+  const [submitting, setSubmitting] = useState(false);
+
+  const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
+
+  const handleEnvSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/environment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          site: envSite || sites[0]?._id,
+          temperature: Number(temp),
+          rainfall: Number(rainfall),
+          humidity: Number(humidity)
+        })
+      });
+      if (res.ok) {
+        alert('Environment reading recorded successfully!');
+        setIsEnvModalOpen(false);
+      } else {
+        alert('Failed to record environment reading');
+      }
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const filteredSites = sites.filter(s => 
     (s.siteName || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -23,6 +58,14 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button
+            className="btn-primary"
+            onClick={() => setIsEnvModalOpen(true)}
+            style={{ background: '#ffffff', color: 'var(--forest-green)', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
+          >
+            + Add Env Reading
+          </button>
+
           <div style={{ position: 'relative' }}>
             <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input
@@ -183,7 +226,73 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
             </tbody>
           </table>
         </div>
-      </div>
+      {/* Environment Reading Modal */}
+      {isEnvModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(3px)' }}>
+          <div style={{ background: '#ffffff', borderRadius: '16px', padding: '2rem', width: '90%', maxWidth: '440px', boxShadow: '0 20px 25px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '0.5rem' }}>Record Environment Reading</h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>Submit field ambient temperature, rainfall, and humidity.</p>
+
+            <form onSubmit={handleEnvSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '0.3rem', display: 'block' }}>Monitoring Site:</label>
+                <select
+                  value={envSite}
+                  onChange={e => setEnvSite(e.target.value)}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
+                >
+                  {sites.map(s => <option key={s._id} value={s._id}>{s.siteName}</option>)}
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '0.3rem', display: 'block' }}>Temperature (°C):</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={temp}
+                    onChange={e => setTemp(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '0.3rem', display: 'block' }}>Rainfall (mm):</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={rainfall}
+                    onChange={e => setRainfall(e.target.value)}
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '0.3rem', display: 'block' }}>Humidity (%):</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={humidity}
+                  onChange={e => setHumidity(e.target.value)}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setIsEnvModalOpen(false)} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-light)', background: '#ffffff', cursor: 'pointer', fontWeight: 700 }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={submitting} className="btn-primary" style={{ flex: 1 }}>
+                  {submitting ? 'Saving...' : 'Save Reading'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

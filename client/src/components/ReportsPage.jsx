@@ -1,34 +1,31 @@
-import React from 'react';
-import { Layers, CalendarDays, FileText, TrendingDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Download, Layers, ShieldAlert, Award, MapPin, Compass, FileSpreadsheet, Loader2 } from 'lucide-react';
 
-export default function ReportsPage({ analytics = {}, species = [], sightings = [], ecosystemHealth = null }) {
-  const statusColor = (status) =>
-    status === 'Excellent' || status === 'Healthy' ? 'badge-green' : 'badge-red';
+const API_BASE = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
-  const statusCounts = species.reduce((acc, sp) => {
-    const key = sp.conservationStatus || 'Healthy';
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
+export default function ReportsPage({ analytics = {}, species = [], sightings = [], sites = [], ecosystemHealth = null }) {
+  const [downloadingFormat, setDownloadingFormat] = useState(null); // format + type, e.g. 'pdf-survey'
 
-  const recentSightings = [...sightings]
-    .sort((a, b) => new Date(b.eventDate || b.createdAt) - new Date(a.eventDate || a.createdAt))
-    .slice(0, 4);
-
-  const handleDownloadReport = async () => {
+  const handleDownload = async (type, format) => {
     const token = localStorage.getItem('token');
-    if (!token) return alert('Please log in to generate the report.');
+    const key = `${format}-${type}`;
+    setDownloadingFormat(key);
 
-    const API_BASE = import.meta.env.VITE_API_URL || window.location.origin;
     try {
-      const res = await fetch(`${API_BASE}/api/reports/download`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const endpoint = format === 'excel'
+        ? `${API_BASE}/reports/excel?type=${type}`
+        : `${API_BASE}/reports/download?type=${type}`;
+
+      const res = await fetch(endpoint, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      if (!res.ok) return alert('Failed to generate report');
+
+      if (!res.ok) throw new Error('Failed to generate report');
 
       const disposition = res.headers.get('Content-Disposition');
       const match = disposition && disposition.match(/filename=(.+)/);
-      const filename = match ? match[1].replace(/['"]/g, '') : 'wildlife-monitoring-report.pdf';
+      const ext = format === 'excel' ? 'xlsx' : 'pdf';
+      const filename = match ? match[1].replace(/['"]/g, '') : `wildlife-report-${type}.${ext}`;
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -38,133 +35,134 @@ export default function ReportsPage({ analytics = {}, species = [], sightings = 
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert('Could not reach the server to generate the report. Is the backend running on port 5000?');
+      alert(`Could not download report: ${err.message}`);
+    } finally {
+      setDownloadingFormat(null);
     }
   };
 
+  const reportCards = [
+    {
+      id: 'survey',
+      title: 'Field Survey & Sighting Log Report',
+      description: 'Comprehensive export of camera trap observations, specimen counts, AI confidence scores, and verifications.',
+      icon: Compass,
+      color: '#113829'
+    },
+    {
+      id: 'species-population',
+      title: 'Species Population Analytics Report',
+      description: 'Detailed analysis of species richness, population size, MoM trends, and IUCN conservation statuses.',
+      icon: Layers,
+      color: '#0f766e'
+    },
+    {
+      id: 'biodiversity',
+      title: 'Biodiversity & Ecosystem Index Report',
+      description: 'Shannon Diversity Index (H\') scores, species evenness breakdown, and site-by-site comparative metrics.',
+      icon: Award,
+      color: '#10b981'
+    },
+    {
+      id: 'habitat',
+      title: 'Habitat & Protected Area Report',
+      description: 'Monitoring station inventory, habitat fragmentation scores, and protected area coverage data.',
+      icon: MapPin,
+      color: '#2563eb'
+    },
+    {
+      id: 'conservation',
+      title: 'Conservation Watch & Priority Action Plan',
+      description: 'High-threat species alerts, declining population flags, and prioritized ranger patrol recommendations.',
+      icon: ShieldAlert,
+      color: '#ef4444'
+    }
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Header */}
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)' }}>Reports & Intelligence</h2>
-            <span className="badge-pill badge-green">Data-driven</span>
-          </div>
-          <button className="btn-new-survey" onClick={handleDownloadReport}>
-            Download Report
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: '800', color: 'var(--text-dark)' }}>Reports & Intelligence Center</h2>
+          <span className="badge-pill badge-teal">5 Report Types</span>
         </div>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Generated conservation reports using the latest sightings and biodiversity analytics.
+          Export publication-ready PDF summaries and raw Excel datasets for ecological analysis and governance compliance.
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-        <div className="eco-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>TOTAL SIGHTINGS</div>
-              <div style={{ fontSize: '1.9rem', fontWeight: '800', color: 'var(--text-dark)' }}>{analytics.totalSightings ?? sightings.length}</div>
-            </div>
-            <CalendarDays size={18} color="#065f46" />
-          </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Field records processed into actionable reports.</div>
-        </div>
+      {/* 5 Report Cards Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.25rem' }}>
+        {reportCards.map(card => {
+          const Icon = card.icon;
+          const isPdfLoading = downloadingFormat === `pdf-${card.id}`;
+          const isExcelLoading = downloadingFormat === `excel-${card.id}`;
 
-        <div className="eco-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>ACTIVE SPECIES</div>
-              <div style={{ fontSize: '1.9rem', fontWeight: '800', color: 'var(--text-dark)' }}>{analytics.activeSpeciesCount ?? species.length}</div>
-            </div>
-            <Layers size={18} color="#0f766e" />
-          </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Tracked taxa contributing to biodiversity reporting.</div>
-        </div>
-
-        <div className="eco-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>SITE COVERAGE</div>
-              <div style={{ fontSize: '1.9rem', fontWeight: '800', color: 'var(--text-dark)' }}>{analytics.activeSitesCount ?? '—'}</div>
-            </div>
-            <FileText size={18} color="#0d9488" />
-          </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Field stations and camera trap deployments available for analysis.</div>
-        </div>
-
-        <div className="eco-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div>
-              <div style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>MONTHLY TREND</div>
-              <div style={{ fontSize: '1.9rem', fontWeight: '800', color: 'var(--text-dark)' }}>{analytics.sightingTrends?.length ? `${analytics.sightingTrends.length} months` : 'N/A'}</div>
-            </div>
-            <TrendingDown size={18} color="#2563eb" />
-          </div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Time series data available for report generation.</div>
-        </div>
-      </div>
-
-      {ecosystemHealth && (
-        <div className="eco-card" style={{ padding: '1.5rem' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: '800', marginBottom: '1rem' }}>
-            Ecosystem Health Score — <span style={{ color: 'var(--forest-green)' }}>{ecosystemHealth.overallScore} ({ecosystemHealth.status})</span>
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {Object.entries(ecosystemHealth.factors).map(([key, f]) => (
-              <div key={key} style={{ fontSize: '0.8rem' }}>
-                <strong style={{ textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}</strong>
-                {f.score !== null ? ` — ${f.score}/100 (spec weight ${f.specWeight})` : ` — unavailable (${f.unavailableReason})`}
-                <div style={{ color: 'var(--text-muted)' }}>{f.note}</div>
-              </div>
-            ))}
-          </div>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic' }}>
-            {ecosystemHealth.weightingNote}
-          </p>
-        </div>
-      )}
-
-      <div className="eco-card" style={{ padding: '1.5rem' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '1rem' }}>Conservation Status Breakdown</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.9rem' }}>
-          {Object.entries(statusCounts).map(([status, count]) => (
-            <div key={status} className="eco-card" style={{ padding: '1rem' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '0.45rem' }}>{status}</div>
-              <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-dark)' }}>{count}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="eco-card" style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)' }}>Recent Sightings Snapshot</h3>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Latest field logs</span>
-        </div>
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          {recentSightings.length ? recentSightings.map((sighting) => (
-            <div key={sighting._id} style={{ padding: '1rem', borderRadius: '12px', background: '#f8fafc', display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem' }}>
+          return (
+            <div key={card.id} className="eco-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
-                <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-dark)' }}>
-                  {sighting.species?.commonName || 'Unknown species'} at {sighting.monitoringSite?.siteName || sighting.locality || 'unknown location'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: `${card.color}15`, color: card.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-dark)' }}>{card.title}</h3>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>TYPE: {card.id}</span>
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                  {new Date(sighting.eventDate || sighting.createdAt).toLocaleString()} • {sighting.individualCount || 1} specimen(s)
-                </div>
+
+                <p style={{ fontSize: '0.84rem', color: 'var(--text-medium)', lineHeight: 1.45, marginBottom: '1.5rem' }}>
+                  {card.description}
+                </p>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                <span className={`badge-pill ${sighting.verified ? 'badge-green' : 'badge-pill'}`} style={{ fontSize: '0.75rem' }}>
-                  {sighting.verified ? 'Verified' : 'Unverified'}
-                </span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{Math.round((sighting.classifierConfidence || 0.85) * 100)}% AI confidence</span>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
+                <button
+                  onClick={() => handleDownload(card.id, 'pdf')}
+                  disabled={!!downloadingFormat}
+                  className="btn-primary"
+                  style={{ flex: 1, fontSize: '0.82rem', padding: '0.6rem 0.75rem' }}
+                >
+                  {isPdfLoading ? <Loader2 size={15} className="animate-spin" /> : <FileText size={15} />}
+                  <span>{isPdfLoading ? 'Exporting PDF...' : 'Download PDF'}</span>
+                </button>
+
+                <button
+                  onClick={() => handleDownload(card.id, 'excel')}
+                  disabled={!!downloadingFormat}
+                  className="btn-primary"
+                  style={{ flex: 1, fontSize: '0.82rem', padding: '0.6rem 0.75rem', background: '#ffffff', color: 'var(--forest-green)', border: '1px solid var(--border-light)' }}
+                >
+                  {isExcelLoading ? <Loader2 size={15} className="animate-spin" /> : <FileSpreadsheet size={15} />}
+                  <span>{isExcelLoading ? 'Exporting Excel...' : 'Download Excel'}</span>
+                </button>
               </div>
             </div>
-          )) : (
-            <div style={{ padding: '1rem', borderRadius: '12px', background: '#f8fafc', color: 'var(--text-muted)' }}>
-              No recent sightings are available to populate report snapshots.
-            </div>
-          )}
+          );
+        })}
+      </div>
+
+      {/* Snapshot Data Overview */}
+      <div className="eco-card" style={{ padding: '1.5rem' }}>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)', marginBottom: '1rem' }}>Dataset Coverage Summary</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+          <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)' }}>TOTAL SIGHTINGS</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-dark)' }}>{analytics.totalSightings ?? sightings.length}</div>
+          </div>
+          <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)' }}>ACTIVE SPECIES</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-dark)' }}>{species.length}</div>
+          </div>
+          <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)' }}>MONITORING SITES</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-dark)' }}>{analytics.activeSitesCount ?? sites.length}</div>
+          </div>
+          <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)' }}>HEALTH STATUS</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--forest-green)' }}>{ecosystemHealth ? ecosystemHealth.status : 'Healthy'}</div>
+          </div>
         </div>
       </div>
     </div>

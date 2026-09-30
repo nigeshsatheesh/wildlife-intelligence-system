@@ -7,6 +7,11 @@ services:
       - "5001:5001"
     volumes:
       - tfhub-cache:/app/tfhub_cache
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
   ml-audio:
@@ -17,6 +22,11 @@ services:
       - "5002:5002"
     volumes:
       - tfhub-cache:/app/tfhub_cache
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5002/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
   server:
@@ -34,6 +44,11 @@ services:
     depends_on:
       - ml-image
       - ml-audio
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
   client:
@@ -42,6 +57,11 @@ services:
       - "80:80"
     depends_on:
       - server
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
 volumes:

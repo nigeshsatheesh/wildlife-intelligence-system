@@ -77,7 +77,7 @@ export default function HabitatPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
             <div style={{ background: '#f9fafb', borderRadius: '8px', padding: '0.65rem 0.85rem' }}>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Richness Index</div>
               <div style={{ fontSize: '1.15rem', fontWeight: '800' }}>
@@ -87,6 +87,16 @@ export default function HabitatPage() {
                     {site.richnessTrend > 0 ? '+' : ''}{site.richnessTrend}
                   </span>
                 )}
+              </div>
+            </div>
+            <div style={{ background: '#f9fafb', borderRadius: '8px', padding: '0.65rem 0.85rem' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Suitability Score</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--forest-green)' }}>{site.suitabilityScore || 78}/100</div>
+            </div>
+            <div style={{ background: '#f9fafb', borderRadius: '8px', padding: '0.65rem 0.85rem' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Degradation Risk</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: '800', color: site.degradationRisk === 'Critical' ? '#dc2626' : site.degradationRisk === 'High' ? '#d97706' : '#16a34a' }}>
+                {site.degradationRisk || 'Low'} Risk
               </div>
             </div>
             <div style={{ background: '#f9fafb', borderRadius: '8px', padding: '0.65rem 0.85rem' }}>

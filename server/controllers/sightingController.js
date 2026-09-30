@@ -105,28 +105,36 @@ exports.createSighting = async (req, res) => {
       }
     };
 
-    if (req.isMongoConnected) {
-      const sighting = await Sighting.create(sightingData);
-      const populated = await Sighting.findById(sighting._id)
-        .populate('species')
-        .populate('monitoringSite')
-        .populate('observedBy', 'name email');
-      res.status(201).json(populated);
-    } else {
-      const matchedSpecies = matchedSpeciesDoc || req.memoryDb.species.find(s => s._id === req.body.species) || req.memoryDb.species[0];
-      const matchedSite = req.memoryDb.sites.find(st => st._id === req.body.monitoringSite) || req.memoryDb.sites[0];
-      
-      const newSighting = {
-        _id: 'sg_' + Date.now(),
-        ...sightingData,
-        species: matchedSpecies,
-        monitoringSite: matchedSite,
-        observedBy: { name: req.user ? req.user.name : 'Researcher' },
-        createdAt: new Date()
-      };
-      req.memoryDb.sightings.unshift(newSighting);
-      res.status(201).json(newSighting);
-    }
+      if (req.isMongoConnected) {
+        const sighting = await Sighting.create(sightingData);
+        const populated = await Sighting.findById(sighting._id)
+          .populate('species')
+          .populate('monitoringSite')
+          .populate('observedBy', 'name email');
+
+        const alertService = require('../services/alertService');
+        alertService.evaluateSightingAlert(populated, req);
+
+        res.status(201).json(populated);
+      } else {
+        const matchedSpecies = matchedSpeciesDoc || req.memoryDb.species.find(s => s._id === req.body.species) || req.memoryDb.species[0];
+        const matchedSite = req.memoryDb.sites.find(st => st._id === req.body.monitoringSite) || req.memoryDb.sites[0];
+        
+        const newSighting = {
+          _id: 'sg_' + Date.now(),
+          ...sightingData,
+          species: matchedSpecies,
+          monitoringSite: matchedSite,
+          observedBy: { name: req.user ? req.user.name : 'Researcher' },
+          createdAt: new Date()
+        };
+        req.memoryDb.sightings.unshift(newSighting);
+
+        const alertService = require('../services/alertService');
+        alertService.evaluateSightingAlert(newSighting, req);
+
+        res.status(201).json(newSighting);
+      }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -215,7 +223,10 @@ exports.classifyPreview = async (req, res) => {
 
     res.json({
       label: mlResponse.data.label,
-      confidence: mlResponse.data.confidence
+      confidence: mlResponse.data.confidence,
+      topK: mlResponse.data.topK || [],
+      quality: mlResponse.data.quality || {},
+      isUnknown: mlResponse.data.isUnknown || false
     });
   } catch (error) {
     res.status(500).json({ message: 'Classification service unavailable' });

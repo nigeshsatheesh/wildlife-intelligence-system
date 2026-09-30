@@ -19,7 +19,7 @@ import {
   LogOut
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onLogout }) {
+export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onLogout, onOpenProfile }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -146,7 +146,18 @@ export default function Sidebar({ activeTab, setActiveTab, user, onOpenAuth, onL
         </button>
 
         {menuOpen && (
-          <div ref={menuRef} style={{ position: 'absolute', left: 12, bottom: 72, width: 180, background: '#ffffff', border: '1px solid var(--border-light)', borderRadius: 8, boxShadow: '0 6px 20px rgba(0,0,0,0.08)', zIndex: 200 }}>
+          <div ref={menuRef} style={{ position: 'absolute', left: 12, bottom: 72, width: 180, background: '#ffffff', border: '1px solid var(--border-light)', borderRadius: 8, boxShadow: '0 6px 20px rgba(0,0,0,0.08)', zIndex: 200, overflow: 'hidden' }}>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                if (typeof onOpenProfile === 'function') onOpenProfile();
+              }}
+              className="nav-sub-item"
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.9rem', background: 'transparent', border: 'none', cursor: 'pointer', borderBottom: '1px solid var(--border-subtle)' }}
+            >
+              <Settings size={15} color="var(--text-medium)" />
+              <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>Edit Profile</span>
+            </button>
             <button
               onClick={() => {
                 setMenuOpen(false);

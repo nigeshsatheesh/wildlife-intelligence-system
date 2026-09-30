@@ -163,6 +163,22 @@ def predict_audio():
     if species_prediction is not None:
         response['species_prediction'] = species_prediction
 
+    # Signal quality computation (read-only, does not alter feature extraction or model)
+    try:
+        rms_val = float(np.sqrt(np.mean(waveform_32k ** 2)))
+        noise_level_db = round(float(20 * np.log10(max(rms_val, 1e-6))), 1)
+        snr_est = round(float(min(45.0, max(0.0, abs(noise_level_db + 60)))), 1)
+        top_event_name = events[0]['label'].lower() if events else ''
+        is_env_noise = any(w in top_event_name for w in ['wind', 'rain', 'thunder', 'water', 'stream', 'noise', 'silence', 'ambient'])
+
+        response['signal_metrics'] = {
+          'noiseLevelDb': noise_level_db,
+          'snrEstimate': snr_est,
+          'environmentalNoise': is_env_noise
+        }
+    except Exception as sig_err:
+        print(f"Signal metrics computation warning: {sig_err}")
+
     # Save to LRU cache
     if len(PREDICTION_CACHE) >= MAX_CACHE_SIZE:
         PREDICTION_CACHE.pop(next(iter(PREDICTION_CACHE)))

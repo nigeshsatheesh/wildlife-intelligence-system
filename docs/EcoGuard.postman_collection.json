@@ -1,0 +1,103 @@
+{
+  "info": {
+    "name": "EcoGuard Wildlife Intelligence System API",
+    "description": "Postman API Collection for EcoGuard MERN + Flask ML microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"sarah.chen@ecoguard.org\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Get Species Catalog",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/species",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "species"]
+        }
+      }
+    },
+    {
+      "name": "Get Sightings",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/sightings",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "sightings"]
+        }
+      }
+    },
+    {
+      "name": "Get Notifications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/notifications",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "notifications"]
+        }
+      }
+    },
+    {
+      "name": "Get Incidents",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/incidents",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "incidents"]
+        }
+      }
+    },
+    {
+      "name": "Get Ecosystem Health Score",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health-score",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health-score"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    }
+  ]
+}

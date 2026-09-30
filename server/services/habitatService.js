@@ -102,6 +102,16 @@ function computeHabitatMetrics(sightings, sites, speciesList, opts = {}) {
       recommendations.push(`${site.siteName} shows stable activity and no immediate concerns based on current data.`);
     }
 
+    // Explicit Habitat Suitability Score (0-100) & Degradation Risk ('Low'|'Moderate'|'High'|'Critical')
+    const suitabilityScore = Math.min(100, Math.max(0, Math.round(
+      (richnessIndex * 0.5) + (activityLevel === 'Active' ? 40 : activityLevel === 'Moderate' ? 25 : 10) + (richnessTrend >= 0 ? 10 : 0)
+    )));
+
+    let degradationRisk = 'Low';
+    if (richnessTrend < -1 || activityLevel === 'Stale') degradationRisk = 'Critical';
+    else if (richnessTrend < 0 || activityLevel === 'Moderate') degradationRisk = 'Moderate';
+    else if (conservationPriorityScore > 60) degradationRisk = 'High';
+
     return {
       siteId,
       siteName: site.siteName,
@@ -112,6 +122,8 @@ function computeHabitatMetrics(sightings, sites, speciesList, opts = {}) {
       richnessTrend,
       activityLevel,
       daysSinceLastSighting,
+      suitabilityScore,
+      degradationRisk,
       conservationPriorityScore,
       conservationPriorityNote: 'Weighted by how many Critical/Vulnerable-status sightings occurred at this site. ' +
         'High score = important refuge for at-risk species, not a "danger" score.',

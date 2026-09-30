@@ -34,4 +34,6 @@ const authorize = (...roles) => (req, res, next) => {
   return res.status(403).json({ message: `Access denied for role: ${req.user ? req.user.role : 'Guest'}` });
 };
 
-module.exports = { protect, authorize };
+const requireRole = authorize;
+
+module.exports = { protect, authorize, requireRole };
