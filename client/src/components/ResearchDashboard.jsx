@@ -169,13 +169,14 @@ export default function ResearchDashboard({ analytics, sightings, species, popul
             overflow: 'hidden',
             border: '1px solid #b2d8c5'
           }}>
-            {/* Topography vector paths / map terrain */}
-            <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
-              <path d="M 0 60 Q 80 20 160 80 T 320 50 T 480 110 T 600 70" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.6" />
-              <path d="M 0 120 Q 100 80 200 140 T 400 100 T 600 150" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.6" />
-              <path d="M 0 170 Q 120 140 240 180 T 480 160 T 600 190" fill="none" stroke="#90c8ad" strokeWidth="2" opacity="0.7" />
+            {/* Topography vector paths / map terrain extending to the rightmost edge */}
+            <svg width="100%" height="100%" viewBox="0 0 1000 210" preserveAspectRatio="none" style={{ position: 'absolute', top: 0, left: 0 }}>
+              <path d="M 0 45 Q 150 15 300 65 T 600 45 T 850 75 T 1000 40" fill="none" stroke="#a4d4bc" strokeWidth="1.8" opacity="0.5" />
+              <path d="M 0 85 Q 130 50 260 95 T 520 70 T 780 110 T 1000 80" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.6" />
+              <path d="M 0 130 Q 160 90 320 140 T 640 105 T 880 140 T 1000 115" fill="none" stroke="#a4d4bc" strokeWidth="2" opacity="0.65" />
+              <path d="M 0 170 Q 180 140 360 175 T 680 150 T 900 180 T 1000 160" fill="none" stroke="#90c8ad" strokeWidth="2" opacity="0.7" />
               {/* River path */}
-              <path d="M -10 160 C 100 140, 150 200, 250 180 C 350 160, 400 220, 610 180" fill="none" stroke="#60a5fa" strokeWidth="4" opacity="0.8" />
+              <path d="M -10 150 C 140 130, 220 180, 380 160 C 540 140, 680 200, 840 160 C 920 140, 960 170, 1010 150" fill="none" stroke="#60a5fa" strokeWidth="4" opacity="0.8" />
             </svg>
 
             {/* Map Location Labels */}
