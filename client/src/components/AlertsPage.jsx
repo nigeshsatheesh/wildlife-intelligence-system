@@ -276,6 +276,8 @@ export default function AlertsPage({ species = [], sightings = [], recommendatio
             ))}
           </div>
         )}
+      </div>
+
       {/* Categorized Conservation Recommendations Section */}
       <div className="eco-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-dark)' }}>Conservation Action Recommendations</h3>

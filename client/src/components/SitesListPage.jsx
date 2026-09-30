@@ -226,6 +226,8 @@ export default function SitesListPage({ sites, onOpenAddSite, habitatData = [] }
             </tbody>
           </table>
         </div>
+      </div>
+
       {/* Environment Reading Modal */}
       {isEnvModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(3px)' }}>
