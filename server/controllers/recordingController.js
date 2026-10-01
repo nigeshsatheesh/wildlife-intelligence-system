@@ -49,10 +49,25 @@ exports.createRecording = async (req, res) => {
         formData.append('audio', fs.createReadStream(req.file.path));
 
         const mlAudioUrl = (process.env.ML_AUDIO_SERVICE_URL || 'http://localhost:5002').replace(/\/+$/, '');
-        const mlRes = await axios.post(`${mlAudioUrl}/predict-audio`, formData, {
-          headers: formData.getHeaders(),
-          timeout: 45000
-        });
+        let mlRes;
+        try {
+          mlRes = await axios.post(`${mlAudioUrl}/predict-audio`, formData, {
+            headers: formData.getHeaders(),
+            timeout: 120000
+          });
+        } catch (firstErr) {
+          if (firstErr.code === 'ECONNABORTED' || firstErr.message?.includes('timeout') || firstErr.code === 'ECONNRESET') {
+            console.log('ML audio service cold start detected, retrying request...');
+            const retryFormData = new FormData();
+            retryFormData.append('audio', fs.createReadStream(req.file.path));
+            mlRes = await axios.post(`${mlAudioUrl}/predict-audio`, retryFormData, {
+              headers: retryFormData.getHeaders(),
+              timeout: 120000
+            });
+          } else {
+            throw firstErr;
+          }
+        }
         mlData = mlRes.data;
 
         if (audioPredictionCache.size >= MAX_AUDIO_CACHE_SIZE) {
