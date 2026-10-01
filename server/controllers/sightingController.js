@@ -23,7 +23,8 @@ exports.createSighting = async (req, res) => {
         const formData = new FormData();
         formData.append('image', fs.createReadStream(req.file.path));
 
-        const mlRes = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL}/predict`, formData, {
+        const mlImageUrl = (process.env.ML_IMAGE_SERVICE_URL || 'http://localhost:5001').replace(/\/+$/, '');
+        const mlRes = await axios.post(`${mlImageUrl}/predict`, formData, {
           headers: formData.getHeaders(),
           timeout: 120000
         });
@@ -216,7 +217,8 @@ exports.classifyPreview = async (req, res) => {
     const formData = new FormData();
     formData.append('image', fs.createReadStream(req.file.path));
 
-    const mlResponse = await axios.post(`${process.env.ML_IMAGE_SERVICE_URL || 'http://localhost:5001'}/predict`, formData, {
+    const mlImageUrl = (process.env.ML_IMAGE_SERVICE_URL || 'http://localhost:5001').replace(/\/+$/, '');
+    const mlResponse = await axios.post(`${mlImageUrl}/predict`, formData, {
       headers: formData.getHeaders(),
       timeout: 120000
     });

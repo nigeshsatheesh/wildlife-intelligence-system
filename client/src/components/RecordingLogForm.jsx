@@ -66,8 +66,8 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        // Bioacoustic service down (503) or nothing detected (422) both surface here honestly
-        throw new Error(errData.message || 'Failed to save recording');
+        const errorMessage = errData.detail ? `${errData.message} (${errData.detail})` : (errData.message || 'Failed to save recording');
+        throw new Error(errorMessage);
       }
 
       const saved = await res.json();

@@ -96,4 +96,4 @@ def health():
     return jsonify({'status': 'ok', 'classes': list(labels.values()), 'unknown_threshold': UNKNOWN_THRESHOLD})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '8080')), debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '5001')), debug=False)

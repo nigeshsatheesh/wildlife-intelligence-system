@@ -44,9 +44,24 @@ MAX_CACHE_SIZE = 500
 # Force-load models at boot to eliminate runtime latency/cold-start on first prediction
 print("Pre-loading bioacoustic models (YAMNet, Perch, AST)...", flush=True)
 get_yamnet_model()
-get_perch_model()
-get_ast_model()
-print("All bioacoustic models pre-loaded into memory.", flush=True)
+perch_available = False
+ast_available = False
+try:
+    get_perch_model()
+    perch_available = True
+except Exception as e:
+    print(f"Warning: Perch model could not be pre-loaded: {e}", flush=True)
+
+try:
+    get_ast_model()
+    ast_available = True
+except Exception as e:
+    print(f"Warning: AST model could not be pre-loaded: {e}", flush=True)
+
+if perch_available and ast_available:
+    print("All bioacoustic models pre-loaded into memory.", flush=True)
+else:
+    print("Some auxiliary bioacoustic models unavailable; operating in degraded mode.", flush=True)
 
 class_map_path = yamnet_model.class_map_path().numpy().decode('utf-8')
 class_names = []
@@ -82,6 +97,7 @@ else:
 
 
 @app.route('/predict-audio', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict_audio():
     if 'audio' not in request.files:
         return jsonify({'error': 'No audio file provided'}), 400
@@ -199,4 +215,4 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '8080')), debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '5002')), debug=False)
