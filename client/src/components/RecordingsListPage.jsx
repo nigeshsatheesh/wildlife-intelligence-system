@@ -137,6 +137,16 @@ export default function RecordingsListPage({ recordings, sitesList, onOpenLogRec
                             }}>
                               {(rec.speciesClassifierConfidence * 100).toFixed(1)}%
                             </span>
+                            {(rec.source === 'fallback' || rec.analysisSource === 'fallback') && (
+                              <span style={{
+                                fontSize: '0.6rem', fontWeight: 700,
+                                color: '#b7791f', background: '#fef3d9',
+                                border: '1px solid #fbd38d',
+                                borderRadius: '4px', padding: '0.1rem 0.35rem'
+                              }}>
+                                Fallback
+                              </span>
+                            )}
                           </div>
                           {(typeof rec.snrEstimate === 'number' || typeof rec.noiseLevelDb === 'number') && (
                             <div style={{ display: 'flex', gap: '0.35rem', fontSize: '0.65rem', color: 'var(--text-muted)' }}>

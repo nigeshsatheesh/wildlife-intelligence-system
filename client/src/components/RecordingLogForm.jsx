@@ -148,6 +148,18 @@ export default function RecordingLogForm({ sites, onSaveRecording, onClose }) {
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                   {detectedEvents.species?.scientificName || 'Bioacoustic signature verified'}
                 </div>
+                <div style={{ marginTop: '0.35rem' }}>
+                  <span style={{
+                    fontSize: '0.65rem',
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '4px',
+                    fontWeight: 700,
+                    background: (detectedEvents.source === 'fallback' || detectedEvents.analysisSource === 'fallback') ? '#fef3d9' : '#e8f3ee',
+                    color: (detectedEvents.source === 'fallback' || detectedEvents.analysisSource === 'fallback') ? '#b7791f' : '#2f855a'
+                  }}>
+                    {(detectedEvents.source === 'fallback' || detectedEvents.analysisSource === 'fallback') ? '⚠️ Fallback Result (ML Unreachable)' : '✓ Verified ML Service'}
+                  </span>
+                </div>
               </div>
               <div className="badge-pill badge-green" style={{ fontSize: '0.9rem', fontWeight: 800 }}>
                 {((detectedEvents.speciesClassifierConfidence || detectedEvents.topConfidence || 0.98) * 100).toFixed(1)}% Confidence

@@ -96,6 +96,17 @@ else:
           "Continuing with generic YAMNet detection only.")
 
 
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        'status': 'healthy',
+        'yamnet': True,
+        'perch': perch_available,
+        'ast': ast_available,
+        'species_classifier': species_model is not None
+    }), 200
+
+
 @app.route('/predict-audio', methods=['POST'])
 @app.route('/predict', methods=['POST'])
 def predict_audio():

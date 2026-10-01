@@ -52,18 +52,6 @@ def _init_yamnet() -> Any:
         try:
             _yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
         except Exception as e:
-            err_str = str(e)
-            if "neither 'saved_model.pb' nor 'saved_model.pbtxt'" in err_str or "incompatible/unknown type" in err_str:
-                import re, shutil
-                m = re.search(r"'(.*?tfhub_modules[\\/][a-f0-9]+)'", err_str)
-                if m and os.path.exists(m.group(1)):
-                    print(f"Detected corrupted TFHub cache at {m.group(1)}. Purging and re-downloading...", flush=True)
-                    shutil.rmtree(m.group(1), ignore_errors=True)
-                    try:
-                        _yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
-                        return _yamnet_model
-                    except Exception as retry_err:
-                        e = retry_err
             raise RuntimeError(f"Error loading YAMNet model: {e}")
     return _yamnet_model
 
@@ -72,7 +60,10 @@ def _init_perch() -> Tuple[Any, Any, str]:
     global _perch_model, _perch_infer, _perch_input_key
     if _perch_model is None or _perch_infer is None or _perch_input_key is None:
         print("Loading Perch 2.0 model from Kaggle Models...", flush=True)
-        PERCH_URL = "https://www.kaggle.com/models/google/bird-vocalization-classifier/frameworks/TensorFlow2/variations/perch_v2_cpu/versions/1"
+        PERCH_URL = os.environ.get(
+            "PERCH_URL",
+            "https://www.kaggle.com/models/google/bird-vocalization-classifier/frameworks/TensorFlow2/variations/perch_v2_cpu/versions/1"
+        )
         try:
             _perch_model = hub.load(PERCH_URL)
             _perch_infer = _perch_model.signatures.get(
@@ -86,27 +77,6 @@ def _init_perch() -> Tuple[Any, Any, str]:
                 _perch_input_key = "inputs"
             print(f"Perch 2.0 loaded successfully. Signature input key: '{_perch_input_key}'", flush=True)
         except Exception as e:
-            err_str = str(e)
-            if "neither 'saved_model.pb' nor 'saved_model.pbtxt'" in err_str or "incompatible/unknown type" in err_str:
-                import re, shutil
-                m = re.search(r"'(.*?tfhub_modules[\\/][a-f0-9]+)'", err_str)
-                if m and os.path.exists(m.group(1)):
-                    print(f"Detected corrupted TFHub cache for Perch at {m.group(1)}. Purging and re-downloading...", flush=True)
-                    shutil.rmtree(m.group(1), ignore_errors=True)
-                    try:
-                        _perch_model = hub.load(PERCH_URL)
-                        _perch_infer = _perch_model.signatures.get(
-                            "serving_default", next(iter(_perch_model.signatures.values()))
-                        )
-                        if hasattr(_perch_infer, 'structured_input_signature'):
-                            sig_dict = _perch_infer.structured_input_signature[1]
-                            if isinstance(sig_dict, dict) and len(sig_dict) > 0:
-                                _perch_input_key = list(sig_dict.keys())[0]
-                        if not _perch_input_key:
-                            _perch_input_key = "inputs"
-                        return _perch_model, _perch_infer, _perch_input_key
-                    except Exception as retry_err:
-                        e = retry_err
             raise RuntimeError(f"Error loading Perch model: {e}")
     return _perch_model, _perch_infer, _perch_input_key
 
@@ -115,10 +85,11 @@ def _init_ast() -> Tuple[Any, Any]:
     global _ast_extractor, _ast_model
     if _ast_extractor is None or _ast_model is None:
         print("Loading AST (Audio Spectrogram Transformer) from HuggingFace...", flush=True)
-        AST_MODEL_ID = 'MIT/ast-finetuned-audioset-10-10-0.4593'
+        AST_MODEL_ID = os.environ.get('AST_MODEL_ID', 'MIT/ast-finetuned-audioset-10-10-0.4593')
+        hf_cache = os.environ.get("HF_HOME")
         try:
-            _ast_extractor = AutoFeatureExtractor.from_pretrained(AST_MODEL_ID)
-            _ast_model = AutoModelForAudioClassification.from_pretrained(AST_MODEL_ID)
+            _ast_extractor = AutoFeatureExtractor.from_pretrained(AST_MODEL_ID, cache_dir=hf_cache)
+            _ast_model = AutoModelForAudioClassification.from_pretrained(AST_MODEL_ID, cache_dir=hf_cache)
             _ast_model.eval()
             print("AST model loaded successfully.", flush=True)
         except Exception as e:

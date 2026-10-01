@@ -18,8 +18,17 @@ RUN python -m pip install --no-cache-dir -r requirements.txt
 RUN python -m pip install --no-cache-dir gunicorn
 
 COPY . .
-ENV TFHUB_CACHE_DIR=/app/tfhub_cache
-RUN python -c "from audio_features import get_yamnet_model, get_perch_model, get_ast_model; get_yamnet_model(); get_perch_model(); get_ast_model()"
+
+# Build-time download of all models to cache directories
+ENV TFHUB_CACHE_DIR=/app/tfhub_cache \
+    HF_HOME=/app/hf_cache \
+    PERCH_URL=https://www.kaggle.com/models/google/bird-vocalization-classifier/frameworks/TensorFlow2/variations/perch_v2_cpu/versions/1
+
+RUN python download_models.py
+
+# Lock container to offline mode at runtime to prevent any runtime downloads
+ENV HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1
 
 EXPOSE 8080
 CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --timeout 300 --access-logfile - --error-logfile - app_audio:app"]

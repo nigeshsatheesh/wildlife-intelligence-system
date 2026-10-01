@@ -69,6 +69,15 @@ const recordingSchema = new mongoose.Schema({
   environmentalNoise: {
     type: String
   },
+  analysisSource: {
+    type: String,
+    enum: ['ml-service', 'fallback', 'onboard-fallback'],
+    default: 'ml-service'
+  },
+  source: {
+    type: String,
+    default: 'ml-service'
+  },
   location: {
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true }
